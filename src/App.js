@@ -38,7 +38,7 @@ const login_type_radio = {
 
 const login_button = {
   position: "relative", fontSize: "16pt",
-  top: 320, width: 300
+  top: 320, width: 200
 }
 
 // login screen
@@ -64,7 +64,7 @@ function App() {
             <label htmlFor="administrator">administrator</label> </div>
         </div>
 
-        <button style={login_button}>Login or Create Account</button>
+        <button style={login_button}>Login or Register</button>
       </div>
 
     </div>
