@@ -37,7 +37,7 @@ const login_type_radio = {
 }
 
 const login_button = {
-  position: "relative", fontSize: "16pt", background: "white",
+  position: "relative", fontSize: "16pt",
   top: 320, width: 300
 }
 
@@ -57,11 +57,11 @@ function App() {
         <label style={login_type_label}>account type:</label>
         <div style={login_type_radio}>
           <div> <input type="radio" id="supporter" name="account_type" value="supporter"></input>
-            <label for="supporter">supporter</label> </div>
+            <label htmlFor="supporter">supporter</label> </div>
           <div> <input type="radio" id="designer" name="account_type" value="designer"></input>
-            <label for="designer">designer</label> </div>
+            <label htmlFor="designer">designer</label> </div>
           <div> <input type="radio" id="administrator" name="account_type" value="administrator"></input>
-            <label for="administrator">administrator</label> </div>
+            <label htmlFor="administrator">administrator</label> </div>
         </div>
 
         <button style={login_button}>Login or Create Account</button>
