@@ -1,0 +1,6 @@
+{
+    "host"     : "crowdsourcing-app-db.cqjrh5vypd8v.us-east-1.rds.amazonaws.com",
+    "user"     : "devAdmin",
+    "password" : "password123",
+    "database" : "users"
+}
