@@ -39,7 +39,7 @@ let getAllProjects = () => {
                 });
             });
 
-}
+};
 
 /**
  *
