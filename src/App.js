@@ -7,10 +7,6 @@ function App() {
   const [redraw, forceRedraw] = React.useState(0);
   if (currentPage == null) currentPage = <Login />
 
-  var input_email = useRef(null);
-  var input_password = useRef(null);
-  var input_account_type = null;
-
   function Login() {
     const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
     const login_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 400, top: 20, left: 0, textAlign: "center" }
@@ -22,12 +18,19 @@ function App() {
     const login_type_radio = { position: "absolute", width: 220, top: 200, left: 150, textAlign: "left" }
     const login_button = { position: "relative", fontSize: "16pt", top: 320, width: 200 }
 
+    var input_email = useRef(null);
+    var input_password = useRef(null);
+    var input_account_type = null;
+
     function handle_button_login() {
       if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked');
   
       if (input_email.current.value.length == 0 || input_password.current.value.length == 0 || input_account_type.value == null) {
         alert("Fill out all fields before logging in or registering.");
       } else {
+        console.log(input_email.current.value);
+        console.log(input_password.current.value);
+        console.log(input_account_type.value);
         currentPage = <DesignerViewProject />;
         forceRedraw(redraw + 1);
       }
