@@ -1,3 +1,5 @@
+//"INSERT INTO Pledge ("?", "?", "?", "?")", [descriptionReward], [projectName], [amount], [maxSupporters]
+
 // const axios = require('axios')
 // const url = 'http://checkip.amazonaws.com/';
 let response;

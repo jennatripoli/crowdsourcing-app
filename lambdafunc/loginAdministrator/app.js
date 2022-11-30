@@ -53,12 +53,12 @@ exports.lambdaHandler = async (event, context) => {
     }; // response
 
 
-    let actual_event = event.body;
-    let info = JSON.parse(actual_event);
-    console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
+    // let actual_event = event.body;
+    //let info = JSON.parse(event);
+    console.log("info:" + JSON.stringify(event)); //  info.arg1
     
     //RYAN
-    let getAllProjects = () => {
+    /*let getAllProjects = () => {
     return new Promise((resolve, reject) => {
                 pool.query("SELECT * FROM Project", (error, rows) => {
                     if (error) { return reject(error); }
@@ -70,7 +70,7 @@ exports.lambdaHandler = async (event, context) => {
                 });
             });
 
-    };
+    };*/
     
     //MIKAELA
     let GetValidUser = (email) => {
@@ -132,7 +132,7 @@ exports.lambdaHandler = async (event, context) => {
         */
         
         //MIKAELA
-        const arg1_value = await GetValidUser(info.arg1);
+        const arg1_value = await GetValidUser(event.arg1);
         
         // If either is NaN then there is an error
         response.statusCode = 200;
