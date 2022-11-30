@@ -43,7 +43,7 @@ const description_label = {
   position: "absolute", width: 740, height: 320, textAlign: "left",
   top: 10, left: 10
 }
-const entrepreneur_label = {
+const designer_label = {
   position: "absolute", fontSize: "14pt", fontWeight: "bold",
   bottom: 70, right: 20
 }
@@ -107,7 +107,7 @@ const DesignerViewProject = () => {
           <div id="description_box" style={description_box}>
             <label style={description_label}>Project Description</label>
           </div>
-          <label style={entrepreneur_label}><i>By: Entreprenuer Name</i></label>
+          <label style={designer_label}><i>By: Designer Name</i></label>
         </div>
 
       

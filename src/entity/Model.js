@@ -56,3 +56,9 @@ export class Project {
         this.launched = false
     }
 }
+
+export class Model {
+    constructor() {
+        
+    }
+}
