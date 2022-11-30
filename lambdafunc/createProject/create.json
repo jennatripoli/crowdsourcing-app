@@ -1,0 +1,6 @@
+{
+    "body" :
+    
+"{\n  \"name\": \"testProject2\",\n  \"story\": \"boring\",\n  \"designerEmail\": \"mcmilch@wpi\",\n  \"type\": \"school\",\n  \"deadline\": \"11302022\",\n  \"activePledges\": [],\n  \"directSupports\": [],\n  \"successful\": 0,\n  \"launched\": 1\n}"
+
+}
