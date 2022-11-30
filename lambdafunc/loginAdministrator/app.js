@@ -27,20 +27,6 @@ function query(conx, sql, params) {
 }
 
 
-let getAllProjects = () => {
-    return new Promise((resolve, reject) => {
-                pool.query("SELECT * FROM Project", (error, rows) => {
-                    if (error) { return reject(error); }
-                    if (rows) {
-                        return resolve(rows);
-                    } else {
-                        return reject("there are no projects");
-                    }
-                });
-            });
-
-};
-
 /**
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
@@ -70,6 +56,37 @@ exports.lambdaHandler = async (event, context) => {
     let actual_event = event.body;
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
+    
+    //RYAN
+    let getAllProjects = () => {
+    return new Promise((resolve, reject) => {
+                pool.query("SELECT * FROM Project", (error, rows) => {
+                    if (error) { return reject(error); }
+                    if (rows) {
+                        return resolve(rows);
+                    } else {
+                        return reject("there are no projects");
+                    }
+                });
+            });
+
+    };
+    
+    //MIKAELA
+    let GetValidUser = (email) => {
+    return new Promise((resolve, reject) => {
+                pool.query("SELECT * FROM Admin WHERE email=?", [email], (error, rows) => {
+                    if (error) { return reject(error); }
+                    if ((rows) && (rows.length == 1)) {
+                        return resolve(rows[0].email);
+                    } else {
+                        return reject("unable to locate user '" + email + "'");
+                    }
+
+                });
+            });
+    };
+
 
     try {
         // DATABASE STUFF HERE
@@ -88,8 +105,10 @@ exports.lambdaHandler = async (event, context) => {
         // “successful” : false, “launched” : false}, …]} 
         
         // const ret = await axios(url);
-        let projects = getAllProjects();
-        let list = [];
+        
+        //RYAN
+        /* let projects = getAllProjects();
+        //let list = [];
         
         for (let i = 0; i<projects.length; i++) {
             let project = projects[i];
@@ -110,6 +129,16 @@ exports.lambdaHandler = async (event, context) => {
         response.body  = JSON.stringify({
             list,
         });
+        */
+        
+        //MIKAELA
+        const arg1_value = await GetValidUser(info.arg1);
+        
+        // If either is NaN then there is an error
+        response.statusCode = 200;
+        let result = arg1_value;
+        response.result = result.toString();
+
         
     } catch (err) {
         console.log(err);
