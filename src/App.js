@@ -1,7 +1,9 @@
 import './App.css';
 import React, {useRef} from 'react';
-import axios from "axios";
+import { Model } from './entity/Model';
+import axios from 'axios';
 
+var model = new Model;
 var currentPage;
 const instance = axios.create({baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/'});
 var current_user_email;
