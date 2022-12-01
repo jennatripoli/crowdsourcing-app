@@ -37,7 +37,8 @@ function App() {
       } else if (input_account_type.value === "designer") {
         let msg ={}
         msg["email"] = input_email.current.value
-        msg["pwd"] = input_password.current.value
+        msg["password"] = input_password.current.value
+        console.log(msg)
         let dataValue = JSON.stringify(msg)
         let data = {'body' : dataValue}
         instance.post('/loginDesigner', data).then((response) => {
