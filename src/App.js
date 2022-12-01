@@ -3,12 +3,10 @@ import React, {useRef} from 'react';
 import axios from "axios";
 
 var currentPage;
-
-// all WEB traffic using this API instance
 const instance = axios.create({baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/'});
 
 function App() {
-  const [redraw, forceRedraw] = React.useState(0)
+  let [redraw, forceRedraw] = React.useState(0)
   if (currentPage == null) currentPage = <Login />
 
   function Login() {
@@ -22,9 +20,9 @@ function App() {
     const login_type_radio = { position: "absolute", width: 220, top: 200, left: 150, textAlign: "left" }
     const login_button = { position: "relative", fontSize: "16pt", top: 320, width: 200 }
 
-    var input_email = useRef(null)
-    var input_password = useRef(null)
-    var input_account_type = null
+    let input_email = useRef(null)
+    let input_password = useRef(null)
+    let input_account_type = null
 
     function handle_button_login() {
       if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked');
@@ -43,16 +41,16 @@ function App() {
           instance.post('/loginDesigner', data).then((response) => {
             currentPage = <DesignerCreateProject />
             forceRedraw(redraw + 1)
+            redraw++
           })
-        } else if (input_account_type.value == 'designer') {
+        } else if (input_account_type.value == 'administrator') {
           instance.post('/loginAdministrator', data)
-          //.then((response) => {}
         }
       }
     }
 
     return (
-      <div className="App">
+      <div className="Login">
         <div id="login-box" style={login_box}>
           <label style={login_title}>LOG IN</label>
   
@@ -75,8 +73,6 @@ function App() {
     );
   }
 
-
-  // onSubmit={this.handleCreate}
   function DesignerCreateProject() {
     var input_name = useRef(null)
     var input_description = useRef(null)
@@ -86,48 +82,28 @@ function App() {
     function handle_button_create() {
       // TODO add error handling here for bad inputs
 
-        let msg = {}
-        msg["name"] = input_name.current.value
-        msg["description"] = input_description.current.value
-        msg["goal"] = input_goal.current.value
-        msg["deadline"] = input_deadline.current.value
-        let dataValue = JSON.stringify(msg)
-        let data = { 'body' : dataValue }
+      let msg = {}
+      msg["name"] = input_name.current.value
+      msg["description"] = input_description.current.value
+      msg["goal"] = input_goal.current.value
+      msg["deadline"] = input_deadline.current.value
+      let dataValue = JSON.stringify(msg)
+      let data = { 'body' : dataValue }
 
-        instance.post('/createProject', data).then((response) => {
-          
-        })
-
+      instance.post('/createProject', data).then((response) => {
         currentPage = <DesignerViewProject />
         forceRedraw(redraw + 1)
+        redraw++
+      })
     }
 
     return (
       <div className="DesignerCreateProject">
-        <form >
-            <label>
-                Project Name:
-                <input name="project_name" type="text" ref={input_name} />
-            </label>
-            <br />
-            <label>
-                Project Description:
-                <input name="project_description" type="text" ref={input_description} />
-            </label>
-            <br />
-            <label>
-                Goal: $
-                <input name="project_goal" type="number" ref={input_goal} />
-            </label>
-            <br />
-            <label>
-                Deadline (MMDDYYYY):
-                <input name="project_deadline" type="text" ref={input_deadline} />
-            </label>
-            <br />
-        </form>
+          <label>Project Name:<input name="project_name" type="text" ref={input_name} /></label><br/>
+          <label>Project Description:<input name="project_description" type="text" ref={input_description} /></label><br/>
+          <label>Goal: $<input name="project_goal" type="number" ref={input_goal} /></label><br/>
+          <label>Deadline (MMDDYYYY):<input name="project_deadline" type="text" ref={input_deadline} /></label><br/>
         <button onClick={handle_button_create}>Create Project</button>
-
       </div>
     )
   }
