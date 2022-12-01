@@ -52,11 +52,6 @@ exports.lambdaHandler = async (event, context) => {
         }
     }; // response
 
-
-    let actual_event = event.body;
-    let info = JSON.parse(actual_event);
-    console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
-
     
     let getAllProjects = () => {
     return new Promise((resolve, reject) => {
@@ -90,28 +85,35 @@ exports.lambdaHandler = async (event, context) => {
         // “successful” : false, “launched” : false}, …]} 
         
         // const ret = await axios(url);
-        let projects = getAllProjects();
-        let list = [];
+        let projects = await getAllProjects();
         
-        for (let i = 0; i<projects.length; i++) {
-            let project = projects[i];
-            list[i] = {
-                name: project.name,
-                description: project.story,
-                entrepreneur: project.designerEmail,
-                type: project.type,
-                goal: project.goal,
-                deadline: project.deadline,
-                successful: project.successful,
-                launched: project.launched
+        if(projects) {
+            
+            let list = [];
+            
+            console.log("info: " + JSON.stringify(projects));
+            
+            for (let i = 0; i<projects.length; i++) {
+                let project = projects[i];
+                list[i] = {
+                    name: project.name,
+                    description: project.story,
+                    entrepreneur: project.designerEmail,
+                    type: project.type,
+                    goal: project.goal,
+                    deadline: project.deadline,
+                    successful: project.successful,
+                    launched: project.launched
+                };
             };
-        };
+            response.statusCode = 200;
+            response.result  = JSON.stringify({list,});
+        }else {
+            response.statusCode = 400;
+            response.error = "Couldn't find projects ";
+        }
         
-        response.statusCode = 200;
         
-        response.body  = JSON.stringify({
-            list,
-        });
         
     } 
     catch (err) {
