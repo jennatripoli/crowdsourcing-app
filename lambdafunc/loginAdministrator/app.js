@@ -57,20 +57,6 @@ exports.lambdaHandler = async (event, context) => {
     //let info = JSON.parse(event);
     console.log("info:" + JSON.stringify(event)); //  info.arg1
     
-    //RYAN
-    /*let getAllProjects = () => {
-    return new Promise((resolve, reject) => {
-                pool.query("SELECT * FROM Project", (error, rows) => {
-                    if (error) { return reject(error); }
-                    if (rows) {
-                        return resolve(rows);
-                    } else {
-                        return reject("there are no projects");
-                    }
-                });
-            });
-
-    };*/
     
     //MIKAELA
     let GetValidUser = (email) => {
@@ -120,31 +106,6 @@ exports.lambdaHandler = async (event, context) => {
         // “successful” : false, “launched” : false}, …]} 
         
         // const ret = await axios(url);
-        
-        //RYAN
-        /* let projects = getAllProjects();
-        //let list = [];
-        
-        for (let i = 0; i<projects.length; i++) {
-            let project = projects[i];
-            list[i] = {
-                name: project.name,
-                description: project.story,
-                entrepreneur: project.designerEmail,
-                type: project.type,
-                goal: project.goal,
-                deadline: project.deadline,
-                successful: project.successful,
-                launched: project.launched
-            };
-        };
-        
-        response.statusCode = 200;
-        
-        response.body  = JSON.stringify({
-            list,
-        });
-        */
         
         //MIKAELA
         const exists = await GetValidUser(event.arg1);
