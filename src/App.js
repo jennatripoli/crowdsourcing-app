@@ -1,15 +1,19 @@
 import './App.css';
 import React, {useRef} from 'react';
-import axios from "axios";
+import { Model } from './entity/Model';
+import axios from 'axios';
 
+var model = new Model;
 var currentPage;
-
-// all WEB traffic using this API instance
 const instance = axios.create({baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/'});
+var current_user_email;
 
 function App() {
-  const [redraw, forceRedraw] = React.useState(0);
+  let [redraw, forceRedraw] = React.useState(0)
   if (currentPage == null) currentPage = <Login />
+
+
+
 
   function Login() {
     const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
@@ -22,26 +26,48 @@ function App() {
     const login_type_radio = { position: "absolute", width: 220, top: 200, left: 150, textAlign: "left" }
     const login_button = { position: "relative", fontSize: "16pt", top: 320, width: 200 }
 
-    var input_email = useRef(null);
-    var input_password = useRef(null);
-    var input_account_type = null;
+    let input_email = useRef(null)
+    let input_password = useRef(null)
+    let input_account_type = null
 
     function handle_button_login() {
       if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked');
   
-      if (input_email.current.value.length == 0 || input_password.current.value.length == 0 || input_account_type.value == null) {
-        alert("Fill out all fields before logging in or registering.");
+      if (input_email.current.value == null || input_password.current.value == null || input_account_type.value == null) {
+        alert("Fill out all fields before logging in or registering.")
       } else {
-        console.log(input_email.current.value);
-        console.log(input_password.current.value);
-        console.log(input_account_type.value);
-        currentPage = <DesignerViewProject />;
-        forceRedraw(redraw + 1);
+        let msg = {}
+        msg["email"] = input_email.current.value
+        msg["password"] = input_password.current.value
+        let dataValue = JSON.stringify(msg)
+        let data = { 'body' : dataValue }
+
+        current_user_email = msg["email"]
+
+        if (input_account_type.value == 'designer') {
+          instance.post('/loginDesigner', data).then((response) => {
+            currentPage = DesignerListProjects(msg["email"])
+            forceRedraw(redraw + 1)
+            redraw++
+          })
+        } else if (input_account_type.value == 'administrator') {
+          instance.post('/loginAdministrator', data).then((response) => {
+            currentPage = <AdministratorListProjects />
+            forceRedraw(redraw + 1)
+            redraw++
+          })
+        } else {
+          //instance.post('/loginSupporter', data).then((response) => {
+            //currentPage = <SupporterListProjects />
+            //forceRedraw(redraw + 1)
+            //redraw++
+          //})
+        }
       }
     }
 
     return (
-      <div className="App">
+      <div className="Login">
         <div id="login-box" style={login_box}>
           <label style={login_title}>LOG IN</label>
   
@@ -64,7 +90,115 @@ function App() {
     );
   }
 
-  function DesignerViewProject() {
+
+
+
+  function DesignerListProjects(designer_email_param) {
+    let msg = {}
+    msg["email"] = designer_email_param
+    let dataValue = JSON.stringify(msg)
+    let data = { 'body' : dataValue }
+
+    let entries = []
+
+    instance.post('/designerList', data).then((response) => {
+      if (response != null) {
+        let projects = response.data.result.list
+        if (projects != undefined) {
+          for (let i = 0; i < projects.length; i++) {
+            let entry = (
+              <div id="project_box">
+                <label onClick={handle_button_view(projects[i].name)}>{projects[i].name}</label><br/>
+                <label >Description: {projects[i].description}</label><br/>
+                <label >Type: {projects[i].type}</label><br/>
+                <label >Goal: ${projects[i].goal}</label><br/>
+                <label >Deadline: {projects[i].deadline}</label><br/>
+                <label>-----------------</label>
+              </div>
+            )
+            entries.push(entry)
+          }
+        }
+      }
+    })
+
+    function handle_button_view(project_name_param) {
+      currentPage = DesignerViewProject(project_name_param)
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
+    function handle_button_create() {
+      currentPage = <DesignerCreateProject />
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
+    return (
+      <div className="DesignerListProjects">
+        <label>Designer List Projects</label><br/>
+        <label>click project name to view project</label><br/>
+        <label>------------------</label><br/>
+        <label>{designer_email_param}</label><br/>
+        <label>{entries}</label><br/>
+        <button onClick={handle_button_create}>Create New Project</button><br/>
+      </div>
+    )
+  }
+
+
+
+
+  function DesignerCreateProject() {
+    let input_name = useRef(null)
+    let input_description = useRef(null)
+    let input_goal = useRef(null)
+    let input_deadline = useRef(null)
+    let input_type = useRef(null)
+
+    function handle_button_create() {
+      if (input_name.current.value == null || input_goal.current.value <= 0 || input_deadline.current.value == null) {
+        alert("Fill out all required fields before creating a new project.")
+      } else {
+        let msg = {}
+        msg["name"] = input_name.current.value
+        msg["story"] = input_description.current.value
+        msg["designerEmail"] = current_user_email
+        msg["type"] = input_type.current.value
+        msg["goal"] = input_goal.current.value
+        msg["deadline"] = input_deadline.current.value
+        msg["successful"] = null
+        msg["launched"] = false
+        let dataValue = JSON.stringify(msg)
+        let data = { 'body' : dataValue }
+
+        console.log(data)
+
+        instance.post('/createProject', data).then((response) => {
+          currentPage = DesignerListProjects(msg["designerEmail"])
+          forceRedraw(redraw + 1)
+          redraw++
+        })
+      }
+    }
+
+    return (
+      <div className="DesignerCreateProject">
+        <label>CREATE A NEW PROJECT</label><br/>
+        <label>Project Name:<input name="project_name" type="text" ref={input_name}/></label><br/>
+        <label>Description (optional):<input name="project_description" type="text" ref={input_description}/></label><br/>
+        <label>Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1"/></label><br/>
+        <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline}/></label><br/>
+        <label>Type:<input name="project_type" type="text" ref={input_type}/></label><br/>
+        <button onClick={handle_button_create}>Create Project</button>
+      </div>
+    )
+  }
+
+
+
+
+  function DesignerViewProject(project_name_param) {
     const info_box = { position: "absolute", width: 800, height: 700, background: "lightgrey", textAlign: "center", top: 50, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "40pt", fontWeight: "bold", top: 40 }
     const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, left: 20 }
@@ -86,31 +220,64 @@ function App() {
     const pledge_amount = { position: "absolute", top: 35 }
     const pledge_description = { position: "absolute", top: 60 }
 
+    var name, story, designerEmail, type, goal, deadline, activePledges, directSupports, successful, launched
+
+    let msg = {}
+    msg["name"] = project_name_param
+    let dataValue = JSON.stringify(msg)
+    let data = { 'body' : dataValue }
+
+    instance.post('/designerViewProject', data).then((response) => {
+      if (response != null) {
+        name = response.data.name
+        story = response.data.story
+        designerEmail = response.data.designerEmail
+        type = response.data.type
+        goal = response.data.goal
+        deadline = response.data.deadline
+        activePledges = response.data.activePledges
+        directSupports = response.data.directSupports
+        successful = response.data.successful
+        launched = response.data.launched
+      }
+    })
+
+    // TODO figure out how to iterate over active pledges
+    let entries = []
+    if (activePledges != null) {
+      for (let pledge of activePledges) {
+        let entry = (
+          <div id="pledge_box" style={pledge_box}>
+            <label style={pledge_name}>{pledge.name}</label>
+            <label style={pledge_amount}>{pledge.amount}</label>
+            <label style={pledge_description}>{pledge.description}</label>
+          </div>
+        )
+        entries.push(entry)
+      }
+    }
+
     return (
       <div className="DesignerViewProject">
         <div id="info_box" style={info_box}>
-          <label style ={project_name}>Project Name</label>
+          <label style={project_name}>{name}</label>
           <div id="deadline_box" style={deadline_box}>
-            <label style={deadline_label}>Project Deadline: mm/dd/yyyy</label>
-            <label style={days_label}>00 DAYS LEFT</label>
+            <label style={deadline_label}>Project Deadline: {deadline}</label>
+            <label style={days_label}>__ DAYS LEFT</label>
           </div>
           <div id="goal_box" style={goal_box}>
-            <label style={goal_label}>Project Goal: $0000</label>
-            <label style={raised_label}>$0000 RAISED</label>
+            <label style={goal_label}>Project Goal: ${goal}</label>
+            <label style={raised_label}>$__ RAISED</label>
           </div>
           <div id="description_box" style={description_box}>
-            <label style={description_label}>Project Description</label>
+            <label style={description_label}>{story}</label>
           </div>
-          <label style={designer_label}><i>By: Designer Name</i></label>
+          <label style={designer_label}><i>By: {designerEmail}</i></label>
         </div>
 
         <div id="active_pledges_box" style={active_pledges_box}>
           <label style={active_label}>Active Pledges</label>
-          <div id="pledge_box" style={pledge_box}>
-            <label style={pledge_name}>Pledge Name</label>
-            <label style={pledge_amount}>$1000</label>
-            <label style={pledge_description}>Pledge Description</label>
-          </div>
+          <div id="pledges">{entries}</div>
         </div>
       </div>
     );
@@ -119,6 +286,82 @@ function App() {
   return (
     <div>{currentPage}</div>
   );
+}
+
+
+
+
+function AdministratorListProjects() {
+  let entries = []
+
+  /*let test = []
+
+  test[0] = {
+    "name": "Ninja-Se",
+    "description": "hello",
+    "entrepreneur": "email",
+    'type': "money",
+    "goal": "100",
+    "deadline": "today",
+    "successful": null,
+    "launched": false
+  }
+
+  test[1] = {
+    "name": "Ninja-Se 2.0",
+    "description": "hello",
+    "entrepreneur": "email",
+    'type': "money",
+    "goal": "100",
+    "deadline": "today",
+    "successful": null,
+    "launched": false
+  }*/
+
+  function handle_button_view(project_name_param) {
+    // open admin view project
+  }
+
+  instance.post('/adminList').then((response) => {
+    if (response != null) {
+      let allProjects = response.data.result.list
+      if (allProjects != undefined) {
+        for (let i = 0; i < allProjects.length; i++) {
+          let entry = (
+            <div id="project_box">
+              <label fontWeight="bold" onClick={handle_button_view(allProjects[i].name)}>{allProjects[i].name}</label><br/>
+              <label >Description: {allProjects[i].description}</label><br/>
+              <label >Type: {allProjects[i].type}</label><br/>
+              <label >Goal: ${allProjects[i].goal}</label><br/>
+              <label >Deadline: {allProjects[i].deadline}</label><br/><br/>
+            </div>
+          )
+          entries.push(entry)
+        }
+      }
+    }
+  })
+
+  /*for (let t of test) {
+    let entry = (
+      <div id="project_box">
+        <label onClick={handle_button_view(t.name)}>{t.name}</label><br/>
+        <label >Description: {t.description}</label><br/>
+        <label >Type: {t.type}</label><br/>
+        <label >Goal: ${t.goal}</label><br/>
+        <label >Deadline: {t.deadline}</label><br/>
+        <label>-----------</label>
+      </div>
+    )
+    entries.push(entry)
+  }*/
+
+  return (
+    <div className="AdministratorListProjects">
+      <label>admin list projects</label><br/>
+      {entries}
+    </div>
+  )
 }
 
 export default App;

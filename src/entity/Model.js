@@ -25,7 +25,8 @@ export class Designer {
 }
 
 export class Pledge {
-    constructor(amount, description, maxSupporters) {
+    constructor(name, amount, description, maxSupporters) {
+        this.name = name
         this.amount = amount
         this.description = description
         this.maxSupporters = maxSupporters
@@ -59,6 +60,11 @@ export class Project {
 
 export class Model {
     constructor() {
-        
+        this.currentUser = null
+    }
+
+    setCurrentUser(email, password, type){
+        this.currentUser = new Designer(email, password)
+        console.log("made it here")
     }
 }
