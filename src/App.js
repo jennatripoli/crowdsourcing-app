@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { Model } from './entity/Model';
 import axios from 'axios';
 
@@ -273,7 +273,11 @@ function App() {
     var entries = ([])
     var allProjects = []
 
-    instance.post('/adminList').then((response) => {
+    let msg = {}
+    let dataValue = JSON.stringify(msg)
+    let data = { 'body': dataValue }
+
+    instance.post('/adminList', data).then((response) => {
       allProjects = JSON.parse(response.data.result)
       if (allProjects != undefined) {
         for (let i = 0; i < allProjects.list.length; i++) {
@@ -296,6 +300,7 @@ function App() {
     return (
       <div className="AdministratorListProjects">
         <label>admin list projects</label><br />
+        <div>{entries}</div>
       </div>
     )
   }
