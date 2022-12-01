@@ -1,7 +1,11 @@
 import './App.css';
 import React, {useRef} from 'react';
+import axios from "axios";
 
 var currentPage;
+
+// all WEB traffic using this API instance
+const instance = axios.create({baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/'});
 
 function App() {
   const [redraw, forceRedraw] = React.useState(0);
