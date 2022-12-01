@@ -53,15 +53,15 @@ exports.lambdaHandler = async (event, context) => {
     }; // response
 
 
-    // let actual_event = event.body;
-    //let info = JSON.parse(event);
-    console.log("info:" + JSON.stringify(event)); //  info.arg1
+    let actual_event = event.body;
+    let info = JSON.parse(actual_event);
+    console.log("info:" + JSON.stringify(info)); //  info.arg1, info.password
     
     
     //MIKAELA
-    let GetValidUser = (email) => {
+    let GetValidUser = (info) => {
     return new Promise((resolve, reject) => {
-                pool.query("SELECT * FROM Admin WHERE email=?", [email], (error, rows) => {
+                pool.query("SELECT * FROM Admin WHERE email=?", [info.email], (error, rows) => {
                     if (error) { return reject(error); }
                     if ((rows) && (rows.length == 1)) {
                         return resolve(rows[0].email);
@@ -74,9 +74,9 @@ exports.lambdaHandler = async (event, context) => {
             });
     };
     
-    let InsertValidUser = (email) => {
+    let InsertValidUser = (info) => {
         return new Promise((resolve, reject) => {
-            pool.query("INSERT INTO Admin (email, password) VALUES (?, 'pwd')", [email], (error, rows) => {
+            pool.query("INSERT INTO Admin (email, password) VALUES (?, ?)", [info.email, info.password], (error, rows) => {
                 if (error) { return reject(error); }
                     if ((rows) && (rows.affectedRows == 1)) {
                         return resolve(true);
@@ -108,7 +108,7 @@ exports.lambdaHandler = async (event, context) => {
         // const ret = await axios(url);
         
         //MIKAELA
-        const exists = await GetValidUser(event.arg1);
+        const exists = await GetValidUser(info);
         
         if (exists) {
             //RETURN EMAIL
@@ -118,11 +118,11 @@ exports.lambdaHandler = async (event, context) => {
             response.result = result.toString();
         } else {
             //INSERT NEW
-            const inserted = await InsertValidUser(event.arg1);
+            const inserted = await InsertValidUser(info);
             if (inserted) {
                 console.log("Admin didn't exist... Creating User");
                 response.statusCode = 200;
-                let result = exists;
+                let result = inserted;
                 response.result = result.toString();
             } else {
                 response.statusCode = 400;
