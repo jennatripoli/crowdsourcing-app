@@ -22,9 +22,9 @@ function App() {
     const login_type_radio = { position: "absolute", width: 220, top: 200, left: 150, textAlign: "left" }
     const login_button = { position: "relative", fontSize: "16pt", top: 320, width: 200 }
 
-    var input_email = useRef(null);
-    var input_password = useRef(null);
-    var input_account_type = null;
+    var input_email = useRef(null)
+    var input_password = useRef(null)
+    var input_account_type = null
 
     function handle_button_login() {
       if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked');
@@ -32,11 +32,26 @@ function App() {
       if (input_email.current.value.length == 0 || input_password.current.value.length == 0 || input_account_type.value == null) {
         alert("Fill out all fields before logging in or registering.");
       } else {
-        console.log(input_email.current.value);
-        console.log(input_password.current.value);
-        console.log(input_account_type.value);
-        currentPage = <DesignerViewProject />;
-        forceRedraw(redraw + 1);
+        console.log(input_email.current.value)
+        console.log(input_password.current.value)
+        console.log(input_account_type.value)
+
+        let msg = {}
+        msg["email"] = input_email.current.value
+        msg["password"] = input_password.current.value
+        msg["account_type"] = input_account_type.value
+        let dataValue = JSON.stringify(msg)
+        let data = { 'body' : dataValue }
+
+        if (input_account_type.value == 'designer') {
+          instance.post('/loginDesigner', data).then((response) => {
+            currentPage = <DesignerViewProject />
+            forceRedraw(redraw + 1)
+          })
+        } else if (input_account_type.value == 'designer') {
+          instance.post('/loginAdministrator', data)
+          //.then((response) => {}
+        }
       }
     }
 
@@ -86,22 +101,37 @@ function App() {
     const pledge_amount = { position: "absolute", top: 35 }
     const pledge_description = { position: "absolute", top: 60 }
 
+    var name, story, designer, type, goal, deadline, activePledges, directSupports, successful, launched
+
+    instance.post('/designerViewProject').then((response) => {
+      name = response.data.name
+      story = response.data.story
+      designer = response.data.designer
+      type = response.data.type
+      goal = response.data.goal
+      deadline = response.data.deadline
+      activePledges = response.data.activePledges
+      directSupports = response.data.directSupports
+      successful = response.data.successful
+      launched = response.data.launched
+    })
+
     return (
       <div className="DesignerViewProject">
         <div id="info_box" style={info_box}>
-          <label style ={project_name}>Project Name</label>
+          <label style={project_name}>{name}</label>
           <div id="deadline_box" style={deadline_box}>
             <label style={deadline_label}>Project Deadline: mm/dd/yyyy</label>
             <label style={days_label}>00 DAYS LEFT</label>
           </div>
           <div id="goal_box" style={goal_box}>
-            <label style={goal_label}>Project Goal: $0000</label>
+            <label style={goal_label}>Project Goal: ${goal}</label>
             <label style={raised_label}>$0000 RAISED</label>
           </div>
           <div id="description_box" style={description_box}>
-            <label style={description_label}>Project Description</label>
+            <label style={description_label}>{story}</label>
           </div>
-          <label style={designer_label}><i>By: Designer Name</i></label>
+          <label style={designer_label}><i>By: {designer}</i></label>
         </div>
 
         <div id="active_pledges_box" style={active_pledges_box}>
