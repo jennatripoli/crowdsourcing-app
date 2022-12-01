@@ -7,6 +7,7 @@ const instance = axios.create({
   baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod'
 });
 
+var model = new Model;
 
 var currentPage;
 
@@ -42,7 +43,8 @@ function App() {
         let dataValue = JSON.stringify(msg)
         let data = {'body' : dataValue}
         instance.post('/loginDesigner', data).then((response) => {
-            let currentUser = Model.loginDesigner(response.email, response.password, "designer")
+            let currentUser = model.setCurrentUser(response.email, response.password, "designer")
+            console.log("current user: " + currentUser.name)
         })
         currentPage = <DesignerViewProject />;
         forceRedraw(redraw + 1);
