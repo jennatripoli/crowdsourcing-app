@@ -63,7 +63,7 @@ export class Model {
     }
 
     setCurrentUser(email, password, type){
-        this.currentUser = new Designer(email, password, "designer")
+        this.currentUser = new Designer(email, password)
         console.log("made it here")
     }
 }

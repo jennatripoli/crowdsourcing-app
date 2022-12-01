@@ -44,7 +44,7 @@ function App() {
         let data = {'body' : dataValue}
         instance.post('/loginDesigner', data).then((response) => {
             let currentUser = model.setCurrentUser(response.email, response.password, "designer")
-            console.log("current user: " + currentUser.name)
+            console.log("current user: " + currentUser.email) //TODO
         })
         currentPage = <DesignerViewProject />;
         forceRedraw(redraw + 1);
