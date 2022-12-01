@@ -36,7 +36,6 @@ function App() {
         let msg = {}
         msg["email"] = input_email.current.value
         msg["password"] = input_password.current.value
-        msg["account_type"] = input_account_type.value
         let dataValue = JSON.stringify(msg)
         let data = { 'body' : dataValue }
 
@@ -48,9 +47,9 @@ function App() {
           })
         } else if (input_account_type.value == 'administrator') {
           instance.post('/loginAdministrator', data).then((response) => {
-            //currentPage = <AdministratorListProjects />
-            //forceRedraw(redraw + 1)
-            //redraw++
+            currentPage = <AdministratorListProjects />
+            forceRedraw(redraw + 1)
+            redraw++
           })
         } else {
           //instance.post('/loginSupporter', data).then((response) => {
@@ -123,7 +122,7 @@ function App() {
     }
 
     function handle_button_create() {
-      currentPage = DesignerCreateProject()
+      currentPage = <DesignerCreateProject />
       forceRedraw(redraw + 1)
       redraw++
     }
@@ -270,6 +269,36 @@ function App() {
   return (
     <div>{currentPage}</div>
   );
+}
+
+
+
+
+function AdministratorListProjects() {
+  let entries = []
+
+  function handle_button_view(project_name_param) {
+    // open admin view project
+  }
+
+  instance.post('/adminList').then((response) => {
+    let allProjects = response.data.allProjects
+
+    if (allProjects != null) {
+      for (let project of allProjects) {
+        let entry = (
+          <div id="project_box">
+            <label onClick={handle_button_view(project.name)}>{project.name}</label><br/>
+            <label >Description: {project.description}</label><br/>
+            <label >Type: {project.type}</label><br/>
+            <label >Goal: ${project.goal}</label><br/>
+            <label >Deadline: {project.deadline}</label><br/>
+          </div>
+        )
+        entries.push(entry)
+      }
+    }
+  })
 }
 
 export default App;
