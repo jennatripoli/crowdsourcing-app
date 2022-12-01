@@ -27,20 +27,6 @@ function query(conx, sql, params) {
 }
 
 
-let getAllProjects = () => {
-    return new Promise((resolve, reject) => {
-                pool.query("SELECT * FROM Project", (error, rows) => {
-                    if (error) { return reject(error); }
-                    if (rows) {
-                        return resolve(rows);
-                    } else {
-                        return reject("there are no projects");
-                    }
-                });
-            });
-
-};
-
 /**
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
@@ -71,6 +57,22 @@ exports.lambdaHandler = async (event, context) => {
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
 
+    
+    let getAllProjects = () => {
+    return new Promise((resolve, reject) => {
+                pool.query("SELECT * FROM Project", (error, rows) => {
+                    if (error) { return reject(error); }
+                    if (rows) {
+                        return resolve(rows);
+                    } else {
+                        return reject("there are no projects");
+                    }
+                });
+            });
+
+};
+
+   
    try {
         // DATABASE STUFF HERE
         

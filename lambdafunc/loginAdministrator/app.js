@@ -80,11 +80,26 @@ exports.lambdaHandler = async (event, context) => {
                     if ((rows) && (rows.length == 1)) {
                         return resolve(rows[0].email);
                     } else {
-                        return reject("unable to locate user '" + email + "'");
+                        //InsertValidUser(email);
+                        return resolve(false);
                     }
 
                 });
             });
+    };
+    
+    let InsertValidUser = (email) => {
+        return new Promise((resolve, reject) => {
+            pool.query("INSERT INTO Admin (email, password) VALUES (?, 'pwd')", [email], (error, rows) => {
+                if (error) { return reject(error); }
+                    if ((rows) && (rows.affectedRows == 1)) {
+                        return resolve(true);
+                    } else {
+                        return reject("unable to insert user");
+                    }
+            });                   
+    
+        });
     };
 
 
@@ -132,13 +147,27 @@ exports.lambdaHandler = async (event, context) => {
         */
         
         //MIKAELA
-        const arg1_value = await GetValidUser(event.arg1);
+        const exists = await GetValidUser(event.arg1);
         
-        // If either is NaN then there is an error
-        response.statusCode = 200;
-        let result = arg1_value;
-        response.result = result.toString();
-
+        if (exists) {
+            //RETURN EMAIL
+            console.log("Admin already exists... Logging In");
+            response.statusCode = 200;
+            let result = exists;
+            response.result = result.toString();
+        } else {
+            //INSERT NEW
+            const inserted = await InsertValidUser(event.arg1);
+            if (inserted) {
+                console.log("Admin didn't exist... Creating User");
+                response.statusCode = 200;
+                let result = exists;
+                response.result = result.toString();
+            } else {
+                response.statusCode = 400;
+                response.error = "Couldn't insert ";
+            }
+        }
         
     } catch (err) {
         console.log(err);
