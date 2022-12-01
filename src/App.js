@@ -4,7 +4,7 @@ import { Model } from './entity/Model';
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'https://u0zs04o1wc.execute-api.us-east-1.amazonaws.com/Prod/'
+  baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod'
 });
 
 
@@ -42,7 +42,7 @@ function App() {
         let dataValue = JSON.stringify(msg)
         let data = {'body' : dataValue}
         instance.post('/loginDesigner', data).then((response) => {
-            let currentUser = Model.loginDesigner(response.email, response.pwd, "designer")
+            let currentUser = Model.loginDesigner(response.email, response.password, "designer")
         })
         currentPage = <DesignerViewProject />;
         forceRedraw(redraw + 1);
