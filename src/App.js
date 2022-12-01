@@ -4,6 +4,7 @@ import axios from "axios";
 
 var currentPage;
 const instance = axios.create({baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/'});
+var current_user_email;
 
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
@@ -38,6 +39,8 @@ function App() {
         msg["password"] = input_password.current.value
         let dataValue = JSON.stringify(msg)
         let data = { 'body' : dataValue }
+
+        current_user_email = msg["email"]
 
         if (input_account_type.value == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
@@ -97,20 +100,22 @@ function App() {
     let entries = []
 
     instance.post('/designerList', data).then((response) => {
-      let projects = response.result.list
-
-      if (projects != null) {
-        for (let project of projects) {
-          let entry = (
-            <div id="project_box">
-              <label onClick={handle_button_view(project.name)}>{project.name}</label><br/>
-              <label >Description: {project.description}</label><br/>
-              <label >Type: {project.type}</label><br/>
-              <label >Goal: ${project.goal}</label><br/>
-              <label >Deadline: {project.deadline}</label><br/>
-            </div>
-          )
-          entries.push(entry)
+      if (response != null) {
+        let projects = response.data.result.list
+        if (projects != undefined) {
+          for (let i = 0; i < projects.length; i++) {
+            let entry = (
+              <div id="project_box">
+                <label onClick={handle_button_view(projects[i].name)}>{projects[i].name}</label><br/>
+                <label >Description: {projects[i].description}</label><br/>
+                <label >Type: {projects[i].type}</label><br/>
+                <label >Goal: ${projects[i].goal}</label><br/>
+                <label >Deadline: {projects[i].deadline}</label><br/>
+                <label>-----------------</label>
+              </div>
+            )
+            entries.push(entry)
+          }
         }
       }
     })
@@ -122,7 +127,7 @@ function App() {
     }
 
     function handle_button_create() {
-      currentPage = DesignerCreateProject(designer_email_param)
+      currentPage = <DesignerCreateProject />
       forceRedraw(redraw + 1)
       redraw++
     }
@@ -130,6 +135,8 @@ function App() {
     return (
       <div className="DesignerListProjects">
         <label>Designer List Projects</label><br/>
+        <label>click project name to view project</label><br/>
+        <label>------------------</label><br/>
         <label>{designer_email_param}</label><br/>
         <label>{entries}</label><br/>
         <button onClick={handle_button_create}>Create New Project</button><br/>
@@ -140,7 +147,7 @@ function App() {
 
 
 
-  function DesignerCreateProject(designer_email_param) {
+  function DesignerCreateProject() {
     let input_name = useRef(null)
     let input_description = useRef(null)
     let input_goal = useRef(null)
@@ -154,7 +161,7 @@ function App() {
         let msg = {}
         msg["name"] = input_name.current.value
         msg["story"] = input_description.current.value
-        msg["designerEmail"] = designer_email_param
+        msg["designerEmail"] = current_user_email
         msg["type"] = input_type.current.value
         msg["goal"] = input_goal.current.value
         msg["deadline"] = input_deadline.current.value
@@ -219,16 +226,18 @@ function App() {
     let data = { 'body' : dataValue }
 
     instance.post('/designerViewProject', data).then((response) => {
-      name = response.name
-      story = response.story
-      designerEmail = response.designerEmail
-      type = response.type
-      goal = response.goal
-      deadline = response.deadline
-      activePledges = response.activePledges
-      directSupports = response.directSupports
-      successful = response.successful
-      launched = response.launched
+      if (response != null) {
+        name = response.data.name
+        story = response.data.story
+        designerEmail = response.data.designerEmail
+        type = response.data.type
+        goal = response.data.goal
+        deadline = response.data.deadline
+        activePledges = response.data.activePledges
+        directSupports = response.data.directSupports
+        successful = response.data.successful
+        launched = response.data.launched
+      }
     })
 
     // TODO figure out how to iterate over active pledges
@@ -283,28 +292,74 @@ function App() {
 function AdministratorListProjects() {
   let entries = []
 
+  /*let test = []
+
+  test[0] = {
+    "name": "Ninja-Se",
+    "description": "hello",
+    "entrepreneur": "email",
+    'type': "money",
+    "goal": "100",
+    "deadline": "today",
+    "successful": null,
+    "launched": false
+  }
+
+  test[1] = {
+    "name": "Ninja-Se 2.0",
+    "description": "hello",
+    "entrepreneur": "email",
+    'type': "money",
+    "goal": "100",
+    "deadline": "today",
+    "successful": null,
+    "launched": false
+  }*/
+
   function handle_button_view(project_name_param) {
     // open admin view project
   }
 
   instance.post('/adminList').then((response) => {
-    let allProjects = response.result.list
-
-    if (allProjects != null) {
-      for (let project of allProjects) {
-        let entry = (
-          <div id="project_box">
-            <label onClick={handle_button_view(project.name)}>{project.name}</label><br/>
-            <label >Description: {project.description}</label><br/>
-            <label >Type: {project.type}</label><br/>
-            <label >Goal: ${project.goal}</label><br/>
-            <label >Deadline: {project.deadline}</label><br/>
-          </div>
-        )
-        entries.push(entry)
+    if (response != null) {
+      let allProjects = response.data.result.list
+      if (allProjects != undefined) {
+        for (let i = 0; i < allProjects.length; i++) {
+          let entry = (
+            <div id="project_box">
+              <label fontWeight="bold" onClick={handle_button_view(allProjects[i].name)}>{allProjects[i].name}</label><br/>
+              <label >Description: {allProjects[i].description}</label><br/>
+              <label >Type: {allProjects[i].type}</label><br/>
+              <label >Goal: ${allProjects[i].goal}</label><br/>
+              <label >Deadline: {allProjects[i].deadline}</label><br/><br/>
+            </div>
+          )
+          entries.push(entry)
+        }
       }
     }
   })
+
+  /*for (let t of test) {
+    let entry = (
+      <div id="project_box">
+        <label onClick={handle_button_view(t.name)}>{t.name}</label><br/>
+        <label >Description: {t.description}</label><br/>
+        <label >Type: {t.type}</label><br/>
+        <label >Goal: ${t.goal}</label><br/>
+        <label >Deadline: {t.deadline}</label><br/>
+        <label>-----------</label>
+      </div>
+    )
+    entries.push(entry)
+  }*/
+
+  return (
+    <div className="AdministratorListProjects">
+      <label>admin list projects</label><br/>
+      {entries}
+    </div>
+  )
 }
 
 export default App;
