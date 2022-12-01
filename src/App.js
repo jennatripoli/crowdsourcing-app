@@ -173,7 +173,7 @@ function App() {
         console.log(data)
 
         instance.post('/createProject', data).then((response) => {
-          currentPage = DesignerViewProject(msg["name"])
+          currentPage = DesignerListProjects(msg["designerEmail"])
           forceRedraw(redraw + 1)
           redraw++
         })
