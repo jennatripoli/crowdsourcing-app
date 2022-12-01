@@ -84,6 +84,15 @@ exports.lambdaHandler = async (event, context) => {
         const exists = await addPledge(info);
         console.log("E2")
         response.statusCode = 200;
+        let descriptionReward = (info.descriptionReward);
+        let projectName = (info.projectName);
+        let maxSupporters = (info.maxSupporters);
+        let amount = (info.amount);
+        response.descriptionReward = descriptionReward.toString();
+        response.projectName = projectName.toString();
+        response.amount = amount;
+        response.maxSupporters = maxSupporters;
+        
         
     } catch (error) {
         console.log("ERROR: " + error);

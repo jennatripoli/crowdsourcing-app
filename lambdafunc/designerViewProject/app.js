@@ -1,7 +1,30 @@
 // const axios = require('axios')
 // const url = 'http://checkip.amazonaws.com/';
 let response;
-// const mysql = require('mysql');
+const mysql = require('mysql');
+
+var config = require('./config.json');
+
+var pool = mysql.createPool({
+    host: config.host,
+    user: config.user,
+    password: config.password,
+    database: config.database
+});
+
+function query(conx, sql, params) {
+    return new Promise((resolve, reject) => {
+        conx.query(sql, params, function(err, rows) {
+            if (err) {
+                // reject because there was an error
+                reject(err);
+            } else {
+                // resolve because we have result(s) from the query. it may be an empty rowset or contain multiple values
+                resolve(rows);
+            }
+        });
+    });
+}
 
 /**
  *
@@ -32,24 +55,59 @@ exports.lambdaHandler = async (event, context) => {
     let actual_event = event.body;
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
+    
+    let DesignerViewProject = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Project WHERE name=?", [info.name], (error, rows) => {
+                    if (error) { return reject(error); }
+                    console.log("INSERT:" + JSON.stringify(rows));
+                    
+                    if ((rows) && (rows.length == 1)) {
+                        return resolve(rows[0]);
+                        console.log("i am here");
 
+                    } else {
+                        return reject("project not found with name '" + info.name + "'");
+                    }            
+        });
+    });
+    }
+    
     try {
-        // DATABASE STUFF HERE
         
-        // receive a POST    
-        // {“email” : “xxx@gmail.com”, “projectName” : “project1”} 
-        // have to add database stuff here
-        // return on 200 {“name” : “project1”, “description” : “this project is”,  “entrepreneur” : “xxx@gmail.com”, “type” : “film”, “goal” : 1000,  “deadline” : “12-01-2022", “active-pledges” : [{...}, ...], “direct-supports” : [{...}, ...],  “successful” : false, “launched” : false} 
-        
-        // const ret = await axios(url);
+        // 1. Query RDS for the first constant value to see if it exists!
+        //   1.1. If doesn't exist then ADD
+        //   1.2  If it DOES exist, then I need to replace
+        // ----> These have to be done asynchronously in series, and you wait for earlier 
+        // ----> request to complete before beginning the next one
+        console.log("E1")
+        const foundProject = await DesignerViewProject(info);
+        console.log(foundProject);
+        console.log("E2")
         response.statusCode = 200;
-        response.body  = JSON.stringify({
-            //project info from database
-        })
+        let name = (foundProject.name);
+        let story = (foundProject.story);
+        let designerEmail = (foundProject.designerEmail);
+        let type = (foundProject.type);
+        let goal = (foundProject.goal);
+        let deadline = (foundProject.deadline);
+        let successfull = (foundProject.successfull);
+        let launched = (foundProject.launched)
+        response.name = name.toString();
+        response.story = story;
+        response.designerEmail = designerEmail;
+        response.type = type;
+        response.goal = goal;
+        response.deadline = deadline;
+        response.successfull = successfull;
+        response.launched = launched;
+        console.log("RESPONSE: " + JSON.stringify(response))
         
-    } catch (err) {
-        console.log(err);
-        return err;
+        
+    } catch (error) {
+        console.log("ERROR: " + error);
+        response.statusCode = 400;
+        response.error = error;
     }
 
     return response

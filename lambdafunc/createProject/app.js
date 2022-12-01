@@ -58,8 +58,8 @@ exports.lambdaHandler = async (event, context) => {
     
     let addProject = (info) => {
         return new Promise((resolve, reject) => {
-            pool.query("INSERT INTO Project (name, story, designerEmail, type, goal, deadline, successful, launched) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", 
-            [info.name, info.story, info.designerEmail, info.type, info.goal, info.deadline, info.successful, info.launched], (error, rows) => {
+            pool.query("INSERT INTO Project (name, story, designerEmail, type, goal, deadline, successfull, launched) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", 
+            [info.name, info.story, info.designerEmail, info.type, info.goal, info.deadline, info.successfull, info.launched], (error, rows) => {
                     if (error) { return reject(error); }
                     console.log("INSERT:" + JSON.stringify(rows));
                     
@@ -83,6 +83,23 @@ exports.lambdaHandler = async (event, context) => {
         const exists = await addProject(info);
         console.log("E2")
         response.statusCode = 200;
+        let name = (info.name);
+        let story = (info.story);
+        let designerEmail = (info.designerEmail);
+        let type = (info.type);
+        let goal = (info.goal);
+        let deadline = (info.deadline);
+        let successfull = (info.successfull);
+        let launched = (info.launched)
+        response.name = name.toString();
+        response.story = story;
+        response.designerEmail = designerEmail;
+        response.type = type;
+        response.goal = goal;
+        response.deadline = deadline;
+        response.successfull = successfull;
+        response.launched = launched;
+        
         
     } catch (error) {
         console.log("ERROR: " + error);
