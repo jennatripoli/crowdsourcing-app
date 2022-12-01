@@ -97,7 +97,7 @@ function App() {
     let entries = []
 
     instance.post('/designerList', data).then((response) => {
-      let projects = response.data.projects
+      let projects = response.result.list
 
       if (projects != null) {
         for (let project of projects) {
@@ -122,7 +122,7 @@ function App() {
     }
 
     function handle_button_create() {
-      currentPage = <DesignerCreateProject />
+      currentPage = DesignerCreateProject(designer_email_param)
       forceRedraw(redraw + 1)
       redraw++
     }
@@ -140,11 +140,12 @@ function App() {
 
 
 
-  function DesignerCreateProject() {
+  function DesignerCreateProject(designer_email_param) {
     let input_name = useRef(null)
     let input_description = useRef(null)
     let input_goal = useRef(null)
     let input_deadline = useRef(null)
+    let input_type = useRef(null)
 
     function handle_button_create() {
       if (input_name.current.value == null || input_goal.current.value <= 0 || input_deadline.current.value == null) {
@@ -152,9 +153,13 @@ function App() {
       } else {
         let msg = {}
         msg["name"] = input_name.current.value
-        msg["description"] = input_description.current.value
+        msg["story"] = input_description.current.value
+        msg["designerEmail"] = designer_email_param
+        msg["type"] = input_type.current.value
         msg["goal"] = input_goal.current.value
         msg["deadline"] = input_deadline.current.value
+        msg["successful"] = null
+        msg["launched"] = false
         let dataValue = JSON.stringify(msg)
         let data = { 'body' : dataValue }
 
@@ -175,6 +180,7 @@ function App() {
         <label>Description (optional):<input name="project_description" type="text" ref={input_description}/></label><br/>
         <label>Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1"/></label><br/>
         <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline}/></label><br/>
+        <label>Type:<input name="project_type" type="text" ref={input_type}/></label><br/>
         <button onClick={handle_button_create}>Create Project</button>
       </div>
     )
@@ -213,16 +219,16 @@ function App() {
     let data = { 'body' : dataValue }
 
     instance.post('/designerViewProject', data).then((response) => {
-      name = response.data.name
-      story = response.data.story
-      designerEmail = response.data.designerEmail
-      type = response.data.type
-      goal = response.data.goal
-      deadline = response.data.deadline
-      activePledges = response.data.activePledges
-      directSupports = response.data.directSupports
-      successful = response.data.successful
-      launched = response.data.launched
+      name = response.name
+      story = response.story
+      designerEmail = response.designerEmail
+      type = response.type
+      goal = response.goal
+      deadline = response.deadline
+      activePledges = response.activePledges
+      directSupports = response.directSupports
+      successful = response.successful
+      launched = response.launched
     })
 
     // TODO figure out how to iterate over active pledges
@@ -282,7 +288,7 @@ function AdministratorListProjects() {
   }
 
   instance.post('/adminList').then((response) => {
-    let allProjects = response.data.allProjects
+    let allProjects = response.result.list
 
     if (allProjects != null) {
       for (let project of allProjects) {
