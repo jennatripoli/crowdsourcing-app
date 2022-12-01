@@ -80,29 +80,32 @@ function App() {
     var input_deadline = useRef(null)
 
     function handle_button_create() {
-      // TODO add error handling here for bad inputs
+      if (input_name.current.value.length == 0 || input_goal.current.value <= 0 || input_deadline.current.value == null) {
+        alert("Fill out all required fields before creating a new project.");
+      } else {
+        let msg = {}
+        msg["name"] = input_name.current.value
+        msg["description"] = input_description.current.value
+        msg["goal"] = input_goal.current.value
+        msg["deadline"] = input_deadline.current.value
+        let dataValue = JSON.stringify(msg)
+        let data = { 'body' : dataValue }
 
-      let msg = {}
-      msg["name"] = input_name.current.value
-      msg["description"] = input_description.current.value
-      msg["goal"] = input_goal.current.value
-      msg["deadline"] = input_deadline.current.value
-      let dataValue = JSON.stringify(msg)
-      let data = { 'body' : dataValue }
-
-      instance.post('/createProject', data).then((response) => {
-        currentPage = <DesignerViewProject />
-        forceRedraw(redraw + 1)
-        redraw++
-      })
+        instance.post('/createProject', data).then((response) => {
+          currentPage = <DesignerViewProject />
+          forceRedraw(redraw + 1)
+          redraw++
+        })
+      }
     }
 
     return (
       <div className="DesignerCreateProject">
-          <label>Project Name:<input name="project_name" type="text" ref={input_name} /></label><br/>
-          <label>Project Description:<input name="project_description" type="text" ref={input_description} /></label><br/>
-          <label>Goal: $<input name="project_goal" type="number" ref={input_goal} /></label><br/>
-          <label>Deadline (MMDDYYYY):<input name="project_deadline" type="text" ref={input_deadline} /></label><br/>
+        <label>CREATE A NEW PROJECT</label><br/>
+        <label>Project Name:<input name="project_name" type="text" ref={input_name} /></label><br/>
+        <label>Description (optional):<input name="project_description" type="text" ref={input_description} /></label><br/>
+        <label>Goal: $<input name="project_goal" type="number" ref={input_goal} /></label><br/>
+        <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline} /></label><br/>
         <button onClick={handle_button_create}>Create Project</button>
       </div>
     )
@@ -147,28 +150,30 @@ function App() {
 
     // TODO figure out how to iterate over active pledges
     let entries = ''
-    /*for (let pledge of activePledges) {
-      let entry = (
-        <div id="pledge_box" style={pledge_box}>
-          <label style={pledge_name}>{pledge.name}</label>
-          <label style={pledge_amount}>{pledge.amount}</label>
-          <label style={pledge_description}>{pledge.description}</label>
-        </div>
-      )
-      entries += entry
-    }*/
+    if (activePledges != null) {
+      for (let pledge of activePledges) {
+        let entry = (
+          <div id="pledge_box" style={pledge_box}>
+            <label style={pledge_name}>{pledge.name}</label>
+            <label style={pledge_amount}>{pledge.amount}</label>
+            <label style={pledge_description}>{pledge.description}</label>
+          </div>
+        )
+        entries += entry
+      }
+    }
 
     return (
       <div className="DesignerViewProject">
         <div id="info_box" style={info_box}>
           <label style={project_name}>{name}</label>
           <div id="deadline_box" style={deadline_box}>
-            <label style={deadline_label}>Project Deadline: mm/dd/yyyy</label>
-            <label style={days_label}>00 DAYS LEFT</label>
+            <label style={deadline_label}>Project Deadline: {deadline}</label>
+            <label style={days_label}>__ DAYS LEFT</label>
           </div>
           <div id="goal_box" style={goal_box}>
             <label style={goal_label}>Project Goal: ${goal}</label>
-            <label style={raised_label}>$0000 RAISED</label>
+            <label style={raised_label}>$__ RAISED</label>
           </div>
           <div id="description_box" style={description_box}>
             <label style={description_label}>{story}</label>
