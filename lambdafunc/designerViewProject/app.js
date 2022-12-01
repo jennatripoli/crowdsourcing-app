@@ -91,7 +91,7 @@ exports.lambdaHandler = async (event, context) => {
         let type = (foundProject.type);
         let goal = (foundProject.goal);
         let deadline = (foundProject.deadline);
-        let successfull = (foundProject.successfull);
+        let successful = (foundProject.successful);
         let launched = (foundProject.launched)
         response.name = name.toString();
         response.story = story;
@@ -99,7 +99,7 @@ exports.lambdaHandler = async (event, context) => {
         response.type = type;
         response.goal = goal;
         response.deadline = deadline;
-        response.successfull = successfull;
+        response.successful = successful;
         response.launched = launched;
         console.log("RESPONSE: " + JSON.stringify(response))
         

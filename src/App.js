@@ -8,6 +8,10 @@ const instance = axios.create({baseURL: 'https://icki0h6bb0.execute-api.us-east-
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
   if (currentPage == null) currentPage = <Login />
+  let initRef = useRef(null)
+
+
+
 
   function Login() {
     const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
@@ -27,8 +31,8 @@ function App() {
     function handle_button_login() {
       if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked');
   
-      if (input_email.current.value.length == 0 || input_password.current.value.length == 0 || input_account_type.value == null) {
-        alert("Fill out all fields before logging in or registering.");
+      if (input_email.current.value == null || input_password.current.value == null || input_account_type.value == null) {
+        alert("Fill out all fields before logging in or registering.")
       } else {
         let msg = {}
         msg["email"] = input_email.current.value
@@ -39,12 +43,22 @@ function App() {
 
         if (input_account_type.value == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
-            currentPage = <DesignerCreateProject />
+            currentPage = DesignerListProjects(msg["email"])
             forceRedraw(redraw + 1)
             redraw++
           })
         } else if (input_account_type.value == 'administrator') {
-          instance.post('/loginAdministrator', data)
+          instance.post('/loginAdministrator', data).then((response) => {
+            //currentPage = <AdministratorListProjects />
+            //forceRedraw(redraw + 1)
+            //redraw++
+          })
+        } else {
+          //instance.post('/loginSupporter', data).then((response) => {
+            //currentPage = <SupporterListProjects />
+            //forceRedraw(redraw + 1)
+            //redraw++
+          //})
         }
       }
     }
@@ -73,15 +87,70 @@ function App() {
     );
   }
 
-  function DesignerCreateProject() {
-    var input_name = useRef(null)
-    var input_description = useRef(null)
-    var input_goal = useRef(null)
-    var input_deadline = useRef(null)
+
+
+
+  function DesignerListProjects(designer_email_param) {
+    let msg = {}
+    msg["email"] = designer_email_param
+    let dataValue = JSON.stringify(msg)
+    let data = { 'body' : dataValue }
+
+    let entries = []
+
+    instance.post('/designerList', data).then((response) => {
+      let projects = response.data.projects
+
+      if (projects != null) {
+        for (let project of projects) {
+          let entry = (
+            <div id="project_box">
+              <label onClick={handle_button_view(project.name)}>{project.name}</label><br/>
+              <label >Description: {project.description}</label><br/>
+              <label >Type: {project.type}</label><br/>
+              <label >Goal: ${project.goal}</label><br/>
+              <label >Deadline: {project.deadline}</label><br/>
+            </div>
+          )
+          entries.push(entry)
+        }
+      }
+    })
+
+    function handle_button_view(project_name_param) {
+      currentPage = DesignerViewProject(project_name_param)
+      forceRedraw(redraw + 1)
+      redraw++
+    }
 
     function handle_button_create() {
-      if (input_name.current.value.length == 0 || input_goal.current.value <= 0 || input_deadline.current.value == null) {
-        alert("Fill out all required fields before creating a new project.");
+      currentPage = DesignerCreateProject()
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
+    return (
+      <div className="DesignerListProjects">
+        <label>Designer List Projects</label><br/>
+        <label>{designer_email_param}</label><br/>
+        <label>{entries}</label><br/>
+        <button onClick={handle_button_create}>Create New Project</button><br/>
+      </div>
+    )
+  }
+
+
+
+
+  function DesignerCreateProject() {
+    let input_name = initRef
+    let input_description = initRef
+    let input_goal = initRef
+    let input_deadline = initRef
+
+    function handle_button_create() {
+      if (input_name.current.value == null || input_goal.current.value <= 0 || input_deadline.current.value == null) {
+        alert("Fill out all required fields before creating a new project.")
       } else {
         let msg = {}
         msg["name"] = input_name.current.value
@@ -92,7 +161,7 @@ function App() {
         let data = { 'body' : dataValue }
 
         instance.post('/createProject', data).then((response) => {
-          currentPage = <DesignerViewProject />
+          currentPage = DesignerViewProject(msg["name"])
           forceRedraw(redraw + 1)
           redraw++
         })
@@ -102,16 +171,19 @@ function App() {
     return (
       <div className="DesignerCreateProject">
         <label>CREATE A NEW PROJECT</label><br/>
-        <label>Project Name:<input name="project_name" type="text" ref={input_name} /></label><br/>
-        <label>Description (optional):<input name="project_description" type="text" ref={input_description} /></label><br/>
-        <label>Goal: $<input name="project_goal" type="number" ref={input_goal} /></label><br/>
-        <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline} /></label><br/>
+        <label>Project Name:<input name="project_name" type="text" ref={input_name}/></label><br/>
+        <label>Description (optional):<input name="project_description" type="text" ref={input_description}/></label><br/>
+        <label>Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1"/></label><br/>
+        <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline}/></label><br/>
         <button onClick={handle_button_create}>Create Project</button>
       </div>
     )
   }
 
-  function DesignerViewProject() {
+
+
+
+  function DesignerViewProject(project_name_param) {
     const info_box = { position: "absolute", width: 800, height: 700, background: "lightgrey", textAlign: "center", top: 50, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "40pt", fontWeight: "bold", top: 40 }
     const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, left: 20 }
@@ -133,12 +205,17 @@ function App() {
     const pledge_amount = { position: "absolute", top: 35 }
     const pledge_description = { position: "absolute", top: 60 }
 
-    var name, story, designer, type, goal, deadline, activePledges, directSupports, successful, launched
+    var name, story, designerEmail, type, goal, deadline, activePledges, directSupports, successful, launched
 
-    instance.post('/designerViewProject').then((response) => {
+    let msg = {}
+    msg["name"] = project_name_param
+    let dataValue = JSON.stringify(msg)
+    let data = { 'body' : dataValue }
+
+    instance.post('/designerViewProject', data).then((response) => {
       name = response.data.name
       story = response.data.story
-      designer = response.data.designer
+      designerEmail = response.data.designerEmail
       type = response.data.type
       goal = response.data.goal
       deadline = response.data.deadline
@@ -178,7 +255,7 @@ function App() {
           <div id="description_box" style={description_box}>
             <label style={description_label}>{story}</label>
           </div>
-          <label style={designer_label}><i>By: {designer}</i></label>
+          <label style={designer_label}><i>By: {designerEmail}</i></label>
         </div>
 
         <div id="active_pledges_box" style={active_pledges_box}>
