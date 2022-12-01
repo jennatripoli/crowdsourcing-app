@@ -8,7 +8,6 @@ const instance = axios.create({baseURL: 'https://icki0h6bb0.execute-api.us-east-
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
   if (currentPage == null) currentPage = <Login />
-  let initRef = useRef(null)
 
 
 
@@ -143,10 +142,10 @@ function App() {
 
 
   function DesignerCreateProject() {
-    let input_name = initRef
-    let input_description = initRef
-    let input_goal = initRef
-    let input_deadline = initRef
+    let input_name = useRef(null)
+    let input_description = useRef(null)
+    let input_goal = useRef(null)
+    let input_deadline = useRef(null)
 
     function handle_button_create() {
       if (input_name.current.value == null || input_goal.current.value <= 0 || input_deadline.current.value == null) {
@@ -159,6 +158,8 @@ function App() {
         msg["deadline"] = input_deadline.current.value
         let dataValue = JSON.stringify(msg)
         let data = { 'body' : dataValue }
+
+        console.log(data)
 
         instance.post('/createProject', data).then((response) => {
           currentPage = DesignerViewProject(msg["name"])
