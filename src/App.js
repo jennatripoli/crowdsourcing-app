@@ -149,7 +149,7 @@ function App() {
     })
 
     // TODO figure out how to iterate over active pledges
-    let entries = ''
+    let entries = []
     if (activePledges != null) {
       for (let pledge of activePledges) {
         let entry = (
@@ -159,7 +159,7 @@ function App() {
             <label style={pledge_description}>{pledge.description}</label>
           </div>
         )
-        entries += entry
+        entries.push(entry)
       }
     }
 
