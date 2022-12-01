@@ -89,7 +89,7 @@ exports.lambdaHandler = async (event, context) => {
     
     let InsertValidUser = (email) => {
         return new Promise((resolve, reject) => {
-            pool.query("INSERT INTO Admin (email, password) VALUES (?, 'pwd')", [email], (error, rows) => {
+            pool.query("INSERT INTO ProjectDesigner (email, password) VALUES (?, 'pwd')", [email], (error, rows) => {
                 if (error) { return reject(error); }
                     if ((rows) && (rows.affectedRows == 1)) {
                         return resolve(true);
