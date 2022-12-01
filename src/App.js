@@ -1,5 +1,12 @@
 import './App.css';
 import React, {useRef} from 'react';
+import { Model } from './entity/Model';
+import axios from 'axios';
+
+const instance = axios.create({
+  baseURL: 'https://u0zs04o1wc.execute-api.us-east-1.amazonaws.com/Prod/'
+});
+
 
 var currentPage;
 
@@ -27,7 +34,15 @@ function App() {
   
       if (input_email.current.value.length == 0 || input_password.current.value.length == 0 || input_account_type.value == null) {
         alert("Fill out all fields before logging in or registering.");
-      } else {
+      } else if (input_account_type.value === "designer") {
+        let msg ={}
+        msg["email"] = input_email.current.value
+        msg["pwd"] = input_password.current.value
+        let dataValue = JSON.stringify(msg)
+        let data = {'body' : dataValue}
+        instance.post('/loginDesigner', data).then((response) => {
+            let currentUser = Model.loginDesigner(response.email, response.pwd, "designer")
+        })
         currentPage = <DesignerViewProject />;
         forceRedraw(redraw + 1);
       }

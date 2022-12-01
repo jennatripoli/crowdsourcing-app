@@ -59,6 +59,11 @@ export class Project {
 
 export class Model {
     constructor() {
-        
+        this.currentUser = null
+    }
+
+    setCurrentUser(email, password, type){
+        this.currentUser = new Designer(email, password, "designer")
+        console.log("made it here")
     }
 }
