@@ -71,25 +71,31 @@ exports.lambdaHandler = async (event, context) => {
             });
 
     };*/
+    let actual_event = event.body;
+    let info = JSON.parse(actual_event);
+    console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
+    
+    
     
     //MIKAELA
-    let GetValidUser = (email, password) => {
+    let GetValidUser = (info) => {
     return new Promise((resolve, reject) => {
-                pool.query("SELECT * FROM ProjectDesigner WHERE email=?", [email, password], (error, rows) => {
+                pool.query("SELECT * FROM ProjectDesigner WHERE email=?", [info.email, info.password], (error, rows) => {
                     if (error) { return reject(error); }
                     if ((rows) && (rows.length == 1)) {
+                        console.log("here");
                         return resolve(rows[0].email);
                     } else {
-                        return reject("unable to locate user '" + email + "'");
+                        return resolve(false);
                     }
 
                 });
             });
     };
     
-    let InsertValidUser = (email, password) => {
+    let InsertValidUser = (info) => {
         return new Promise((resolve, reject) => {
-            pool.query("INSERT INTO ProjectDesigner (email, password) VALUES (?, ?)", [email], (error, rows) => {
+            pool.query("INSERT INTO ProjectDesigner (email, password) VALUES (?, ?)", [info.email, info.password], (error, rows) => {
                 if (error) { return reject(error); }
                     if ((rows) && (rows.affectedRows == 1)) {
                         return resolve(true);
@@ -146,13 +152,27 @@ exports.lambdaHandler = async (event, context) => {
         */
         
         //MIKAELA
-        const arg1_value = await GetValidUser(event.arg1);
+        const exists = await GetValidUser(info);
         
-        // If either is NaN then there is an error
-        response.statusCode = 200;
-        let result = arg1_value;
-        response.result = result.toString();
-
+        if (exists) {
+            //RETURN EMAIL
+            console.log("Designer already exists... Logging In");
+            response.statusCode = 200;
+            let result = exists;
+            response.result = result.toString();
+        } else {
+            //INSERT NEW
+            const inserted = await InsertValidUser(info);
+            if (inserted) {
+                console.log("Designer didn't exist... Creating User");
+                response.statusCode = 200;
+                let result = exists;
+                response.result = result.toString();
+            } else {
+                response.statusCode = 400;
+                response.error = "Couldn't insert ";
+            }
+        }
         
     } catch (err) {
         console.log(err);
