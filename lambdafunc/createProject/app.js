@@ -58,8 +58,8 @@ exports.lambdaHandler = async (event, context) => {
     
     let addProject = (info) => {
         return new Promise((resolve, reject) => {
-            pool.query("INSERT INTO Project (name, story, designerEmail, type, goal, deadline, successfull, launched) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", 
-            [info.name, info.story, info.designerEmail, info.type, info.goal, info.deadline, info.successfull, info.launched], (error, rows) => {
+            pool.query("INSERT INTO Project (name, story, designerEmail, type, goal, deadline, successful, launched) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", 
+            [info.name, info.story, info.designerEmail, info.type, info.goal, info.deadline, info.successful, info.launched], (error, rows) => {
                     if (error) { return reject(error); }
                     console.log("INSERT:" + JSON.stringify(rows));
                     
@@ -89,7 +89,7 @@ exports.lambdaHandler = async (event, context) => {
         let type = (info.type);
         let goal = (info.goal);
         let deadline = (info.deadline);
-        let successfull = (info.successfull);
+        let successful = (info.successful);
         let launched = (info.launched)
         response.name = name.toString();
         response.story = story;
@@ -97,7 +97,7 @@ exports.lambdaHandler = async (event, context) => {
         response.type = type;
         response.goal = goal;
         response.deadline = deadline;
-        response.successfull = successfull;
+        response.successful = successful;
         response.launched = launched;
         
         
