@@ -1,7 +1,30 @@
 // const axios = require('axios')
 // const url = 'http://checkip.amazonaws.com/';
 let response;
-// const mysql = require('mysql');
+const mysql = require('mysql');
+
+var config = require('./config.json');
+
+var pool = mysql.createPool({
+    host: config.host,
+    user: config.user,
+    password: config.password,
+    database: config.database
+});
+
+function query(conx, sql, params) {
+    return new Promise((resolve, reject) => {
+        conx.query(sql, params, function(err, rows) {
+            if (err) {
+                // reject because there was an error
+                reject(err);
+            } else {
+                // resolve because we have result(s) from the query. it may be an empty rowset or contain multiple values
+                resolve(rows);
+            }
+        });
+    });
+}
 
 /**
  *
@@ -32,30 +55,49 @@ exports.lambdaHandler = async (event, context) => {
     let actual_event = event.body;
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
-
+    
+    let addPledge = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("INSERT INTO Pledge (descriptionReward, projectName, amount, maxSupporters) VALUES(?, ?, ?, ?)", 
+            [info.descriptionReward, info.projectName, info.amount, info.maxSupporters], (error, rows) => {
+                    if (error) { return reject(error); }
+                    console.log("INSERT:" + JSON.stringify(rows));
+                    
+                    if ((rows) && (rows.affectedRows === 1)) {
+                        return resolve(true);
+                    } else {
+                        return reject("pledge already exists for '" + info.descriptionReward + "'");
+                    }            
+        });
+    });
+    }
+    
+    
     try {
-        // DATABASE STUFF HERE
         
-        // receive a POST    
-        // {{“project-name” : “project1”, “pledge-name” : “Tier1”, “amount” : 20, “max-supporters” : 100,  “description-reward” : “You will get a cool potted plant”, “supporters” : [{...}, ...], “successful” : false} 
-        // have to add database stuff here
-        // return on 200 same thing
+        // 1. Query RDS for the first constant value to see if it exists!
+        //   1.1. If doesn't exist then ADD
+        //   1.2  If it DOES exist, then I need to replace
+        // ----> These have to be done asynchronously in series, and you wait for earlier 
+        // ----> request to complete before beginning the next one
+        console.log("E1")
+        const exists = await addPledge(info);
+        console.log("E2")
+        response.statusCode = 200;
+        let descriptionReward = (info.descriptionReward);
+        let projectName = (info.projectName);
+        let maxSupporters = (info.maxSupporters);
+        let amount = (info.amount);
+        response.descriptionReward = descriptionReward.toString();
+        response.projectName = projectName.toString();
+        response.amount = amount;
+        response.maxSupporters = maxSupporters;
         
-        // const ret = await axios(url);
-       response.statusCode = 200;
-        response.body  = JSON.stringify({
-            projectname: info.projectname,
-            pledgename: info.pledgename,
-            amount: info.amount,
-            maxsupporters: info.maxsupporters,
-            descriptionreward: info.descriptionreward,
-            supporters: info.supporters,
-            successful: info.successful
-        })
         
-    } catch (err) {
-        console.log(err);
-        return err;
+    } catch (error) {
+        console.log("ERROR: " + error);
+        response.statusCode = 400;
+        response.error = error;
     }
 
     return response

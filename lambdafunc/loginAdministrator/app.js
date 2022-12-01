@@ -27,20 +27,6 @@ function query(conx, sql, params) {
 }
 
 
-let getAllProjects = () => {
-    return new Promise((resolve, reject) => {
-                pool.query("SELECT * FROM Project", (error, rows) => {
-                    if (error) { return reject(error); }
-                    if (rows) {
-                        return resolve(rows);
-                    } else {
-                        return reject("there are no projects");
-                    }
-                });
-            });
-
-}
-
 /**
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
@@ -69,7 +55,39 @@ exports.lambdaHandler = async (event, context) => {
 
     let actual_event = event.body;
     let info = JSON.parse(actual_event);
-    console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
+    console.log("info:" + JSON.stringify(info)); //  info.arg1, info.password
+    
+    
+    //MIKAELA
+    let GetValidUser = (info) => {
+    return new Promise((resolve, reject) => {
+                pool.query("SELECT * FROM Admin WHERE email=?", [info.email], (error, rows) => {
+                    if (error) { return reject(error); }
+                    if ((rows) && (rows.length == 1)) {
+                        return resolve(rows[0].email);
+                    } else {
+                        //InsertValidUser(email);
+                        return resolve(false);
+                    }
+
+                });
+            });
+    };
+    
+    let InsertValidUser = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("INSERT INTO Admin (email, password) VALUES (?, ?)", [info.email, info.password], (error, rows) => {
+                if (error) { return reject(error); }
+                    if ((rows) && (rows.affectedRows == 1)) {
+                        return resolve(true);
+                    } else {
+                        return reject("unable to insert user");
+                    }
+            });                   
+    
+        });
+    };
+
 
     try {
         // DATABASE STUFF HERE
@@ -88,28 +106,29 @@ exports.lambdaHandler = async (event, context) => {
         // “successful” : false, “launched” : false}, …]} 
         
         // const ret = await axios(url);
-        let projects = getAllProjects();
-        let list = [];
         
-        for (let i = 0; i<projects.length; i++) {
-            let project = projects[i];
-            list[i] = {
-                name: project.name,
-                description: project.story,
-                entrepreneur: project.designerEmail,
-                type: project.type,
-                goal: project.goal,
-                deadline: project.deadline,
-                successful: project.successful,
-                launched: project.launched
-            };
-        };
+        //MIKAELA
+        const exists = await GetValidUser(info);
         
-        response.statusCode = 200;
-        
-        response.body  = JSON.stringify({
-            list,
-        });
+        if (exists) {
+            //RETURN EMAIL
+            console.log("Admin already exists... Logging In");
+            response.statusCode = 200;
+            let result = exists;
+            response.result = result.toString();
+        } else {
+            //INSERT NEW
+            const inserted = await InsertValidUser(info);
+            if (inserted) {
+                console.log("Admin didn't exist... Creating User");
+                response.statusCode = 200;
+                let result = inserted;
+                response.result = result.toString();
+            } else {
+                response.statusCode = 400;
+                response.error = "Couldn't insert ";
+            }
+        }
         
     } catch (err) {
         console.log(err);

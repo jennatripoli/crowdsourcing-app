@@ -1,7 +1,30 @@
 // const axios = require('axios')
 // const url = 'http://checkip.amazonaws.com/';
 let response;
-// const mysql = require('mysql');
+const mysql = require('mysql');
+
+var config = require('./config.json');
+
+var pool = mysql.createPool({
+    host: config.host,
+    user: config.user,
+    password: config.password,
+    database: config.database
+});
+
+function query(conx, sql, params) {
+    return new Promise((resolve, reject) => {
+        conx.query(sql, params, function(err, rows) {
+            if (err) {
+                // reject because there was an error
+                reject(err);
+            } else {
+                // resolve because we have result(s) from the query. it may be an empty rowset or contain multiple values
+                resolve(rows);
+            }
+        });
+    });
+}
 
 /**
  *
@@ -32,32 +55,56 @@ exports.lambdaHandler = async (event, context) => {
     let actual_event = event.body;
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
-
+    
+    let addProject = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("INSERT INTO Project (name, story, designerEmail, type, goal, deadline, successful, launched) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", 
+            [info.name, info.story, info.designerEmail, info.type, info.goal, info.deadline, info.successful, info.launched], (error, rows) => {
+                    if (error) { return reject(error); }
+                    console.log("INSERT:" + JSON.stringify(rows));
+                    
+                    if ((rows) && (rows.affectedRows === 1)) {
+                        return resolve(true);
+                    } else {
+                        return reject("project name already taken for '" + info.name + "'");
+                    }            
+        });
+    });
+    }
+    
     try {
-        // DATABASE STUFF HERE
         
-        // receive a POST    
-        // {“name” : “project1”, “description” : “this project is”, “entrepreneur” : “xxx@gmail.com”, “type” : “film”, “goal” : 1000, “deadline” : “12-01-2022", “active-pledges” : [{...}, ...],  “direct-supports” : [{...}, ...], “successful” : false, “launched” : false} 
-        // have to add database stuff here
-        // return on 200 same thing
-        
-        // const ret = await axios(url);
+        // 1. Query RDS for the first constant value to see if it exists!
+        //   1.1. If doesn't exist then ADD
+        //   1.2  If it DOES exist, then I need to replace
+        // ----> These have to be done asynchronously in series, and you wait for earlier 
+        // ----> request to complete before beginning the next one
+        console.log("E1")
+        const exists = await addProject(info);
+        console.log("E2")
         response.statusCode = 200;
-        response.body  = JSON.stringify({
-            name: info.name,
-            descrip: info.descrip,
-            entrepreneur: info.entrepreneur,
-            type: info.type,
-            goal: info.goal,
-            activepledges: info.activepledges,
-            directsupports: info.directsupports,
-            successful: info.successful,
-            launched: info.launched
-        })
+        let name = (info.name);
+        let story = (info.story);
+        let designerEmail = (info.designerEmail);
+        let type = (info.type);
+        let goal = (info.goal);
+        let deadline = (info.deadline);
+        let successful = (info.successful);
+        let launched = (info.launched)
+        response.name = name.toString();
+        response.story = story;
+        response.designerEmail = designerEmail;
+        response.type = type;
+        response.goal = goal;
+        response.deadline = deadline;
+        response.successful = successful;
+        response.launched = launched;
         
-    } catch (err) {
-        console.log(err);
-        return err;
+        
+    } catch (error) {
+        console.log("ERROR: " + error);
+        response.statusCode = 400;
+        response.error = error;
     }
 
     return response
