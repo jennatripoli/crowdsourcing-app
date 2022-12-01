@@ -8,7 +8,7 @@ var currentPage;
 const instance = axios.create({baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/'});
 
 function App() {
-  const [redraw, forceRedraw] = React.useState(0);
+  const [redraw, forceRedraw] = React.useState(0)
   if (currentPage == null) currentPage = <Login />
 
   function Login() {
@@ -32,10 +32,6 @@ function App() {
       if (input_email.current.value.length == 0 || input_password.current.value.length == 0 || input_account_type.value == null) {
         alert("Fill out all fields before logging in or registering.");
       } else {
-        console.log(input_email.current.value)
-        console.log(input_password.current.value)
-        console.log(input_account_type.value)
-
         let msg = {}
         msg["email"] = input_email.current.value
         msg["password"] = input_password.current.value
@@ -45,7 +41,7 @@ function App() {
 
         if (input_account_type.value == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
-            currentPage = <DesignerViewProject />
+            currentPage = <DesignerCreateProject />
             forceRedraw(redraw + 1)
           })
         } else if (input_account_type.value == 'designer') {
@@ -77,6 +73,63 @@ function App() {
         </div>
       </div>
     );
+  }
+
+
+  // onSubmit={this.handleCreate}
+  function DesignerCreateProject() {
+    var input_name = useRef(null)
+    var input_description = useRef(null)
+    var input_goal = useRef(null)
+    var input_deadline = useRef(null)
+
+    function handle_button_create() {
+      // TODO add error handling here for bad inputs
+
+        let msg = {}
+        msg["name"] = input_name.current.value
+        msg["description"] = input_description.current.value
+        msg["goal"] = input_goal.current.value
+        msg["deadline"] = input_deadline.current.value
+        let dataValue = JSON.stringify(msg)
+        let data = { 'body' : dataValue }
+
+        instance.post('/createProject', data).then((response) => {
+          
+        })
+
+        currentPage = <DesignerViewProject />
+        forceRedraw(redraw + 1)
+    }
+
+    return (
+      <div className="DesignerCreateProject">
+        <form >
+            <label>
+                Project Name:
+                <input name="project_name" type="text" ref={input_name} />
+            </label>
+            <br />
+            <label>
+                Project Description:
+                <input name="project_description" type="text" ref={input_description} />
+            </label>
+            <br />
+            <label>
+                Goal: $
+                <input name="project_goal" type="number" ref={input_goal} />
+            </label>
+            <br />
+            <label>
+                Deadline (MMDDYYYY):
+                <input name="project_deadline" type="text" ref={input_deadline} />
+            </label>
+            <br />
+        </form>
+        <button onClick={handle_button_create}>Create Project</button>
+
+      </div>
+    )
   }
 
   function DesignerViewProject() {
@@ -116,8 +169,9 @@ function App() {
       launched = response.data.launched
     })
 
+    // TODO figure out how to iterate over active pledges
     let entries = ''
-    for (let pledge of activePledges) {
+    /*for (let pledge of activePledges) {
       let entry = (
         <div id="pledge_box" style={pledge_box}>
           <label style={pledge_name}>{pledge.name}</label>
@@ -126,7 +180,7 @@ function App() {
         </div>
       )
       entries += entry
-    }
+    }*/
 
     return (
       <div className="DesignerViewProject">
