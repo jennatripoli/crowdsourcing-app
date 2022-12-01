@@ -116,6 +116,18 @@ function App() {
       launched = response.data.launched
     })
 
+    let entries = ''
+    for (let pledge of activePledges) {
+      let entry = (
+        <div id="pledge_box" style={pledge_box}>
+          <label style={pledge_name}>{pledge.name}</label>
+          <label style={pledge_amount}>{pledge.amount}</label>
+          <label style={pledge_description}>{pledge.description}</label>
+        </div>
+      )
+      entries += entry
+    }
+
     return (
       <div className="DesignerViewProject">
         <div id="info_box" style={info_box}>
@@ -136,11 +148,7 @@ function App() {
 
         <div id="active_pledges_box" style={active_pledges_box}>
           <label style={active_label}>Active Pledges</label>
-          <div id="pledge_box" style={pledge_box}>
-            <label style={pledge_name}>Pledge Name</label>
-            <label style={pledge_amount}>$1000</label>
-            <label style={pledge_description}>Pledge Description</label>
-          </div>
+          <div id="pledges">{entries}</div>
         </div>
       </div>
     );

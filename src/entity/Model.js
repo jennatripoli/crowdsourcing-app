@@ -25,7 +25,8 @@ export class Designer {
 }
 
 export class Pledge {
-    constructor(amount, description, maxSupporters) {
+    constructor(name, amount, description, maxSupporters) {
+        this.name = name
         this.amount = amount
         this.description = description
         this.maxSupporters = maxSupporters
