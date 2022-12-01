@@ -74,6 +74,7 @@ exports.lambdaHandler = async (event, context) => {
             });
     };
     
+    //not currently being used
     let InsertValidUser = (info) => {
         return new Promise((resolve, reject) => {
             pool.query("INSERT INTO Admin (email, password) VALUES (?, ?)", [info.email, info.password], (error, rows) => {
@@ -118,16 +119,16 @@ exports.lambdaHandler = async (event, context) => {
             response.result = result.toString();
         } else {
             //INSERT NEW
-            const inserted = await InsertValidUser(info);
+            /*const inserted = await InsertValidUser(info);
             if (inserted) {
                 console.log("Admin didn't exist... Creating User");
                 response.statusCode = 200;
                 let result = inserted;
                 response.result = result.toString();
-            } else {
+            } else {*/
                 response.statusCode = 400;
-                response.error = "Couldn't insert ";
-            }
+                response.error = "User didn't exist";
+            //}
         }
         
     } catch (err) {
