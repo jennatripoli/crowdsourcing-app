@@ -270,29 +270,27 @@ function App() {
   }
 
   function AdministratorListProjects() {
-    var entries = ([])
-    var allProjects = []
+    let [entries, setEntries] = React.useState([])
 
-    let msg = {}
-    let dataValue = JSON.stringify(msg)
-    let data = { 'body': dataValue }
-
-    instance.post('/adminList', data).then((response) => {
-      allProjects = JSON.parse(response.data.result)
-      if (allProjects != undefined) {
-        for (let i = 0; i < allProjects.list.length; i++) {
-          let project = allProjects.list[i]
-
-          const entry = (
-            <div>
-              <label fontWeight="bold">{project.name}</label><br/>
-              <label >{project.description}</label><br/>
-              <label >Deadline: {project.deadline}</label><br/>
-              <label >Type: {project.type}</label><br/>
-              <label >Goal: ${project.goal}</label><br/>
-            </div>
-          )
-          entries.push(entry)
+    instance.post('/adminList').then((response) => {
+      if (response != null) {
+        let allProjects = JSON.parse(response.data.result)
+        if (allProjects != undefined) {
+          let inner = []
+          for (let project of allProjects.list) {
+            const entry = (
+              <div id="project_box">
+                <label fontWeight="bold">{project.name}</label><br/>
+                <label >{project.description}</label><br/>
+                <label >Deadline: {project.deadline}</label><br/>
+                <label >Type: {project.type}</label><br/>
+                <label >Goal: ${project.goal}</label><br/>
+                <label >---------------------</label><br/>
+              </div>
+            )
+            inner.push(entry)
+          }
+          setEntries(inner)
         }
       }
     })
