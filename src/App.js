@@ -187,6 +187,42 @@ function App() {
     )
   }
 
+  function DesignerCreatePledge() {
+    let input_amount = useRef(null)
+    let input_description = useRef(null)
+
+    function handle_button_create() {
+      if (input_amount.current.value == 0) {
+        alert("Fill out all required fields before creating a new pledge.")
+      } else {
+        let msg = {}
+        msg["amount"] = input_description.current.value
+        msg["descriptionReward"] = input_description.current.value
+        msg["maxSupporters"] = 1000
+        msg["projectName"] = current_project
+        let dataValue = JSON.stringify(msg)
+        let data = { 'body': dataValue }
+
+        console.log(data)
+
+        instance.post('/createPledge', data).then((response) => {
+          currentPage = <DesignerViewProject />
+          forceRedraw(redraw + 1)
+          redraw++
+        })
+      }
+    }
+
+    return (
+      <div className="DesignerCreatePledge">
+        <label>CREATE A NEW PLDEGE</label><br />
+        <label>Description (optional):<input name="project_description" type="text" ref={input_description} /></label><br />
+        <label>Amount: $<input name="project_goal" type="number" ref={input_amount} min="1" default="1" /></label><br />
+        <button onClick={handle_button_create}>Create Pledge</button>
+      </div>
+    )
+  }
+
   function DesignerViewProject() {
     const info_box = { position: "absolute", width: 800, height: 700, background: "lightgrey", textAlign: "center", top: 50, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "40pt", fontWeight: "bold", top: 40 }
@@ -251,6 +287,11 @@ function App() {
       }
     })
   
+    function handle_button_create_pledge() {
+      currentPage = <DesignerCreatePledge />
+      forceRedraw(redraw + 1)
+      redraw++
+    }
 
     return (
       <div className="DesignerViewProject">
@@ -272,6 +313,7 @@ function App() {
 
         <div id="active_pledges_box" style={active_pledges_box}>
           <label style={active_label}>Active Pledges</label>
+          <button onClick={() => handle_button_create_pledge()}>Create a new pledge</button>
           <div id="pledges">{pledges}</div>
         </div>
       </div>
