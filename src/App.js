@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { Model } from './entity/Model';
 import axios from 'axios';
 
-var model = new Model, currentPage, current_user_email;
+var model = new Model, currentPage, current_user_email, current_project;
 const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/' });
 
 function App() {
@@ -26,7 +26,7 @@ function App() {
     let input_account_type = null
 
     function handle_button_login() {
-      if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked');
+      if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked')
 
       if (input_email.current.value == null || input_password.current.value == null || input_account_type.value == null) {
         alert("Fill out all fields before logging in or registering.")
@@ -37,11 +37,11 @@ function App() {
         let dataValue = JSON.stringify(msg)
         let data = { 'body': dataValue }
 
-        current_user_email = msg["email"]
+        current_user_email = input_email.current.value
 
         if (input_account_type.value == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
-            currentPage = DesignerListProjects(msg["email"])
+            currentPage = <DesignerListProjects />
             forceRedraw(redraw + 1)
             redraw++
           })
@@ -52,11 +52,7 @@ function App() {
             redraw++
           })
         } else {
-          //instance.post('/loginSupporter', data).then((response) => {
-          //currentPage = <SupporterListProjects />
-          //forceRedraw(redraw + 1)
-          //redraw++
-          //})
+          // login supporter
         }
       }
     }
@@ -85,37 +81,44 @@ function App() {
     );
   }
 
-  function DesignerListProjects(designer_email_param) {
+  function DesignerListProjects() {
     let msg = {}
-    msg["email"] = designer_email_param
+    msg["email"] = current_user_email
     let dataValue = JSON.stringify(msg)
     let data = { 'body': dataValue }
 
-    let entries = []
+    let [entries, setEntries] = React.useState([])
 
     instance.post('/designerList', data).then((response) => {
+      console.log(response)
       if (response != null) {
-        let projects = response.data.result.list
-        if (projects != undefined) {
-          for (let i = 0; i < projects.length; i++) {
-            let entry = (
+        let allProjects = JSON.parse(response.data.result)
+        console.log(allProjects)
+        if (allProjects != undefined) {
+          let inner = []
+          for (let i = 0; i < allProjects.list.length; i++) {
+            let project = allProjects.list[i]
+            const entry = (
               <div id="project_box">
-                <label onClick={handle_button_view(projects[i].name)}>{projects[i].name}</label><br />
-                <label >Description: {projects[i].description}</label><br />
-                <label >Type: {projects[i].type}</label><br />
-                <label >Goal: ${projects[i].goal}</label><br />
-                <label >Deadline: {projects[i].deadline}</label><br />
-                <label>-----------------</label>
+                <label onClick={handle_button_view(project.name)}>Name: {project.name}</label><br/>
+                <label >Description: {project.description}</label><br/>
+                <label >Deadline: {project.deadline}</label><br/>
+                <label >Type: {project.type}</label><br/>
+                <label >Goal: ${project.goal}</label><br/>
+                <label >Designer: {project.entrepreneur}</label><br/>
+                <label >---------------------</label><br/>
               </div>
             )
-            entries.push(entry)
+            inner.push(entry)
           }
+          setEntries(inner)
         }
       }
     })
 
     function handle_button_view(project_name_param) {
-      currentPage = DesignerViewProject(project_name_param)
+      current_project = project_name_param
+      currentPage = <DesignerViewProject />
       forceRedraw(redraw + 1)
       redraw++
     }
@@ -129,10 +132,10 @@ function App() {
     return (
       <div className="DesignerListProjects">
         <label>Designer List Projects</label><br />
+        <label>{current_user_email} 's projects</label><br />
         <label>click project name to view project</label><br />
         <label>------------------</label><br />
-        <label>{designer_email_param}</label><br />
-        <label>{entries}</label><br />
+        <div>{entries}</div><br />
         <button onClick={handle_button_create}>Create New Project</button><br />
       </div>
     )
@@ -184,7 +187,7 @@ function App() {
     )
   }
 
-  function DesignerViewProject(project_name_param) {
+  function DesignerViewProject() {
     const info_box = { position: "absolute", width: 800, height: 700, background: "lightgrey", textAlign: "center", top: 50, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "40pt", fontWeight: "bold", top: 40 }
     const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, left: 20 }
@@ -206,30 +209,32 @@ function App() {
     const pledge_amount = { position: "absolute", top: 35 }
     const pledge_description = { position: "absolute", top: 60 }
 
-    var name, story, designerEmail, type, goal, deadline, activePledges, directSupports, successful, launched
+    var a_name, a_story, a_designerEmail, a_type, a_goal, a_deadline, a_activePledges, a_directSupports, a_successful, a_launched
 
     let msg = {}
-    msg["name"] = project_name_param
+    msg["name"] = current_project
     let dataValue = JSON.stringify(msg)
     let data = { 'body': dataValue }
 
     instance.post('/designerViewProject', data).then((response) => {
+      console.log(response)
       if (response != null) {
-        name = response.data.name
-        story = response.data.story
-        designerEmail = response.data.designerEmail
-        type = response.data.type
-        goal = response.data.goal
-        deadline = response.data.deadline
-        activePledges = response.data.activePledges
-        directSupports = response.data.directSupports
-        successful = response.data.successful
-        launched = response.data.launched
+        a_name = response.data.name
+        a_story = response.data.story
+        a_designerEmail = response.data.designerEmail
+        a_type = response.data.type
+        a_goal = response.data.goal
+        a_deadline = response.data.deadline
+        a_activePledges = response.data.activePledges
+        a_directSupports = response.data.directSupports
+        a_successful = response.data.successful
+        a_launched = response.data.launched
       }
     })
+  
 
     // TODO figure out how to iterate over active pledges
-    let entries = []
+    /*let entries = []
     if (activePledges != null) {
       for (let pledge of activePledges) {
         let entry = (
@@ -241,29 +246,31 @@ function App() {
         )
         entries.push(entry)
       }
-    }
+
+                <div id="pledges">{entries}</div>
+
+    }*/
 
     return (
       <div className="DesignerViewProject">
         <div id="info_box" style={info_box}>
-          <label style={project_name}>{name}</label>
+          <label style={project_name}>{a_name}</label>
           <div id="deadline_box" style={deadline_box}>
-            <label style={deadline_label}>Project Deadline: {deadline}</label>
+            <label style={deadline_label}>Project Deadline: {a_deadline}</label>
             <label style={days_label}>__ DAYS LEFT</label>
           </div>
           <div id="goal_box" style={goal_box}>
-            <label style={goal_label}>Project Goal: ${goal}</label>
+            <label style={goal_label}>Project Goal: ${a_goal}</label>
             <label style={raised_label}>$__ RAISED</label>
           </div>
           <div id="description_box" style={description_box}>
-            <label style={description_label}>{story}</label>
+            <label style={description_label}>{a_story}</label>
           </div>
-          <label style={designer_label}><i>By: {designerEmail}</i></label>
+          <label style={designer_label}><i>By: {a_designerEmail}</i></label>
         </div>
 
         <div id="active_pledges_box" style={active_pledges_box}>
           <label style={active_label}>Active Pledges</label>
-          <div id="pledges">{entries}</div>
         </div>
       </div>
     );
@@ -277,14 +284,16 @@ function App() {
         let allProjects = JSON.parse(response.data.result)
         if (allProjects != undefined) {
           let inner = []
-          for (let project of allProjects.list) {
+          for (let i = 0; i < allProjects.list.length; i++) {
+            let project = allProjects.list[i]
             const entry = (
               <div id="project_box">
-                <label fontWeight="bold">{project.name}</label><br/>
-                <label >{project.description}</label><br/>
+                <button onClick={() => handle_button_view(project.name)}>Name: {project.name}</button><br/>
+                <label >Description: {project.description}</label><br/>
                 <label >Deadline: {project.deadline}</label><br/>
                 <label >Type: {project.type}</label><br/>
                 <label >Goal: ${project.goal}</label><br/>
+                <label >Designer: {project.entrepreneur}</label><br/>
                 <label >---------------------</label><br/>
               </div>
             )
@@ -295,9 +304,17 @@ function App() {
       }
     })
 
+    function handle_button_view(project_name_param) {
+      current_project = project_name_param
+      currentPage = <DesignerViewProject />
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
     return (
       <div className="AdministratorListProjects">
         <label>admin list projects</label><br />
+        <label>------------------------</label>
         <div>{entries}</div>
       </div>
     )
