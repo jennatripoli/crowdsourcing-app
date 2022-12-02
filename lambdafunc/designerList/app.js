@@ -85,7 +85,7 @@ exports.lambdaHandler = async (event, context) => {
         // “successful” : false, “launched” : false}, …]} 
         
         // const ret = await axios(url);
-        let projects = await getDesignerProjects(event.arg1);
+        let projects = await getDesignerProjects(event.email);
         
         if(projects) {
             
