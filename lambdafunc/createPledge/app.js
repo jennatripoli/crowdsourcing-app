@@ -80,18 +80,27 @@ exports.lambdaHandler = async (event, context) => {
         //   1.2  If it DOES exist, then I need to replace
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
-        console.log("E1")
+        //console.log("E1")
         const exists = await addPledge(info);
-        console.log("E2")
-        response.statusCode = 200;
-        let descriptionReward = (info.descriptionReward);
-        let projectName = (info.projectName);
-        let maxSupporters = (info.maxSupporters);
-        let amount = (info.amount);
-        response.descriptionReward = descriptionReward.toString();
-        response.projectName = projectName.toString();
-        response.amount = amount;
-        response.maxSupporters = maxSupporters;
+        
+        if (exists) {
+            // console.log("E2")
+            let descriptionReward = (info.descriptionReward);
+            let projectName = (info.projectName);
+            let maxSupporters = (info.maxSupporters);
+            let amount = (info.amount);
+            
+            response.descriptionReward = descriptionReward.toString();
+            response.projectName = projectName.toString();
+            response.amount = amount;
+            response.maxSupporters = maxSupporters;
+            response.statusCode = 200;
+        }
+        
+        else {
+            response.statusCode = 400;
+            response.error = "unable to create pledge";
+        }
         
         
     } catch (error) {
