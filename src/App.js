@@ -164,10 +164,9 @@ function App() {
         let dataValue = JSON.stringify(msg)
         let data = { 'body': dataValue }
 
-        console.log(data)
-
         instance.post('/createProject', data).then((response) => {
-          currentPage = DesignerListProjects(msg["designerEmail"])
+          current_project = input_name.current.value
+          currentPage = <DesignerViewProject />
           forceRedraw(redraw + 1)
           redraw++
         })
