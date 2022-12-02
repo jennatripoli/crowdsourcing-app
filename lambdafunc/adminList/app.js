@@ -107,7 +107,7 @@ exports.lambdaHandler = async (event, context) => {
                 };
             };
             response.statusCode = 200;
-            response.result  = JSON.stringify({list,});
+            response.result  = list
         }else {
             response.statusCode = 400;
             response.error = "Couldn't find projects ";
