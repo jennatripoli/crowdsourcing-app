@@ -64,14 +64,27 @@ exports.lambdaHandler = async (event, context) => {
                     
                     if ((rows) && (rows.length == 1)) {
                         return resolve(rows[0]);
-                        console.log("i am here");
-
                     } else {
                         return reject("project not found with name '" + info.name + "'");
                     }            
+            });
         });
-    });
     }
+    
+    let getPledges = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Pledge WHERE projectName=?", [info.name], (error, rows) => {
+                if(error) { return reject(error); }
+                
+                if(rows){
+                    return resolve(rows);
+                } else {
+                    return reject("no pledges for project with name "+info.name);
+                }
+            });
+        });
+    }
+    
     
     try {
         
@@ -80,28 +93,57 @@ exports.lambdaHandler = async (event, context) => {
         //   1.2  If it DOES exist, then I need to replace
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
-        console.log("E1")
-        const foundProject = await DesignerViewProject(info);
-        console.log(foundProject);
-        console.log("E2")
-        response.statusCode = 200;
-        let name = (foundProject.name);
-        let story = (foundProject.story);
-        let designerEmail = (foundProject.designerEmail);
-        let type = (foundProject.type);
-        let goal = (foundProject.goal);
-        let deadline = (foundProject.deadline);
-        let successful = (foundProject.successful);
-        let launched = (foundProject.launched)
-        response.name = name.toString();
-        response.story = story;
-        response.designerEmail = designerEmail;
-        response.type = type;
-        response.goal = goal;
-        response.deadline = deadline;
-        response.successful = successful;
-        response.launched = launched;
-        console.log("RESPONSE: " + JSON.stringify(response))
+        //console.log("E1")
+        let foundProject = await DesignerViewProject(info);
+        
+        if(foundProject){
+            console.log("project info: " + JSON.stringify(foundProject));
+            //console.log("E2")
+            let name = (foundProject.name);
+            let story = (foundProject.story);
+            let designerEmail = (foundProject.designerEmail);
+            let type = (foundProject.type);
+            let goal = (foundProject.goal);
+            let deadline = (foundProject.deadline);
+            let activePledges = [];
+            let successful = (foundProject.successful);
+            let launched = (foundProject.launched); //maybe no semicolon here?
+            
+            //GETTING PLEDGES HERE
+            let pledges = await getPledges(info);
+            
+            if(pledges) {
+                console.log("pledge info: " + JSON.stringify(pledges));
+                
+                for (let i = 0; i < pledges.length; i++) {
+                    let pledge = pledges[i];
+                    activePledges[i] = {
+                        description:  pledge.descriptionReward,
+                        amount: pledge.amount,
+                        maxSupporters: pledge.maxSupporters
+                    };
+                };
+                response.statusCode = 200;
+            }else {
+                response.error = "No pledges";
+            }
+            
+            
+            response.statusCode = 200;
+            response.name = name;
+            response.story = story;
+            response.designerEmail = designerEmail;
+            response.type = type;
+            response.goal = goal;
+            response.deadline = deadline;
+            response.activePledges = activePledges;
+            response.successful = successful;
+            response.launched = launched;
+            console.log("RESPONSE: " + JSON.stringify(response))
+        } else {
+            response.statusCode = 400;
+            response.error = "Couldn't find projects";
+        }
         
         
     } catch (error) {
