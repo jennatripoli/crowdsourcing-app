@@ -52,10 +52,13 @@ exports.lambdaHandler = async (event, context) => {
         }
     }; // response
 
+    let actual_event = event.body;
+    let info = JSON.parse(actual_event);
+    console.log("info:" + JSON.stringify(info));
     
-    let getDesignerProjects = (email) => {
+    let getDesignerProjects = (info) => {
     return new Promise((resolve, reject) => {
-                pool.query("SELECT * FROM Project WHERE designerEmail=?", [email], (error, rows) => {
+                pool.query("SELECT * FROM Project WHERE designerEmail=?", [info.email], (error, rows) => {
                     if (error) { return reject(error); }
                     if (rows) {
                         return resolve(rows);
@@ -85,7 +88,7 @@ exports.lambdaHandler = async (event, context) => {
         // “successful” : false, “launched” : false}, …]} 
         
         // const ret = await axios(url);
-        let projects = await getDesignerProjects(event.email);
+        let projects = await getDesignerProjects(info);
         
         if(projects) {
             
