@@ -209,68 +209,70 @@ function App() {
     const pledge_amount = { position: "absolute", top: 35 }
     const pledge_description = { position: "absolute", top: 60 }
 
-    var a_name, a_story, a_designerEmail, a_type, a_goal, a_deadline, a_activePledges, a_directSupports, a_successful, a_launched
-
     let msg = {}
     msg["name"] = current_project
     let dataValue = JSON.stringify(msg)
     let data = { 'body': dataValue }
 
+    let [entries, setEntries] = React.useState([])
+    let [pledges, setPledges] = React.useState([])
+
     instance.post('/designerViewProject', data).then((response) => {
-      console.log(response)
+      let projectInfo = JSON.parse(JSON.stringify(response.data))
+      let temp = {}
       if (response != null) {
-        a_name = response.data.name
-        a_story = response.data.story
-        a_designerEmail = response.data.designerEmail
-        a_type = response.data.type
-        a_goal = response.data.goal
-        a_deadline = response.data.deadline
-        a_activePledges = response.data.activePledges
-        a_directSupports = response.data.directSupports
-        a_successful = response.data.successful
-        a_launched = response.data.launched
+        temp.name = response.data.name
+        temp.story = response.data.story
+        temp.designerEmail = response.data.designerEmail
+        temp.type = response.data.type
+        temp.goal = response.data.goal
+        temp.deadline = response.data.deadline
+        temp.activePledges = response.data.activePledges
+        temp.directSupports = response.data.directSupports
+        temp.successful = response.data.successful
+        temp.launched = response.data.launched
+      }
+      setEntries(temp)
+
+      if (temp.activePledges != null) {
+        let inner = []
+        for (let i = 0; i < temp.activePledges.length; i++) {
+          let pledge = temp.activePledges[i]
+          let entry = (
+            <div id="pledge_box" style={pledge_box}>
+              <label style={pledge_name}>{pledge.name}</label>
+              <label style={pledge_amount}>{pledge.amount}</label>
+              <label style={pledge_description}>{pledge.description}</label>
+            </div>
+          )
+          inner.push(entry)
+        }
+        setPledges(inner)
       }
     })
   
 
-    // TODO figure out how to iterate over active pledges
-    /*let entries = []
-    if (activePledges != null) {
-      for (let pledge of activePledges) {
-        let entry = (
-          <div id="pledge_box" style={pledge_box}>
-            <label style={pledge_name}>{pledge.name}</label>
-            <label style={pledge_amount}>{pledge.amount}</label>
-            <label style={pledge_description}>{pledge.description}</label>
-          </div>
-        )
-        entries.push(entry)
-      }
-
-                <div id="pledges">{entries}</div>
-
-    }*/
-
     return (
       <div className="DesignerViewProject">
         <div id="info_box" style={info_box}>
-          <label style={project_name}>{a_name}</label>
+          <label style={project_name}>{entries.name}</label>
           <div id="deadline_box" style={deadline_box}>
-            <label style={deadline_label}>Project Deadline: {a_deadline}</label>
+            <label style={deadline_label}>Project Deadline: {entries.deadline}</label>
             <label style={days_label}>__ DAYS LEFT</label>
           </div>
           <div id="goal_box" style={goal_box}>
-            <label style={goal_label}>Project Goal: ${a_goal}</label>
+            <label style={goal_label}>Project Goal: ${entries.goal}</label>
             <label style={raised_label}>$__ RAISED</label>
           </div>
           <div id="description_box" style={description_box}>
-            <label style={description_label}>{a_story}</label>
+            <label style={description_label}>{entries.story}</label>
           </div>
-          <label style={designer_label}><i>By: {a_designerEmail}</i></label>
+          <label style={designer_label}><i>By: {entries.designerEmail}</i></label>
         </div>
 
         <div id="active_pledges_box" style={active_pledges_box}>
           <label style={active_label}>Active Pledges</label>
+          <div id="pledges">{pledges}</div>
         </div>
       </div>
     );
