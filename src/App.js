@@ -82,6 +82,12 @@ function App() {
   }
 
   function DesignerListProjects() {
+    const page_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 20 }
+    const project_list_box = { position: "absolute", width: 800, height: 580, overflowY: "scroll", top: 100, left: 20 }
+    const project_button = { width: 780, textAlign: "left" }
+    const project_name = { fontSize: "18pt", fontWeight: "bold" }
+    const button_create = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 700, left: 380 }
+
     let msg = {}
     msg["email"] = current_user_email
     let dataValue = JSON.stringify(msg)
@@ -98,13 +104,14 @@ function App() {
             let project = allProjects[i]
             const entry = (
               <div id="project_box">
-                <button onClick={() => handle_button_view(project.name)}>Name: {project.name}</button><br/>
-                <label >Description: {project.description}</label><br/>
-                <label >Deadline: {project.deadline}</label><br/>
-                <label >Type: {project.type}</label><br/>
-                <label >Goal: ${project.goal}</label><br/>
-                <label >Designer: {project.entrepreneur}</label><br/>
-                <label >---------------------</label><br/>
+                <button style={project_button} onClick={() => handle_button_view(project.name)}>
+                  <label style={project_name}>{project.name}</label><br/>
+                  <label>Description: {project.description}</label><br/>
+                  <label>Deadline: {project.deadline}</label><br/>
+                  <label>Type: {project.type}</label><br/>
+                  <label>Goal: ${project.goal}</label><br/>
+                </button><br/>
+                <label></label><br/>
               </div>
             )
             inner.push(entry)
@@ -121,7 +128,7 @@ function App() {
       redraw++
     }
 
-    function handle_button_create() {
+    function handle_button_create_project() {
       currentPage = <DesignerCreateProject />
       forceRedraw(redraw + 1)
       redraw++
@@ -129,12 +136,11 @@ function App() {
 
     return (
       <div className="DesignerListProjects">
-        <label>Designer List Projects</label><br />
-        <label>{current_user_email} 's projects</label><br />
-        <label>click project name to view project</label><br />
-        <label>------------------</label><br />
-        <div>{entries}</div><br />
-        <button onClick={handle_button_create}>Create New Project</button><br />
+        <label style={page_title}>{current_user_email}'s Projects</label><br/>
+        <div style={project_list_box}>
+          {entries}
+        </div><br/>
+        <button style={button_create} onClick={handle_button_create_project}>+</button><br/>
       </div>
     )
   }
@@ -222,7 +228,7 @@ function App() {
 
   function DesignerViewProject() {
     const info_box = { position: "absolute", width: 800, height: 700, background: "lightgrey", textAlign: "center", top: 50, left: 50, display: "inline-block" }
-    const project_name = { position: "relative", fontSize: "40pt", fontWeight: "bold", top: 40 }
+    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 40 }
     const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, left: 20 }
     const deadline_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
     const days_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
@@ -235,12 +241,12 @@ function App() {
     const description_label = { position: "absolute", width: 740, height: 320, textAlign: "left", top: 10, left: 10 }
     const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", bottom: 70, right: 20 }
 
-    const active_label = { position: "absolute", width: 540, fontSize: "20pt", fontWeight: "bold", top: -45, left: 0 }
-    const active_pledges_box = { position: "absolute", width: 540, height: 650, background: "lightgrey", textAlign: "center", top: 100, left: 900, display: "inline-block" }
-    const pledge_box = { position: "relative", width: 500, height: 100, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
-    const pledge_name = { position: "absolute", fontWeight: "bold" }
-    const pledge_amount = { position: "absolute", top: 35 }
-    const pledge_description = { position: "absolute", top: 60 }
+    const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 50, left: 1070 }
+    const active_pledges_box = { position: "absolute", width: 540, height: 545, background: "lightgrey", textAlign: "center", top: 100, left: 900, display: "inline-block", overflowY: "scroll" }
+    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const pledge_amount = { fontWeight: "bold" }
+    const pledge_description = { }
+    const button_create = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 680, left: 1120 }
 
     let msg = {}
     msg["name"] = current_project
@@ -251,7 +257,8 @@ function App() {
     let [pledges, setPledges] = React.useState([])
 
     instance.post('/designerViewProject', data).then((response) => {
-      let projectInfo = JSON.parse(JSON.stringify(response.data))
+      let projectInfo = response.data
+      console.log(projectInfo)
       let temp = {}
       if (response != null) {
         temp.name = response.data.name
@@ -260,10 +267,10 @@ function App() {
         temp.type = response.data.type
         temp.goal = response.data.goal
         temp.deadline = response.data.deadline
-        temp.activePledges = response.data.activePledges
-        temp.directSupports = response.data.directSupports
         temp.successful = response.data.successful
         temp.launched = response.data.launched
+        temp.activePledges = response.data.activePledges
+        temp.directSupports = response.data.directSupports
       }
       setEntries(temp)
 
@@ -273,9 +280,9 @@ function App() {
           let pledge = temp.activePledges[i]
           let entry = (
             <div id="pledge_box" style={pledge_box}>
-              <label style={pledge_name}>{pledge.name}</label>
-              <label style={pledge_amount}>{pledge.amount}</label>
+              <label style={pledge_amount}>Amount: ${pledge.amount}</label><br/>
               <label style={pledge_description}>{pledge.description}</label>
+              <label></label><br/>
             </div>
           )
           inner.push(entry)
@@ -308,9 +315,9 @@ function App() {
           <label style={designer_label}><i>By: {entries.designerEmail}</i></label>
         </div>
 
+        <label style={active_label}>Active Pledges</label>
+        <button style={button_create} onClick={() => handle_button_create_pledge()}>+</button>
         <div id="active_pledges_box" style={active_pledges_box}>
-          <label style={active_label}>Active Pledges</label>
-          <button onClick={() => handle_button_create_pledge()}>Create a new pledge</button>
           <div id="pledges">{pledges}</div>
         </div>
       </div>
@@ -322,11 +329,11 @@ function App() {
 
     instance.post('/adminList').then((response) => {
       if (response != null) {
-        let allProjects = JSON.parse(response.data.result)
+        let allProjects = response.data.result
         if (allProjects != undefined) {
           let inner = []
-          for (let i = 0; i < allProjects.list.length; i++) {
-            let project = allProjects.list[i]
+          for (let i = 0; i < allProjects.length; i++) {
+            let project = allProjects[i]
             const entry = (
               <div id="project_box">
                 <button onClick={() => handle_button_view(project.name)}>Name: {project.name}</button><br/>
