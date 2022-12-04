@@ -329,11 +329,11 @@ function App() {
 
     instance.post('/adminList').then((response) => {
       if (response != null) {
-        let allProjects = JSON.parse(response.data.result)
+        let allProjects = response.data.result
         if (allProjects != undefined) {
           let inner = []
-          for (let i = 0; i < allProjects.list.length; i++) {
-            let project = allProjects.list[i]
+          for (let i = 0; i < allProjects.length; i++) {
+            let project = allProjects[i]
             const entry = (
               <div id="project_box">
                 <button onClick={() => handle_button_view(project.name)}>Name: {project.name}</button><br/>
