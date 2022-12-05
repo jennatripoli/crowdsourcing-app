@@ -1,6 +1,6 @@
 {
     "body" :
     
-"{\n  \"name\": \"al;skdjfa\",\n  \"story\": \"boring\",\n  \"designerEmail\": \"mcmilch@wpi\",\n  \"type\": \"school\",\n  \"deadline\": \"11302022\",\n  \"activePledges\": [],\n  \"directSupports\": [],\n  \"successful\": 0,\n  \"launched\": 1\n}"
+"{\n  \"name\": \"testProject\",\n  \"story\": \"boring\",\n  \"designerEmail\": \"mcmilch@wpi\",\n  \"type\": \"school\",\n  \"deadline\": \"11302022\",\n  \"activePledges\": [],\n  \"directSupports\": [],\n  \"successful\": 0,\n  \"launched\": 1,\n  \"goal\": 1000\n}"
 
 }

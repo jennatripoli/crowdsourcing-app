@@ -63,7 +63,7 @@ exports.lambdaHandler = async (event, context) => {
                     if (error) { return reject(error); }
                     console.log("INSERT:" + JSON.stringify(rows));
                     
-                    if ((rows) && (rows.length == 1)) {
+                    if (rows.affectedRows > 0) {
                         return resolve(rows[0]);
                     } else {
                         return reject("pledger already exists with description '" + info.descriptionReward + "'");
@@ -108,10 +108,10 @@ exports.lambdaHandler = async (event, context) => {
                     if (error) { return reject(error); }
                     //console.log("INSERT:" + JSON.stringify(rows));
                     
-                    if ((rows) && (rows.length == 1)) {
+                    if (rows.affectedRows == 1) {
                         return resolve(rows[0].availableFunds);
                     } else {
-                        return reject("supporter not found with name '" + info.name + "'");
+                        return reject("supporter not found with name '" + info.supporterEmail + "'");
                     }            
             });
         });
@@ -125,10 +125,15 @@ exports.lambdaHandler = async (event, context) => {
         // ----> request to complete before beginning the next one
         //console.log("E1")
         const pledger = await addPledger(info);
+        console.log("E1");
         let prevFunds = await getCurrentFunds(info);
+        console.log("E2");
         let cost = await getPledgeAmount(info);
+        console.log(cost)
+        console.log("E3");
         let newFunds = prevFunds - cost;
         const update = await updateFunds(newFunds, info);
+        console.log("E4");
         
         
         if(update > 0){
