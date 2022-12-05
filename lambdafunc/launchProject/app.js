@@ -56,9 +56,9 @@ exports.lambdaHandler = async (event, context) => {
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
     
-    let DesignerViewProject = (info) => {
+    let launchProject = (info) => {
         return new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM Project WHERE name=?", [info.name], (error, rows) => {
+            pool.query("UPDATE Project SET launched = true WHERE name=?", [info.name], (error, rows) => {
                     if (error) { return reject(error); }
                     console.log("INSERT:" + JSON.stringify(rows));
                     
@@ -71,21 +71,6 @@ exports.lambdaHandler = async (event, context) => {
         });
     }
     
-    let getPledges = (info) => {
-        return new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM Pledge WHERE projectName=?", [info.name], (error, rows) => {
-                if(error) { return reject(error); }
-                
-                if(rows){
-                    return resolve(rows);
-                } else {
-                    return reject("no pledges for project with name "+info.name);
-                }
-            });
-        });
-    }
-    
-    
     try {
         
         // 1. Query RDS for the first constant value to see if it exists!
@@ -94,40 +79,20 @@ exports.lambdaHandler = async (event, context) => {
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
         //console.log("E1")
-        let foundProject = await DesignerViewProject(info);
+        let editedProject = await launchProject(info);
         
-        if(foundProject){
-            console.log("project info: " + JSON.stringify(foundProject));
+        if(editedProject){
+            console.log("project info: " + JSON.stringify(editedProject));
             //console.log("E2")
-            let name = (foundProject.name);
-            let story = (foundProject.story);
-            let designerEmail = (foundProject.designerEmail);
-            let type = (foundProject.type);
-            let goal = (foundProject.goal);
-            let deadline = (foundProject.deadline);
-            let activePledges = [];
-            let successful = (foundProject.successful);
-            let launched = (foundProject.launched); //maybe no semicolon here?
-            
-            //GETTING PLEDGES HERE
-            let pledges = await getPledges(info);
-            
-            if(pledges) {
-                console.log("pledge info: " + JSON.stringify(pledges));
-                
-                for (let i = 0; i < pledges.length; i++) {
-                    let pledge = pledges[i];
-                    activePledges[i] = {
-                        description:  pledge.descriptionReward,
-                        amount: pledge.amount,
-                        maxSupporters: pledge.maxSupporters
-                    };
-                };
-                response.statusCode = 200;
-            }else {
-                response.error = "No pledges";
-            }
-            
+            let name = (editedProject.name);
+            let story = (editedProject.story);
+            let designerEmail = (editedProject.designerEmail);
+            let type = (editedProject.type);
+            let goal = (editedProject.goal);
+            let deadline = (editedProject.deadline);
+            let activePledges = (editedProject.activePledges)
+            let successful = (editedProject.successful);
+            let launched = (editedProject.launched); //maybe no semicolon here?
             
             response.statusCode = 200;
             response.name = name;
@@ -142,7 +107,7 @@ exports.lambdaHandler = async (event, context) => {
             console.log("RESPONSE: " + JSON.stringify(response))
         } else {
             response.statusCode = 400;
-            response.error = "Couldn't find projects";
+            response.error = "Couldn't edit project";
         }
         
         

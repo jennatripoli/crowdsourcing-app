@@ -56,23 +56,66 @@ exports.lambdaHandler = async (event, context) => {
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
     
-    let addPledge = (info) => {
+    let addPledger = (info) => {
         return new Promise((resolve, reject) => {
-            pool.query("INSERT INTO Pledge (descriptionReward, projectName, amount, maxSupporters) VALUES(?, ?, ?, ?)", 
-            [info.descriptionReward, info.projectName, info.amount, info.maxSupporters], (error, rows) => {
+            pool.query("INSERT INTO Pledger (supporterEmail, descriptionReward) VALUES(?, ?)", 
+            [info.supporterEmail, info.descriptionReward], (error, rows) => {
                     if (error) { return reject(error); }
                     console.log("INSERT:" + JSON.stringify(rows));
                     
-                    if ((rows) && (rows.affectedRows === 1)) {
-                        return resolve(true);
+                    if ((rows) && (rows.length == 1)) {
+                        return resolve(rows[0]);
                     } else {
-                        return reject("pledge already exists for '" + info.descriptionReward + "'");
+                        return reject("pledger already exists with description '" + info.descriptionReward + "'");
                     }            
+            });
         });
-    });
     }
     
+    let getCurrentFunds = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Supporter WHERE email=?", [info.supporterEmail], (error, rows) => {
+                    if (error) { return reject(error); }
+                    //console.log("INSERT:" + JSON.stringify(rows));
+                    
+                    if ((rows) && (rows.length == 1)) {
+                        return resolve(rows[0].availableFunds);
+                    } else {
+                        return reject("project not found with name '" + info.name + "'");
+                    }            
+            });
+        });
+    }
     
+    let getPledgeAmount = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Pledge WHERE descriptionReward=?", [info.descriptionReward], (error, rows) => {
+                    if (error) { return reject(error); }
+                    //console.log("INSERT:" + JSON.stringify(rows));
+                    
+                    if ((rows) && (rows.length == 1)) {
+                        return resolve(rows[0].amount);
+                    } else {
+                        return reject("pledge not found with description '" + info.descriptionReward + "'");
+                    }            
+            });
+        });
+    }
+    
+    let updateFunds = (funds, info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("UPDATE Supporter SET availableFunds =? WHERE email=?", [funds, info.supporterEmail], (error, rows) => {
+                    if (error) { return reject(error); }
+                    //console.log("INSERT:" + JSON.stringify(rows));
+                    
+                    if ((rows) && (rows.length == 1)) {
+                        return resolve(rows[0].availableFunds);
+                    } else {
+                        return reject("supporter not found with name '" + info.name + "'");
+                    }            
+            });
+        });
+    }
     try {
         
         // 1. Query RDS for the first constant value to see if it exists!
@@ -81,25 +124,27 @@ exports.lambdaHandler = async (event, context) => {
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
         //console.log("E1")
-        const exists = await addPledge(info);
+        const pledger = await addPledger(info);
+        let prevFunds = await getCurrentFunds(info);
+        let cost = await getPledgeAmount(info);
+        let newFunds = prevFunds - cost;
+        const update = await updateFunds(newFunds, info);
         
-        if (exists) {
-            // console.log("E2")
-            let descriptionReward = (info.descriptionReward);
-            let projectName = (info.projectName);
-            let maxSupporters = (info.maxSupporters);
-            let amount = (info.amount);
+        
+        if(update > 0){
+            console.log("new available funds: " + JSON.stringify(update));
+            //console.log("E2")
+            let email = (info.supporterEmail);
+            let availableFunds = (update);
             
-            response.descriptionReward = descriptionReward.toString();
-            response.projectName = projectName.toString();
-            response.amount = amount;
-            response.maxSupporters = maxSupporters;
             response.statusCode = 200;
-        }
-        
-        else {
+            response.email = email;
+            response.availableFunds = availableFunds;
+            
+            console.log("RESPONSE: " + JSON.stringify(response))
+        } else {
             response.statusCode = 400;
-            response.error = "unable to create pledge";
+            response.error = "Not enough funds";
         }
         
         
