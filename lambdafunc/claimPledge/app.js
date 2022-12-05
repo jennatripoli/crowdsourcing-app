@@ -104,7 +104,7 @@ exports.lambdaHandler = async (event, context) => {
     
     let updateFunds = (funds, info) => {
         return new Promise((resolve, reject) => {
-            pool.query("UPDATE Supporter SET availableFunds =? WHERE email=?", [funds, info.supporterEmail], (error, rows) => {
+            pool.query("UPDATE Supporter SET availableFunds=? WHERE email=?", [funds, info.supporterEmail], (error, rows) => {
                     if (error) { return reject(error); }
                     //console.log("INSERT:" + JSON.stringify(rows));
                     
