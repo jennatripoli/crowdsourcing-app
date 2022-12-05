@@ -58,7 +58,7 @@ exports.lambdaHandler = async (event, context) => {
     
     let launchProject = (info) => {
         return new Promise((resolve, reject) => {
-            pool.query("UPDATE Project SET launched=1 WHERE name=?", [info.name], (error, rows) => {
+            pool.query("UPDATE Project SET launched=true WHERE name=?", [info.name], (error, rows) => {
                     if (error) { return reject(error); }
                     console.log("INSERT:" + JSON.stringify(rows));
                     
