@@ -51,11 +51,18 @@ exports.lambdaHandler = async (event, context) => {
             "Access-Control-Allow-Methods": "POST" // Allow POST request
         }
     }; // response
+    
+    
+    console.log("info:" + JSON.stringify(event)); //  info.arg1
+    
+    let actual_event = event.body;
+    let info = JSON.parse(actual_event);
+    console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
 
     
-    let getAllProjects = () => {
-    return new Promise((resolve, reject) => {
-                pool.query("SELECT * FROM Project", (error, rows) => {
+    let getAllProjects = (info) => {
+        return new Promise((resolve, reject) => {
+                pool.query("SELECT * FROM Project WHERE launched=1", (error, rows) => {
                     if (error) { return reject(error); }
                     if (rows) {
                         return resolve(rows);
@@ -63,9 +70,24 @@ exports.lambdaHandler = async (event, context) => {
                         return reject("there are no projects");
                     }
                 });
+        });
+    };
+    
+    
+    let filterProjects = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Project WHERE launched=1 AND type=?", [info.type], (error, rows) => {
+                if (error) {return reject(error); }
+                if (rows) {
+                    return resolve(rows);
+                } else {
+                    return reject("there are no projects");
+                }
             });
-
-};
+        });
+    };
+    
+    
 
    
    try {
@@ -84,8 +106,13 @@ exports.lambdaHandler = async (event, context) => {
 
         // “successful” : false, “launched” : false}, …]} 
         
-        // const ret = await axios(url);
-        let projects = await getAllProjects();
+        //if they want to filter
+        let projects;
+        if(info.type.length > 4){
+            projects = await filterProjects(info);    
+        } else {
+            projects = await getAllProjects();
+        }
         
         if(projects) {
             
