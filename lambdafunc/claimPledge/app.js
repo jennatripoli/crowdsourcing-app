@@ -64,7 +64,7 @@ exports.lambdaHandler = async (event, context) => {
                     console.log("INSERT:" + JSON.stringify(rows));
                     
                     if (rows.affectedRows > 0) {
-                        return resolve(rows[0]);
+                        return resolve(true);
                     } else {
                         return reject("pledger already exists with description '" + info.descriptionReward + "'");
                     }            
@@ -79,7 +79,9 @@ exports.lambdaHandler = async (event, context) => {
                     //console.log("INSERT:" + JSON.stringify(rows));
                     
                     if ((rows) && (rows.length == 1)) {
-                        return resolve(rows[0].availableFunds);
+                        console.log("HERE:" + JSON.stringify(rows))
+                        console.log("AVAILABLE FUNDS:" + JSON.stringify(rows[0].availableFunds))
+                        return resolve(JSON.stringify(rows[0].availableFunds));
                     } else {
                         return reject("project not found with name '" + info.name + "'");
                     }            
@@ -102,13 +104,14 @@ exports.lambdaHandler = async (event, context) => {
         });
     }
     
-    let updateFunds = (funds, info) => {
+    let updateFunds = (newFunds, info) => {
         return new Promise((resolve, reject) => {
-            pool.query("UPDATE Supporter SET availableFunds=? WHERE email=?", [funds, info.supporterEmail], (error, rows) => {
+            pool.query("UPDATE Supporter SET availableFunds=? WHERE email=?", [newFunds, info.supporterEmail], (error, rows) => {
                     if (error) { return reject(error); }
-                    //console.log("INSERT:" + JSON.stringify(rows));
+                    console.log("TEST:" + JSON.stringify(rows));
                     
                     if (rows.affectedRows == 1) {
+                        console.log("TEST2:" + JSON.stringify(JSON.stringify(rows[0])));
                         return resolve(rows[0].availableFunds);
                     } else {
                         return reject("supporter not found with name '" + info.supporterEmail + "'");
@@ -132,6 +135,8 @@ exports.lambdaHandler = async (event, context) => {
         console.log(cost)
         console.log("E3");
         let newFunds = prevFunds - cost;
+        newFunds = JSON.stringify(newFunds);
+        console.log("NEW FUNDS:" + newFunds);
         const update = await updateFunds(newFunds, info);
         console.log("E4");
         
