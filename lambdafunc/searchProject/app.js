@@ -108,7 +108,7 @@ exports.lambdaHandler = async (event, context) => {
         
         //if they want to filter
         let projects;
-        if(info.type.length > 4){
+        if(info.type.length > 0){
             projects = await filterProjects(info);    
         } else {
             projects = await getAllProjects();
