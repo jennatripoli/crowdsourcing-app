@@ -1,14 +1,41 @@
 import './App.css';
-import React, { useEffect, useRef } from 'react';
-import { Model } from './entity/Model';
+import React, { useRef } from 'react';
 import axios from 'axios';
 
-var model = new Model, currentPage, current_user_email = "lerinaldi@wpi.edu", current_project
+var current_page, current_user, current_project
 const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/' });
 
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
-  if (currentPage == null) currentPage = <SupporterListProjects />
+  if (current_page == null) current_page = <Login />
+
+  function Header() {
+    const header_user = { position: "absolute", left: 20, top: 26 }
+    const header_title = { position: "absolute", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
+    const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
+    const header_button = {position: "absolute", right: 20, top: 24 }
+    let back_button = ( <div/> )
+
+    if (current_page.type.name == "DesignerViewProject") {
+      back_button = (<button onClick={() => back_designer()}>Back to List</button>)
+    } // add other cases here
+
+    function back_designer() {
+      current_project = null
+      current_page = <DesignerListProjects/>
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
+    return (
+      <div>
+        <label style={header_user}>{current_user}</label>
+        <label style={header_title}>CROWDSOURCING APP</label>
+        <div style={header_button}>{back_button}</div>
+        <div style={header_box}/>
+      </div>
+    )
+  }
 
   function Login() {
     const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
@@ -36,17 +63,17 @@ function App() {
         msg["password"] = input_password.current.value
         let data = { 'body': JSON.stringify(msg) }
 
-        current_user_email = input_email.current.value
+        current_user = input_email.current.value
 
         if (input_account_type.value == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
-            currentPage = <DesignerListProjects />
+            current_page = <DesignerListProjects />
             forceRedraw(redraw + 1)
             redraw++
           })
         } else if (input_account_type.value == 'administrator') {
           instance.post('/loginAdministrator', data).then((response) => {
-            currentPage = <AdministratorListProjects />
+            current_page = <AdministratorListProjects />
             forceRedraw(redraw + 1)
             redraw++
           })
@@ -62,6 +89,7 @@ function App() {
 
     return (
       <div className="Login">
+        <Header />
         <div id="login-box" style={login_box}>
           <label style={login_title}>LOG IN</label>
 
@@ -262,15 +290,14 @@ function App() {
   }
 
   function DesignerListProjects() {
-    const page_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 20 }
-    const project_list_box = { position: "absolute", width: 800, height: 580, overflowY: "scroll", top: 100, left: 20 }
-    const project_button = { width: 700, textAlign: "left" }
-    const project_name = { fontSize: "18pt", fontWeight: "bold" }
-    const button_create = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 700, left: 380 }
-    const edit_button = { position: "relative", left: 10, top: -10, width: 50 }
+    const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
+    const projects_box = { background: "lightgrey", position: "absolute", width: 800, height: 520, overflowY: "scroll", top: 160, left: 20 }
+    const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
+    const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 700, left: 380 }
+    const edit_button = { position: "relative", top: -10, width: 50 }
 
     let msg = {}
-    msg["email"] = current_user_email
+    msg["email"] = current_user
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
@@ -290,7 +317,7 @@ function App() {
               const entry = (
                 <div id="project_box">
                   <button style={project_button} onClick={() => handle_button_view(project.name)}>
-                    <label style={project_name}>{project.name}</label><br/>
+                    <label style={{fontSize: "18pt", fontWeight: "bold"}}>{project.name}</label><br/>
                     <label>Description: {project.description}</label><br/>
                     <label>Deadline: {project.deadline}</label><br/>
                     <label>Type: {project.type}</label><br/>
@@ -298,7 +325,6 @@ function App() {
                     <label>Launched: {project.launched ? "Yes":"No"}</label><br/>
                   </button>
                   <button style={edit_button} onClick={() => handle_button_edit(project.name)}>Edit</button>
-                  <br/><label/><br/>
                 </div>
               )
               inner.push(entry)
@@ -310,22 +336,22 @@ function App() {
       })
     }
 
-    function handle_button_view(project_name_param) {
-      current_project = project_name_param
-      currentPage = <DesignerViewProject />
+    function handle_button_view(name_param) {
+      current_project = name_param
+      current_page = <DesignerViewProject />
       forceRedraw(redraw + 1)
       redraw++
     }
 
     function handle_button_create() {
-      currentPage = <DesignerCreateProject />
+      current_page = <DesignerCreateProject />
       forceRedraw(redraw + 1)
       redraw++
     }
 
-    function handle_button_edit(project_name_param) {
-      current_project = project_name_param
-      currentPage = <DesignerEditProject />
+    function handle_button_edit(name_param) {
+      current_project = name_param
+      current_page = <DesignerEditProject />
       forceRedraw(redraw + 1)
       redraw++
     }
@@ -337,11 +363,10 @@ function App() {
 
     return (
       <div className="DesignerListProjects">
-        <label style={page_title}>{current_user_email}'s Projects</label><br/>
-        <div style={project_list_box}>
-          {entries}
-        </div><br/>
-        <button style={button_create} onClick={handle_button_create}>+</button><br/>
+        <Header />
+        <label style={page_label}>Your Projects</label>
+        <div style={projects_box}>{entries}</div>
+        <button style={create_button} onClick={handle_button_create}>+</button>
       </div>
     )
   }
@@ -360,7 +385,7 @@ function App() {
         let msg = {}
         msg["name"] = input_name.current.value
         msg["story"] = input_description.current.value
-        msg["designerEmail"] = current_user_email
+        msg["designerEmail"] = current_user
         msg["type"] = input_type.current.value
         msg["goal"] = input_goal.current.value
         msg["deadline"] = input_deadline.current.value
@@ -370,7 +395,7 @@ function App() {
 
         instance.post('/createProject', data).then((response) => {
           current_project = input_name.current.value
-          currentPage = <DesignerViewProject />
+          current_page = <DesignerViewProject />
           forceRedraw(redraw + 1)
           redraw++
         })
@@ -381,7 +406,7 @@ function App() {
       <div className="DesignerCreateProject">
         <label>CREATE A NEW PROJECT</label><br />
         <label>Project Name:<input name="project_name" type="text" ref={input_name} /></label><br />
-        <label>Description (optional):<input name="project_description" type="text" ref={input_description} /></label><br />
+        <label>Description (optional):<textarea name="project_description" type="text" ref={input_description} /></label><br />
         <label>Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1" /></label><br />
         <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline} /></label><br />
         <label>Type:<input name="project_type" type="text" ref={input_type} /></label><br />
@@ -392,21 +417,21 @@ function App() {
 
   function DesignerCreatePledge() {
     let input_amount = useRef(null)
-    let input_description = useRef(null)
+    let input_reward = useRef(null)
 
     function handle_button_create() {
       if (input_amount.current.value == 0) {
         alert("Fill out all required fields before creating a new pledge.")
       } else {
         let msg = {}
-        msg["amount"] = input_description.current.value
-        msg["descriptionReward"] = input_description.current.value
+        msg["amount"] = input_reward.current.value
+        msg["descriptionReward"] = input_reward.current.value
         msg["maxSupporters"] = 1000
         msg["projectName"] = current_project
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/createPledge', data).then((response) => {
-          currentPage = <DesignerViewProject />
+          current_page = <DesignerViewProject />
           forceRedraw(redraw + 1)
           redraw++
         })
@@ -416,7 +441,7 @@ function App() {
     return (
       <div className="DesignerCreatePledge">
         <label>CREATE A NEW PLDEGE</label><br />
-        <label>Description (optional):<input name="project_description" type="text" ref={input_description} /></label><br />
+        <label>Description (optional):<input name="project_description" type="text" ref={input_reward} /></label><br />
         <label>Amount: $<input name="project_goal" type="number" ref={input_amount} min="1" default="1" /></label><br />
         <button onClick={handle_button_create}>Create Pledge</button>
       </div>
@@ -424,6 +449,28 @@ function App() {
   }
 
   function DesignerEditProject() {
+    const info_box = { position: "absolute", width: 800, height: 550, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
+    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
+    const deadline_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+
+    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
+    const goal_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+
+    const description_box = { position: "absolute", padding: 10, width: 738, height: 275, textAlign: "left", top: 205, left: 20 }
+    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 510, right: 20 }
+
+    const launch_button = { position: "absolute", fontSize: "20pt", top: 700, left: 200 }
+    const save_button = { position: "absolute", fontSize: "20pt", top: 700, left: 410 }
+    const delete_button = { position: "absolute", fontSize: "20pt", top: 700, left: 600 }
+
+    const all_pledges_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
+    const all_pledges_box = { position: "absolute", width: 540, height: 520, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const pledge_amount = { fontWeight: "bold" }
+    const pledge_delete_button = { position: "absolute", top: 10, right: 10 }
+    const pledge_create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 1120 }
+
     let input_name = useRef(null), input_description = useRef(null), input_goal = useRef(null), input_deadline = useRef(null), input_type = useRef(null)
 
     let msg = {}
@@ -431,6 +478,7 @@ function App() {
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
+    let [pledges, setPledges] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
 
     function retrieve() {
@@ -438,16 +486,34 @@ function App() {
       setRetrieving(true)
 
       instance.post('/designerViewProject', data).then((response) => {
-        let temp = {}
+        let inner1 = {}
         if (response != null) {
-          temp.name = response.data.name
-          temp.story = response.data.story
-          temp.type = response.data.type
-          temp.goal = response.data.goal
-          temp.deadline = response.data.deadline
-          temp.activePledges = response.data.activePledges
+          inner1.name = response.data.name
+          inner1.story = response.data.story
+          inner1.designerEmail = response.data.designerEmail
+          inner1.type = response.data.type
+          inner1.goal = response.data.goal
+          inner1.deadline = response.data.deadline
+          inner1.activePledges = response.data.activePledges
         }
-        setEntries(temp)
+        setEntries(inner1)
+
+        if (inner1.activePledges != null) {
+          let inner2 = []
+          for (let i = 0; i < inner1.activePledges.length; i++) {
+            let pledge = inner1.activePledges[i]
+            let entry = (
+              <div id="pledge_box" style={pledge_box}>
+                <label style={pledge_amount}>Amount: ${pledge.amount}</label><br/>
+                <label>{pledge.description}</label>
+                <button style={pledge_delete_button} onClick={() => handle_button_delete_pledge(pledge.description)}>Delete</button>
+                <label></label><br/>
+              </div>
+            )
+            inner2.push(entry)
+          }
+          setPledges(inner2)
+        }
         setRetrieving(false)
       })
     }
@@ -467,7 +533,7 @@ function App() {
 
         instance.post('/saveProject', data).then((response) => {
           current_project = null
-          currentPage = <DesignerListProjects />
+          current_page = <DesignerListProjects />
           forceRedraw(redraw + 1)
           redraw++
         })
@@ -478,9 +544,9 @@ function App() {
       msg["name"] = input_name.current.value
       let data = { 'body': JSON.stringify(msg) }
 
-      instance.post('/deleteProject', data).then((response) => {
+      instance.post('/designerDeleteProject', data).then((response) => {
         current_project = null
-        currentPage = <DesignerListProjects />
+        current_page = <DesignerListProjects />
         forceRedraw(redraw + 1)
         redraw++
       })
@@ -496,11 +562,29 @@ function App() {
 
         instance.post('/launchProject', data).then((response) => {
           current_project = null
-          currentPage = <DesignerListProjects />
+          current_page = <DesignerListProjects />
           forceRedraw(redraw + 1)
           redraw++
         })
       }
+    }
+
+    function handle_button_create_pledge() {
+      current_page = <DesignerCreatePledge />
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
+    function handle_button_delete_pledge(reward_param) {
+      msg["descriptionReward"] = reward_param
+      let data = { 'body': JSON.stringify(msg) }
+
+      instance.post('/designerDeletePledge', data).then((response) => {
+        current_project = null
+        current_page = <DesignerEditProject />
+        forceRedraw(redraw + 1)
+        redraw++
+      })
     }
 
     if (entries === undefined) {
@@ -510,40 +594,47 @@ function App() {
 
     return (
       <div className="DesignerEditProject">
-        <label>EDIT PROJECT</label><br />
-        <label>Project Name:<input name="project_name" type="text" ref={input_name} defaultValue={entries.name} /></label><br />
-        <label>Description (optional):<input name="project_description" type="text" ref={input_description} defaultValue={entries.description} /></label><br />
-        <label>Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1" defaultValue={entries.goal} /></label><br />
-        <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline} defaultValue={entries.deadline} /></label><br />
-        <label>Type:<input name="project_type" type="text" ref={input_type} defaultValue={entries.type} /></label><br />
-        <button onClick={handle_button_save}>Save Project</button>
-        <button onClick={handle_button_launch}>Launch Project</button>
-        <button onClick={handle_button_delete}>Delete Project</button>
+        <Header />
+        <div style={info_box}>
+          <label style={project_name}>{entries.name}</label><br />
+          <div style={deadline_box}><label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" ref={input_deadline} defaultValue={entries.deadline} /></label></div>
+          <div style={goal_box}><label style={goal_label}>Project Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1" defaultValue={entries.goal} /></label></div>
+          <textarea wrap="soft" name="project_description" type="text" ref={input_description} defaultValue={entries.name} style={description_box} />
+          <label style={designer_label}><i>Designer: {entries.designerEmail}</i></label>
+        </div>
+
+        <button style={save_button} onClick={handle_button_save}>Save</button>
+        <button style={launch_button} onClick={handle_button_launch}>Launch</button>
+        <button style={delete_button} onClick={handle_button_delete}>Delete</button>
+
+        <label style={all_pledges_label}>All Pledges</label>
+        <button style={pledge_create_button} onClick={() => handle_button_create_pledge()}>+</button>
+        <div style={all_pledges_box}>{pledges}</div>
       </div>
     )
   }
 
   function DesignerViewProject() {
-    const info_box = { position: "absolute", width: 800, height: 700, background: "lightgrey", textAlign: "center", top: 50, left: 50, display: "inline-block" }
-    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 40 }
-    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, left: 20 }
+    const info_box = { position: "absolute", width: 800, height: 635, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
+    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
     const deadline_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
     const days_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
 
-    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, right: 20 }
+    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
     const goal_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
     const raised_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
 
-    const description_box = { position: "absolute", width: 760, height: 340, background: "white", outline: "1px solid black", textAlign: "center", top: 255, left: 20 }
+    const description_box = { position: "absolute", width: 760, height: 340, background: "white", outline: "1px solid black", textAlign: "center", top: 205, left: 20 }
     const description_label = { position: "absolute", width: 740, height: 320, textAlign: "left", top: 10, left: 10 }
-    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", bottom: 70, right: 20 }
+    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, right: 20 }
 
-    const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 50, left: 1070 }
-    const active_pledges_box = { position: "absolute", width: 540, height: 545, background: "lightgrey", textAlign: "center", top: 100, left: 900, display: "inline-block", overflowY: "scroll" }
+    const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
+    const active_pledges_box = { position: "absolute", width: 540, height: 520, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
     const pledge_amount = { fontWeight: "bold" }
     const pledge_description = { }
-    const button_create = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 680, left: 1120 }
+    const button_create = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 1120 }
 
     let msg = {}
     msg["name"] = current_project
@@ -558,25 +649,25 @@ function App() {
       setRetrieving(true)
 
       instance.post('/designerViewProject', data).then((response) => {
-        let temp = {}
+        let inner1 = {}
         if (response != null) {
-          temp.name = response.data.name
-          temp.story = response.data.story
-          temp.designerEmail = response.data.designerEmail
-          temp.type = response.data.type
-          temp.goal = response.data.goal
-          temp.deadline = response.data.deadline
-          temp.successful = response.data.successful
-          temp.launched = response.data.launched
-          temp.activePledges = response.data.activePledges
-          temp.directSupports = response.data.directSupports
+          inner1.name = response.data.name
+          inner1.story = response.data.story
+          inner1.designerEmail = response.data.designerEmail
+          inner1.type = response.data.type
+          inner1.goal = response.data.goal
+          inner1.deadline = response.data.deadline
+          inner1.successful = response.data.successful
+          inner1.launched = response.data.launched
+          inner1.activePledges = response.data.activePledges
+          inner1.directSupports = response.data.directSupports
         }
-        setEntries(temp)
+        setEntries(inner1)
   
-        if (temp.activePledges != null) {
-          let inner = []
-          for (let i = 0; i < temp.activePledges.length; i++) {
-            let pledge = temp.activePledges[i]
+        if (inner1.activePledges != null) {
+          let inner2 = []
+          for (let i = 0; i < inner1.activePledges.length; i++) {
+            let pledge = inner1.activePledges[i]
             let entry = (
               <div id="pledge_box" style={pledge_box}>
                 <label style={pledge_amount}>Amount: ${pledge.amount}</label><br/>
@@ -584,18 +675,23 @@ function App() {
                 <label></label><br/>
               </div>
             )
-            inner.push(entry)
+            inner2.push(entry)
           }
-          setPledges(inner)
+          setPledges(inner2)
         }
         setRetrieving(false)
       })
     }
   
     function handle_button_create_pledge() {
-      currentPage = <DesignerCreatePledge />
+      current_page = <DesignerCreatePledge />
       forceRedraw(redraw + 1)
       redraw++
+    }
+
+    function days_from_deadline() {
+      let today = new Date(), deadline = new Date(entries.deadline)
+      return Math.ceil((deadline - today) / (1000*60*60*24))
     }
 
     if (entries === undefined || pledges === undefined) {
@@ -605,11 +701,12 @@ function App() {
 
     return (
       <div className="DesignerViewProject">
+        <Header />
         <div id="info_box" style={info_box}>
           <label style={project_name}>{entries.name}</label>
           <div id="deadline_box" style={deadline_box}>
             <label style={deadline_label}>Project Deadline: {entries.deadline}</label>
-            <label style={days_label}>__ DAYS LEFT</label>
+            <label style={days_label}>{days_from_deadline()} DAYS LEFT</label>
           </div>
           <div id="goal_box" style={goal_box}>
             <label style={goal_label}>Project Goal: ${entries.goal}</label>
@@ -618,7 +715,7 @@ function App() {
           <div id="description_box" style={description_box}>
             <label style={description_label}>{entries.story}</label>
           </div>
-          <label style={designer_label}><i>By: {entries.designerEmail}</i></label>
+          <label style={designer_label}><i>Designer: {entries.designerEmail}</i></label>
         </div>
 
         <label style={active_label}>Active Pledges</label>
@@ -631,6 +728,11 @@ function App() {
   }
 
   function AdministratorListProjects() {
+    const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
+    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 613, overflowY: "scroll", top: 160, left: 20 }
+    const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
+    const delete_button = { position: "relative", top: -10, width: 55 }
+    
     let [entries, setEntries] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
 
@@ -639,6 +741,7 @@ function App() {
       setRetrieving(true)
 
       instance.post('/adminList').then((response) => {
+        console.log(response.data.result)
         if (response != null) {
           let allProjects = response.data.result
           if (allProjects != undefined) {
@@ -647,13 +750,16 @@ function App() {
               let project = allProjects[i]
               const entry = (
                 <div id="project_box">
-                  <button onClick={() => handle_button_view(project.name)}>Name: {project.name}</button><br/>
-                  <label >Description: {project.description}</label><br/>
-                  <label >Deadline: {project.deadline}</label><br/>
-                  <label >Type: {project.type}</label><br/>
-                  <label >Goal: ${project.goal}</label><br/>
-                  <label >Designer: {project.entrepreneur}</label><br/>
-                  <label >---------------------</label><br/>
+                  <button style={project_button} onClick={() => handle_button_view(project.name)}>
+                    <label style={{fontSize: "18pt", fontWeight: "bold"}}>{project.name}</label><br/>
+                    <label>Description: {project.description}</label><br/>
+                    <label>Deadline: {project.deadline}</label><br/>
+                    <label>Type: {project.type}</label><br/>
+                    <label>Goal: ${project.goal}</label><br/>
+                    <label>Designer: {project.entrepreneur}</label><br/>
+                    <label>Launched: {project.launched ? "Yes":"No"}</label>
+                  </button>
+                  <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button>
                 </div>
               )
               inner.push(entry)
@@ -665,11 +771,25 @@ function App() {
       })
     }
 
-    function handle_button_view(project_name_param) {
-      current_project = project_name_param
-      currentPage = <DesignerViewProject />
+    function handle_button_view(name_param) {
+      current_project = name_param
+      current_page = <DesignerViewProject />
       forceRedraw(redraw + 1)
       redraw++
+    }
+
+    function handle_button_delete(name_param) {
+      let msg = {}
+      msg["name"] = name_param
+      let data = { 'body': JSON.stringify(msg) }
+
+      // TODO change to adminDeleteProject
+      instance.post('/designerDeleteProject', data).then((response) => {
+        current_project = null
+        current_page = <AdministratorListProjects />
+        forceRedraw(redraw + 1)
+        redraw++
+      })
     }
 
     if (entries === undefined) {
@@ -679,15 +799,15 @@ function App() {
 
     return (
       <div className="AdministratorListProjects">
-        <label>admin list projects</label><br />
-        <label>------------------------</label>
-        <div>{entries}</div>
+        <Header />
+        <label style={page_label}>All Projects</label>
+        <div style={projects_box}>{entries}</div>
       </div>
     )
   }
 
   return (
-    <div>{currentPage}</div>
+    <div>{current_page}</div>
   );
 }
 
