@@ -10,6 +10,10 @@ function App() {
   if (current_page == null) current_page = <Login />
 
   function Header() {
+    const header_user = { position: "absolute", left: 20, top: 26 }
+    const header_title = { position: "absolute", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
+    const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
+    const header_button = {position: "absolute", right: 20, top: 24 }
     let back_button = ( <div/> )
 
     if (current_page.type.name == "DesignerViewProject") {
@@ -23,11 +27,6 @@ function App() {
       redraw++
     }
 
-    const header_user = { position: "absolute", left: 20, top: 26 }
-    const header_title = { position: "absolute", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
-    const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
-    const header_button = {position: "absolute", right: 20, top: 24 }
-
     return (
       <div>
         <label style={header_user}>{current_user}</label>
@@ -39,6 +38,16 @@ function App() {
   }
 
   function Login() {
+    const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
+    const login_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 400, top: 20, left: 0, textAlign: "center" }
+    const login_email_label = { position: "absolute", fontWeight: "bold", top: 100, left: 20, textAlign: "center" }
+    const login_email_input = { position: "absolute", width: 220, background: "white", top: 100, left: 150, textAlign: "left" }
+    const login_pass_label = { position: "absolute", fontWeight: "bold", top: 150, left: 20, textAlign: "center" }
+    const login_pass_input = { position: "absolute", width: 220, background: "white", top: 150, left: 150, textAlign: "left" }
+    const login_type_label = { position: "absolute", fontWeight: "bold", top: 200, left: 20, textAlign: "center" }
+    const login_type_radio = { position: "absolute", width: 220, top: 200, left: 150, textAlign: "left" }
+    const login_button = { position: "relative", fontSize: "16pt", top: 320, width: 200 }
+
     let input_email = useRef(null)
     let input_password = useRef(null)
     let input_account_type = null
@@ -74,31 +83,25 @@ function App() {
       }
     }
 
-    const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
-    const login_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 400, top: 20, left: 0, textAlign: "center" }
-    const login_email_label = { position: "absolute", fontWeight: "bold", top: 100, left: 20, textAlign: "center" }
-    const login_email_input = { position: "absolute", width: 220, background: "white", top: 100, left: 150, textAlign: "left" }
-    const login_pass_label = { position: "absolute", fontWeight: "bold", top: 150, left: 20, textAlign: "center" }
-    const login_pass_input = { position: "absolute", width: 220, background: "white", top: 150, left: 150, textAlign: "left" }
-    const login_type_label = { position: "absolute", fontWeight: "bold", top: 200, left: 20, textAlign: "center" }
-    const login_type_radio = { position: "absolute", width: 220, top: 200, left: 150, textAlign: "left" }
-    const login_button = { position: "relative", fontSize: "16pt", top: 320, width: 200 }
-
     return (
       <div className="Login">
         <Header />
         <div id="login-box" style={login_box}>
           <label style={login_title}>LOG IN</label>
+
           <label style={login_email_label}>email address:</label>
           <input id="email" type="text" ref={input_email} style={login_email_input}></input>
+
           <label style={login_pass_label}>password:</label>
           <input id="password" type="text" ref={input_password} style={login_pass_input}></input>
+
           <label style={login_type_label}>account type:</label>
           <div style={login_type_radio}>
             <div> <label><input type="radio" id="supporter" name="account_type" value="supporter"></input>supporter</label> </div>
             <div> <label><input type="radio" id="designer" name="account_type" value="designer"></input>designer</label> </div>
             <div> <label><input type="radio" id="administrator" name="account_type" value="administrator"></input>administrator</label> </div>
           </div>
+
           <button style={login_button} onClick={handle_button_login}>Login or Register</button>
         </div>
       </div>
@@ -106,6 +109,12 @@ function App() {
   }
 
   function DesignerListProjects() {
+    const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
+    const projects_box = { background: "lightgrey", position: "absolute", width: 800, height: 520, overflowY: "scroll", top: 160, left: 20 }
+    const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
+    const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 700, left: 380 }
+    const edit_button = { position: "relative", top: -10, width: 50 }
+
     let msg = {}
     msg["email"] = current_user
     let data = { 'body': JSON.stringify(msg) }
@@ -171,11 +180,6 @@ function App() {
       return
     }
 
-    const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
-    const projects_box = { background: "lightgrey", position: "absolute", width: 800, height: 520, overflowY: "scroll", top: 160, left: 20 }
-    const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
-    const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 700, left: 380 }
-    const edit_button = { position: "relative", top: -10, width: 50 }
     return (
       <div className="DesignerListProjects">
         <Header />
@@ -264,6 +268,28 @@ function App() {
   }
 
   function DesignerEditProject() {
+    const info_box = { position: "absolute", width: 800, height: 550, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
+    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
+    const deadline_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+
+    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
+    const goal_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+
+    const description_box = { position: "absolute", padding: 10, width: 738, height: 275, textAlign: "left", top: 205, left: 20 }
+    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 510, right: 20 }
+
+    const launch_button = { position: "absolute", fontSize: "20pt", top: 700, left: 200 }
+    const save_button = { position: "absolute", fontSize: "20pt", top: 700, left: 410 }
+    const delete_button = { position: "absolute", fontSize: "20pt", top: 700, left: 600 }
+
+    const all_pledges_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
+    const all_pledges_box = { position: "absolute", width: 540, height: 520, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const pledge_amount = { fontWeight: "bold" }
+    const pledge_delete_button = { position: "absolute", top: 10, right: 10 }
+    const pledge_create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 1120 }
+
     let input_name = useRef(null), input_description = useRef(null), input_goal = useRef(null), input_deadline = useRef(null), input_type = useRef(null)
 
     let msg = {}
@@ -385,28 +411,6 @@ function App() {
       return
     }
 
-    const info_box = { position: "absolute", width: 800, height: 550, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
-    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
-    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
-    const deadline_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
-
-    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
-    const goal_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
-
-    const description_box = { position: "absolute", padding: 10, width: 738, height: 275, textAlign: "left", top: 205, left: 20 }
-    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 510, right: 20 }
-
-    const launch_button = { position: "absolute", fontSize: "20pt", top: 700, left: 200 }
-    const save_button = { position: "absolute", fontSize: "20pt", top: 700, left: 410 }
-    const delete_button = { position: "absolute", fontSize: "20pt", top: 700, left: 600 }
-
-    const all_pledges_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
-    const all_pledges_box = { position: "absolute", width: 540, height: 520, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
-    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
-    const pledge_amount = { fontWeight: "bold" }
-    const pledge_delete_button = { position: "absolute", top: 10, right: 10 }
-    const pledge_create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 1120 }
-
     return (
       <div className="DesignerEditProject">
         <Header />
@@ -430,6 +434,27 @@ function App() {
   }
 
   function DesignerViewProject() {
+    const info_box = { position: "absolute", width: 800, height: 635, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
+    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
+    const deadline_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
+    const days_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
+
+    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
+    const goal_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
+    const raised_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
+
+    const description_box = { position: "absolute", width: 760, height: 340, background: "white", outline: "1px solid black", textAlign: "center", top: 205, left: 20 }
+    const description_label = { position: "absolute", width: 740, height: 320, textAlign: "left", top: 10, left: 10 }
+    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, right: 20 }
+
+    const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
+    const active_pledges_box = { position: "absolute", width: 540, height: 520, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const pledge_amount = { fontWeight: "bold" }
+    const pledge_description = { }
+    const button_create = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 1120 }
+
     let msg = {}
     msg["name"] = current_project
     let data = { 'body': JSON.stringify(msg) }
@@ -493,27 +518,6 @@ function App() {
       return
     }
 
-    const info_box = { position: "absolute", width: 800, height: 635, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
-    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
-    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
-    const deadline_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
-    const days_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
-
-    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
-    const goal_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
-    const raised_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
-
-    const description_box = { position: "absolute", width: 760, height: 340, background: "white", outline: "1px solid black", textAlign: "center", top: 205, left: 20 }
-    const description_label = { position: "absolute", width: 740, height: 320, textAlign: "left", top: 10, left: 10 }
-    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, right: 20 }
-
-    const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
-    const active_pledges_box = { position: "absolute", width: 540, height: 520, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
-    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
-    const pledge_amount = { fontWeight: "bold" }
-    const pledge_description = { }
-    const button_create = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 1120 }
-
     return (
       <div className="DesignerViewProject">
         <Header />
@@ -542,7 +546,12 @@ function App() {
     );
   }
 
-  function AdministratorListProjects() {    
+  function AdministratorListProjects() {
+    const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
+    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 613, overflowY: "scroll", top: 160, left: 20 }
+    const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
+    const delete_button = { position: "relative", top: -10, width: 55 }
+    
     let [entries, setEntries] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
 
@@ -606,11 +615,6 @@ function App() {
       retrieve()
       return
     }
-
-    const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
-    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 613, overflowY: "scroll", top: 160, left: 20 }
-    const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
-    const delete_button = { position: "relative", top: -10, width: 55 }
 
     return (
       <div className="AdministratorListProjects">
