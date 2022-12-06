@@ -3,12 +3,12 @@ import React, { useEffect, useRef } from 'react';
 import { Model } from './entity/Model';
 import axios from 'axios';
 
-var model = new Model, currentPage, current_user_email = "lerinaldi@wpi.edu", current_project;
+var model = new Model, currentPage, current_user_email, current_project
 const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/' });
 
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
-  if (currentPage == null) currentPage = <DesignerListProjects />
+  if (currentPage == null) currentPage = <Login />
 
   function Login() {
     const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
