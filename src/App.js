@@ -138,7 +138,7 @@ function App() {
 
     function handle_button_view(project_name_param) {
       current_project = project_name_param
-      currentPage = <DesignerViewProject />
+      currentPage = <SupporterViewProject />
       forceRedraw(redraw + 1)
       redraw++
     }
@@ -161,7 +161,7 @@ function App() {
     )
   }
 
-  function SupporterViewProjects() {
+  function SupporterViewProject() {
     const info_box = { position: "absolute", width: 800, height: 700, background: "lightgrey", textAlign: "center", top: 50, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 40 }
     const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, left: 20 }
