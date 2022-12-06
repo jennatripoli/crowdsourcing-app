@@ -537,17 +537,19 @@ function App() {
   function DesignerEditProject() {
     const info_box = { position: "absolute", width: 800, height: 550, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
-    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
-    const deadline_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+
+    const type_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
+    const type_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0}
 
     const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
-    const goal_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+    const goal_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 10, left: 0 }
+    const deadline_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 50, left: 0 }
 
     const description_box = { position: "absolute", padding: 10, width: 738, height: 275, textAlign: "left", top: 205, left: 20 }
     const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 510, right: 20 }
 
     const launch_button = { position: "absolute", fontSize: "20pt", top: 700, left: 200 }
-    const save_button = { position: "absolute", fontSize: "20pt", top: 700, left: 410 }
+    const save_button = { position: "absolute", fontSize: "20pt", top: 700, left: 415 }
     const delete_button = { position: "absolute", fontSize: "20pt", top: 700, left: 600 }
 
     const all_pledges_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
@@ -614,10 +616,9 @@ function App() {
         msg["type"] = input_type.current.value
         msg["goal"] = input_goal.current.value
         msg["deadline"] = input_deadline.current.value
-
         let data = { 'body': JSON.stringify(msg) }
 
-        instance.post('/saveProject', data).then((response) => {
+        instance.post('/editProject', data).then((response) => {
           current_page = <DesignerViewProject />
           forceRedraw(redraw + 1)
           redraw++
@@ -681,8 +682,11 @@ function App() {
         <Header />
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label><br />
-          <div style={deadline_box}><label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" ref={input_deadline} style={{width: 150}} defaultValue={entries.deadline} /></label></div>
-          <div style={goal_box}><label style={goal_label}>Project Goal: $<input name="project_goal" type="number" ref={input_goal} style={{width: 150}} min="1" defaultValue={entries.goal} /></label></div>
+          <div style={type_box}><label style={type_label}>Project Type: <input name="project_type" type="text" ref={input_type} style={{width: 150}} defaultValue={entries.type} /></label></div>
+          <div style={goal_box}>
+            <label style={goal_label}>Project Goal: $<input name="project_goal" type="number" ref={input_goal} style={{width: 150}} min="1" defaultValue={entries.goal} /></label>
+            <label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" ref={input_deadline} style={{width: 130}} defaultValue={entries.deadline} /></label>
+            </div>
           <textarea wrap="soft" name="project_description" type="text" ref={input_description} defaultValue={entries.name} style={description_box} />
           <label style={designer_label}><i>Designer: {entries.designerEmail}</i></label>
         </div>
