@@ -3,12 +3,12 @@ import React, { useEffect, useRef } from 'react';
 import { Model } from './entity/Model';
 import axios from 'axios';
 
-var model = new Model, currentPage, current_user_email = "lerinaldi@wpi.edu", current_project;
+var model = new Model, currentPage, current_user_email = "lerinaldi@wpi.edu", current_project
 const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/' });
 
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
-  if (currentPage == null) currentPage = <DesignerListProjects />
+  if (currentPage == null) currentPage = <SupporterListProjects />
 
   function Login() {
     const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
@@ -51,7 +51,11 @@ function App() {
             redraw++
           })
         } else {
-          // login supporter
+          instance.post('/loginSupporter', data).then((response) => {
+            currentPage = <SupporterListProjects />
+            forceRedraw(redraw + 1)
+            redraw++
+          })
         }
       }
     }
@@ -75,6 +79,183 @@ function App() {
           </div>
 
           <button style={login_button} onClick={handle_button_login}>Login or Register</button>
+        </div>
+      </div>
+    );
+  }
+
+  function SupporterListProjects() {
+    const search_bar = { position: "absolute", width: 400, left: 20, top: 40 }
+    const sort_label = { position: "absolute", left: 500, top: 40 }
+    const deadline_button = { position: "absolute", left: 570, top: 40 }
+    const type_button = { position: "absolute", left: 650, top: 40 }
+
+    const project_list_box = { position: "absolute", width: 800, height: 580, overflowY: "scroll", top: 100, left: 20 }
+    const project_button = { width: 760, textAlign: "left" }
+    const project_name = { fontSize: "18pt", fontWeight: "bold" }
+
+    let input_name = useRef(null)
+
+    let msg = {}
+    msg["email"] = current_user_email
+    let data = { 'body': JSON.stringify(msg) }
+
+    let [entries, setEntries] = React.useState(undefined)
+    let [retrieving, setRetrieving] = React.useState(false)
+
+
+    function retrieve() {
+      if (retrieving) return
+      setRetrieving(true)
+
+      instance.post('/designerList', data).then((response) => {
+        if (response != null) {
+          let allProjects = response.data.result
+          if (allProjects != undefined) {
+            let inner = []
+            for (let i = 0; i < allProjects.length; i++) {
+              let project = allProjects[i]
+              const entry = (
+                <div id="project_box">
+                  <button style={project_button} onClick={() => handle_button_view(project.name)}>
+                    <label style={project_name}>{project.name}</label><br/>
+                    <label>Description: {project.description}</label><br/>
+                    <label>Deadline: {project.deadline}</label><br/>
+                    <label>Type: {project.type}</label><br/>
+                    <label>Goal: ${project.goal}</label><br/>
+                  </button>
+                  <br/><label/><br/>
+                </div>
+              )
+              inner.push(entry)
+            }
+            setEntries(inner)
+            setRetrieving(false)
+          }
+        }
+      })
+    }
+
+    function handle_button_view(project_name_param) {
+      current_project = project_name_param
+      currentPage = <DesignerViewProject />
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
+    if (entries === undefined) {
+      retrieve()
+      return
+    }
+
+    return (
+      <div className="SupporterListProjects">
+        <div>
+          <input style={search_bar} name="project_name" type="text" ref={input_name} placeHolder="search projects" />
+          <label style={sort_label}>Sort By: </label>
+          <button style={deadline_button}>Deadline</button>
+          <button style={type_button}>Type</button>
+        </div>
+        <div style={project_list_box}>{entries}</div>
+      </div>
+    )
+  }
+
+  function SupporterViewProjects() {
+    const info_box = { position: "absolute", width: 800, height: 700, background: "lightgrey", textAlign: "center", top: 50, left: 50, display: "inline-block" }
+    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 40 }
+    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, left: 20 }
+    const deadline_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
+    const days_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
+
+    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 150, right: 20 }
+    const goal_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
+    const raised_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
+
+    const description_box = { position: "absolute", width: 760, height: 340, background: "white", outline: "1px solid black", textAlign: "center", top: 255, left: 20 }
+    const description_label = { position: "absolute", width: 740, height: 320, textAlign: "left", top: 10, left: 10 }
+    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", bottom: 70, right: 20 }
+
+    const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 50, left: 1070 }
+    const active_pledges_box = { position: "absolute", width: 540, height: 545, background: "lightgrey", textAlign: "center", top: 100, left: 900, display: "inline-block", overflowY: "scroll" }
+    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const pledge_amount = { fontWeight: "bold" }
+    const pledge_description = { }
+    const claim_button = { }
+
+    let msg = {}
+    msg["name"] = current_project
+    let data = { 'body': JSON.stringify(msg) }
+
+    let [entries, setEntries] = React.useState(undefined)
+    let [pledges, setPledges] = React.useState(undefined)
+    let [retrieving, setRetrieving] = React.useState(false)
+
+    function retrieve() {
+      if (retrieving) return;
+      setRetrieving(true)
+
+      instance.post('/designerViewProject', data).then((response) => {
+        let temp = {}
+        if (response != null) {
+          temp.name = response.data.name
+          temp.story = response.data.story
+          temp.designerEmail = response.data.designerEmail
+          temp.type = response.data.type
+          temp.goal = response.data.goal
+          temp.deadline = response.data.deadline
+          temp.successful = response.data.successful
+          temp.activePledges = response.data.activePledges
+          temp.directSupports = response.data.directSupports
+        }
+        setEntries(temp)
+  
+        if (temp.activePledges != null) {
+          let inner = []
+          for (let i = 0; i < temp.activePledges.length; i++) {
+            let pledge = temp.activePledges[i]
+            let entry = (
+              <div id="pledge_box" style={pledge_box}>
+                <label style={pledge_amount}>Amount: ${pledge.amount}</label><br/>
+                <label style={pledge_description}>{pledge.description}</label>
+                <button>Claim</button>
+                <label></label><br/>
+              </div>
+            )
+            inner.push(entry)
+          }
+          setPledges(inner)
+        }
+        setRetrieving(false)
+      })
+    }
+
+    if (entries === undefined || pledges === undefined) {
+      retrieve()
+      return
+    }
+
+    return (
+      <div className="SupporterViewProject">
+        <div id="info_box" style={info_box}>
+          <label style={project_name}>{entries.name}</label>
+          <div id="deadline_box" style={deadline_box}>
+            <label style={deadline_label}>Project Deadline: {entries.deadline}</label>
+            <label style={days_label}>__ DAYS LEFT</label>
+          </div>
+          <div id="goal_box" style={goal_box}>
+            <label style={goal_label}>Project Goal: ${entries.goal}</label>
+            <label style={raised_label}>$__ RAISED</label>
+          </div>
+          <div id="description_box" style={description_box}>
+            <label style={description_label}>{entries.story}</label>
+          </div>
+          <label style={designer_label}><i>By: {entries.designerEmail}</i></label>
+        </div>
+
+        <label style={active_label}>Active Pledges</label>
+        <div id="active_pledges_box" style={active_pledges_box}>
+          <div id="pledges">{pledges}</div>
         </div>
       </div>
     );
