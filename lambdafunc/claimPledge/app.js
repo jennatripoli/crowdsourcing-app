@@ -112,6 +112,22 @@ exports.lambdaHandler = async (event, context) => {
                     
                     if (rows.affectedRows == 1) {
                         console.log("TEST2:" + JSON.stringify(JSON.stringify(rows[0])));
+                        return resolve(true);
+                    } else {
+                        return reject("supporter not found with name '" + info.supporterEmail + "'");
+                    }            
+            });
+        });
+    }
+    
+    let availableFunds = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Supporter WHERE email=?", [info.supporterEmail], (error, rows) => {
+                    if (error) { return reject(error); }
+                    console.log("TEST:" + JSON.stringify(rows));
+                    
+                    if ((rows) && (rows.length == 1)) {
+                        console.log("TEST2:" + JSON.stringify(JSON.stringify(rows[0])));
                         return resolve(rows[0].availableFunds);
                     } else {
                         return reject("supporter not found with name '" + info.supporterEmail + "'");
@@ -119,6 +135,7 @@ exports.lambdaHandler = async (event, context) => {
             });
         });
     }
+    
     try {
         
         // 1. Query RDS for the first constant value to see if it exists!
@@ -139,13 +156,15 @@ exports.lambdaHandler = async (event, context) => {
         console.log("NEW FUNDS:" + newFunds);
         const update = await updateFunds(newFunds, info);
         console.log("E4");
+        let updatedAvailableFunds = await availableFunds(info)
+        console.log("E5");
         
         
         if(update > 0){
             console.log("new available funds: " + JSON.stringify(update));
             //console.log("E2")
             let email = (info.supporterEmail);
-            let availableFunds = (update);
+            let availableFunds = (updatedAvailableFunds);
             
             response.statusCode = 200;
             response.email = email;
