@@ -56,6 +56,38 @@ exports.lambdaHandler = async (event, context) => {
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
     
+    let countPledgers = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT count(*) AS CNT FROM Pledger WHERE supporterEmail=?", [info.supporterEmail], (error, rows) => {
+                    if (error) { return reject(error); }
+                    console.log("INSERT:" + JSON.stringify(rows));
+                    
+                    if ((rows) && rows.length==1) {
+                        console.log(JSON.stringify(rows[0].CNT))
+                        return resolve(rows[0].CNT)
+                    } else {
+                        return reject("no pledgers exist with description: '" + info.descriptionReward + "'");
+                    }            
+            });
+        });
+    }
+    
+    let getMaxPledgers = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Pledger WHERE email=?", [info.supporterEmail], (error, rows) => {
+                    if (error) { return reject(error); }
+                    console.log("INSERT:" + JSON.stringify(rows));
+                    
+                    if ((rows) && rows.length==1) {
+                        console.log(JSON.stringify(rows[0].CNT))
+                        return resolve(rows[0].CNT)
+                    } else {
+                        return reject("no pledgers exist with description: '" + info.descriptionReward + "'");
+                    }            
+            });
+        });
+    }
+    
     let addPledger = (info) => {
         return new Promise((resolve, reject) => {
             pool.query("INSERT INTO Pledger (supporterEmail, descriptionReward) VALUES(?, ?)", 
