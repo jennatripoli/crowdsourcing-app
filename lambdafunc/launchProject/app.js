@@ -62,6 +62,21 @@ exports.lambdaHandler = async (event, context) => {
                     if (error) { return reject(error); }
                     console.log("INSERT:" + JSON.stringify(rows));
                     
+                    if (rows.affectedRows == 1) {
+                        return resolve(true);
+                    } else {
+                        return reject("project not found with name '" + info.name + "'");
+                    }            
+            });
+        });
+    }
+    
+    let getProject = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Project WHERE name=?", [info.name], (error, rows) => {
+                    if (error) { return reject(error); }
+                    console.log("INSERT:" + JSON.stringify(rows));
+                    
                     if ((rows) && (rows.length == 1)) {
                         return resolve(rows[0]);
                     } else {
@@ -79,9 +94,10 @@ exports.lambdaHandler = async (event, context) => {
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
         //console.log("E1")
-        let editedProject = await launchProject(info);
+        let projectIsEdited = await launchProject(info);
+        let editedProject = await getProject(info)
         
-        if(editedProject){
+        if(projectIsEdited){
             console.log("project info: " + JSON.stringify(editedProject));
             //console.log("E2")
             let name = (editedProject.name);
