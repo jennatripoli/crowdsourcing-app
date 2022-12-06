@@ -145,15 +145,18 @@ function App() {
   }
 
   function SupporterListProjects() {
-    const search_bar = { position: "absolute", width: 400, left: 60, top: 115 }
-    const sort_label = { position: "absolute", left: 500, top: 115 }
-    const name_button = { position: "absolute", left: 570, top: 115 }
-    const deadline_button = { position: "absolute", left: 630, top: 115 }
-    const type_button = { position: "absolute", left: 708, top: 115 }
+    const search_bar = { position: "absolute", width: 300, left: 50, top: 120 }
+    const sort_label = { position: "absolute", left: 408, top: 120 }
+    const name_button = { position: "absolute", left: 470, top: 120 }
+    const deadline_button = { position: "absolute", left: 530, top: 120 }
+    const type_button = { position: "absolute", left: 608, top: 120 }
 
-    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 613, overflowY: "scroll", top: 160, left: 20 }
+    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 760, textAlign: "left", margin: 10, marginBottom: 0 }
     const project_name = { fontSize: "18pt", fontWeight: "bold" }
+
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1050 }
+    const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
 
     let input_name = useRef(null)
 
@@ -227,6 +230,10 @@ function App() {
           <button style={type_button} onClick={handle_button_type}>Type</button>
         </div>
         <div style={projects_box}>{entries}</div>
+
+        <label style={activity_label}>Supporter Activity</label>
+        <div id="active_pledges_box" style={activity_box}>
+        </div>
       </div>
     )
   }
@@ -249,6 +256,7 @@ function App() {
     const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
     const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const claim_button = { position: "absolute", right: 10, top: 10 }
 
     let msg = {}
     msg["name"] = current_project
@@ -285,7 +293,7 @@ function App() {
               <div id="pledge_box" style={pledge_box}>
                 <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
                 <label>{pledge.description}</label>
-                <button onClick={claim_pledge(pledge.description, pledge.amount)}>Claim</button>
+                <button style={claim_button} onClick={claim_pledge(pledge.description, pledge.amount)}>Claim</button>
                 <label></label><br/>
               </div>
             )
@@ -352,10 +360,13 @@ function App() {
 
   function DesignerListProjects() {
     const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
-    const projects_box = { background: "lightgrey", position: "absolute", width: 800, height: 520, overflowY: "scroll", top: 160, left: 20 }
+    const projects_box = { background: "lightgrey", position: "absolute", width: 800, height: 520, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
-    const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 700, left: 380 }
+    const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 380 }
     const edit_button = { position: "relative", top: -10, width: 50 }
+
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1060 }
+    const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
 
     let msg = {}
     msg["email"] = current_user
@@ -428,16 +439,25 @@ function App() {
         <label style={page_label}>Your Projects</label>
         <div style={projects_box}>{entries}</div>
         <button style={create_button} onClick={handle_button_create}>+</button>
+
+        <label style={activity_label}>Project Activity</label>
+        <div id="active_pledges_box" style={activity_box}></div>
       </div>
     )
   }
 
   function DesignerCreateProject() {
-    let input_name = useRef(null)
-    let input_description = useRef(null)
-    let input_goal = useRef(null)
-    let input_deadline = useRef(null)
-    let input_type = useRef(null)
+    const info_box = { position: "absolute", width: 800, height: 550, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", textAlign: "center", top: 20 }
+    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
+    const deadline_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
+    const goal_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+    const description_box = { position: "absolute", padding: 10, width: 738, height: 275, textAlign: "left", top: 205, left: 20 }
+    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 510, right: 20 }
+    const create_button = { position: "absolute", fontSize: "20pt", top: 700, left: 200 }
+
+    let input_name = useRef(null), input_description = useRef(null), input_goal = useRef(null), input_deadline = useRef(null), input_type = useRef(null)
 
     function handle_button_create() {
       if (input_name.current.value == null || input_goal.current.value <= 0 || input_deadline.current.value == null) {
@@ -466,14 +486,15 @@ function App() {
     return (
       <div className="DesignerCreateProject">
         <Header />
-        <br/><br/><br/><br/><br/><br/>
-        <label>CREATE A NEW PROJECT</label><br />
-        <label>Project Name:<input name="project_name" type="text" ref={input_name} /></label><br />
-        <label>Description (optional):<textarea name="project_description" type="text" ref={input_description} /></label><br />
-        <label>Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1" /></label><br />
-        <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline} /></label><br />
-        <label>Type:<input name="project_type" type="text" ref={input_type} /></label><br />
-        <button onClick={handle_button_create}>Create Project</button>
+        <div style={info_box}>
+          <input name="project_name" style={project_name} type="text" ref={input_name} placeholder="project name" />
+          <div style={deadline_box}><label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" style={{width: 100}} ref={input_deadline} /></label></div>
+          <div style={goal_box}><label style={goal_label}>Project Goal: $<input name="project_goal" type="number" style={{width: 100}} ref={input_goal} min="1" /></label></div>
+          <textarea wrap="soft" name="project_description" type="text" ref={input_description} style={description_box} placeholder="project description" />
+          <label style={designer_label}><i>Designer: {current_user}</i></label>
+        </div>
+
+        <button style={create_button} onClick={handle_button_create}>Create</button>
       </div>
     )
   }
@@ -660,8 +681,8 @@ function App() {
         <Header />
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label><br />
-          <div style={deadline_box}><label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" ref={input_deadline} defaultValue={entries.deadline} /></label></div>
-          <div style={goal_box}><label style={goal_label}>Project Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1" defaultValue={entries.goal} /></label></div>
+          <div style={deadline_box}><label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" ref={input_deadline} style={{width: 150}} defaultValue={entries.deadline} /></label></div>
+          <div style={goal_box}><label style={goal_label}>Project Goal: $<input name="project_goal" type="number" ref={input_goal} style={{width: 150}} min="1" defaultValue={entries.goal} /></label></div>
           <textarea wrap="soft" name="project_description" type="text" ref={input_description} defaultValue={entries.name} style={description_box} />
           <label style={designer_label}><i>Designer: {entries.designerEmail}</i></label>
         </div>
@@ -783,9 +804,24 @@ function App() {
 
   function AdministratorListProjects() {
     const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
-    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 613, overflowY: "scroll", top: 160, left: 20 }
+    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
     const delete_button = { position: "relative", top: -10, width: 55 }
+
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1092 }
+    const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900 }
+
+    const activity_projects_box = { position: "absolute", width: 500, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 20, left: 20 }
+    const activity_projects_label = { position: "absolute", width: 500, fontSize: "12pt", top: 10, left: 0 }
+    const activity_projects_number = { position: "absolute", width: 500, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
+
+    const activity_funded_box = { position: "absolute", width: 500, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 130, right: 20 }
+    const activity_funded_label = { position: "absolute", width: 500, fontSize: "12pt", top: 10, left: 0 }
+    const activity_funded_number = { position: "absolute", width: 500, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
+
+    const activity_pledges_box = { position: "absolute", width: 500, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 240, right: 20 }
+    const activity_pledges_label = { position: "absolute", width: 500, fontSize: "12pt", top: 10, left: 0 }
+    const activity_pledges_number = { position: "absolute", width: 500, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
     
     let [entries, setEntries] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
@@ -837,9 +873,7 @@ function App() {
       msg["name"] = name_param
       let data = { 'body': JSON.stringify(msg) }
 
-      // TODO change to adminDeleteProject
       instance.post('/designerDeleteProject', data).then((response) => {
-        current_project = null
         current_page = <AdministratorListProjects />
         forceRedraw(redraw + 1)
         redraw++
@@ -856,6 +890,22 @@ function App() {
         <Header />
         <label style={page_label}>All Projects</label>
         <div style={projects_box}>{entries}</div>
+
+        <label style={activity_label}>Site Activity</label>
+        <div style={activity_box}>
+          <div style={activity_projects_box}>
+            <label style={activity_projects_label}>TOTAL PROJECTS:</label>
+            <label style={activity_projects_number}>{entries.length}</label>
+          </div>
+          <div style={activity_funded_box}>
+            <label style={activity_funded_label}>TOTAL FUNDED:</label>
+            <label style={activity_funded_number}>$___</label>
+          </div>
+          <div style={activity_pledges_box}>
+            <label style={activity_pledges_label}>TOTAL PLEDGES:</label>
+            <label style={activity_pledges_number}>___</label>
+          </div>
+        </div>
       </div>
     )
   }
