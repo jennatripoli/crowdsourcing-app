@@ -51,7 +51,7 @@ function App() {
     }
 
     function back_supporter_list() {
-      current_project= null
+      current_project = null
       current_page = <SupporterListProjects/>
       forceRedraw(redraw + 1)
       redraw++
@@ -110,7 +110,7 @@ function App() {
           })
         } else {
           instance.post('/loginSupporter', data).then((response) => {
-            available_funds = response.availableFunds
+            available_funds = response.data.availableFunds
             current_page = <SupporterListProjects />
             forceRedraw(redraw + 1)
             redraw++
