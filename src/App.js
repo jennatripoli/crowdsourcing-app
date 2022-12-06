@@ -17,12 +17,20 @@ function App() {
     let back_button = ( <div/> )
 
     if (current_page.type.name == "DesignerViewProject") {
-      back_button = (<button onClick={() => back_designer()}>Back to List</button>)
-    } // add other cases here
+      back_button = (<button onClick={() => back_designer_view()}>Back to List</button>)
+    } else if (current_page.type.name == "DesignerEditProject") {
+      back_button = (<button onClick={() => back_designer_edit()}>Back to View</button>)
+    }
 
-    function back_designer() {
+    function back_designer_view() {
       current_project = null
       current_page = <DesignerListProjects/>
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
+    function back_designer_edit() {
+      current_page = <DesignerViewProject/>
       forceRedraw(redraw + 1)
       redraw++
     }
@@ -351,8 +359,7 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/saveProject', data).then((response) => {
-          current_project = null
-          current_page = <DesignerListProjects />
+          current_page = <DesignerViewProject />
           forceRedraw(redraw + 1)
           redraw++
         })
