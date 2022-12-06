@@ -64,7 +64,7 @@ exports.lambdaHandler = async (event, context) => {
                 pool.query("SELECT * FROM Supporter WHERE email=?", [info.email], (error, rows) => {
                     if (error) { return reject(error); }
                     if ((rows) && (rows.length == 1)) {
-                        return resolve(rows[0].email);
+                        return resolve(rows[0]);
                     } else {
                         //InsertValidUser(email);
                         return resolve(false);
@@ -114,20 +114,26 @@ exports.lambdaHandler = async (event, context) => {
         if (exists) {
             //RETURN EMAIL
             console.log("Supporter already exists... Logging In");
+            response.email = exists.email
+            response.availableFunds = exists.availableFunds
             response.statusCode = 200;
-            let result = exists;
-            response.result = result.toString();
         } else {
             //INSERT NEW
             const inserted = await InsertValidUser(info);
             if (inserted) {
-                console.log("Admin didn't exist... Creating User");
-                response.statusCode = 200;
-                let result = inserted;
-                response.result = result.toString();
+                console.log("Supporter didn't exist... Creating User");
+                let newUser = await GetValidUser(info);
+                if (newUser){
+                    response.email = newUser.email
+                    response.availableFunds = newUser.availableFunds
+                    response.statusCode = 200;
+                } else {
+                    response.statusCode = 400;
+                    response.error = "Couldn't find new user";
+                }
             } else {
                 response.statusCode = 400;
-                response.error = "User didn't exist";
+                response.error = "Supporter didn't exist";
             //}
         }
         }
