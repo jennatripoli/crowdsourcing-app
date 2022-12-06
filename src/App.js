@@ -225,7 +225,7 @@ function App() {
       <div className="DesignerCreateProject">
         <label>CREATE A NEW PROJECT</label><br />
         <label>Project Name:<input name="project_name" type="text" ref={input_name} /></label><br />
-        <label>Description (optional):<input name="project_description" type="text" ref={input_description} /></label><br />
+        <label>Description (optional):<textarea name="project_description" type="text" ref={input_description} /></label><br />
         <label>Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1" /></label><br />
         <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline} /></label><br />
         <label>Type:<input name="project_type" type="text" ref={input_type} /></label><br />
@@ -236,15 +236,15 @@ function App() {
 
   function DesignerCreatePledge() {
     let input_amount = useRef(null)
-    let input_description = useRef(null)
+    let input_reward = useRef(null)
 
     function handle_button_create() {
       if (input_amount.current.value == 0) {
         alert("Fill out all required fields before creating a new pledge.")
       } else {
         let msg = {}
-        msg["amount"] = input_description.current.value
-        msg["descriptionReward"] = input_description.current.value
+        msg["amount"] = input_reward.current.value
+        msg["descriptionReward"] = input_reward.current.value
         msg["maxSupporters"] = 1000
         msg["projectName"] = current_project
         let data = { 'body': JSON.stringify(msg) }
@@ -260,7 +260,7 @@ function App() {
     return (
       <div className="DesignerCreatePledge">
         <label>CREATE A NEW PLDEGE</label><br />
-        <label>Description (optional):<input name="project_description" type="text" ref={input_description} /></label><br />
+        <label>Description (optional):<input name="project_description" type="text" ref={input_reward} /></label><br />
         <label>Amount: $<input name="project_goal" type="number" ref={input_amount} min="1" default="1" /></label><br />
         <button onClick={handle_button_create}>Create Pledge</button>
       </div>
@@ -268,6 +268,28 @@ function App() {
   }
 
   function DesignerEditProject() {
+    const info_box = { position: "absolute", width: 800, height: 550, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
+    const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
+    const deadline_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+
+    const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
+    const goal_label = { position: "absolute", fontWeight: "bold", width: 370, fontSize: "12pt", top: 30, left: 0 }
+
+    const description_box = { position: "absolute", padding: 10, width: 738, height: 275, textAlign: "left", top: 205, left: 20 }
+    const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 510, right: 20 }
+
+    const launch_button = { position: "absolute", fontSize: "20pt", top: 700, left: 200 }
+    const save_button = { position: "absolute", fontSize: "20pt", top: 700, left: 410 }
+    const delete_button = { position: "absolute", fontSize: "20pt", top: 700, left: 600 }
+
+    const all_pledges_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
+    const all_pledges_box = { position: "absolute", width: 540, height: 520, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const pledge_amount = { fontWeight: "bold" }
+    const pledge_delete_button = { position: "absolute", top: 10, right: 10 }
+    const pledge_create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 1120 }
+
     let input_name = useRef(null), input_description = useRef(null), input_goal = useRef(null), input_deadline = useRef(null), input_type = useRef(null)
 
     let msg = {}
@@ -275,6 +297,7 @@ function App() {
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
+    let [pledges, setPledges] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
 
     function retrieve() {
@@ -282,16 +305,34 @@ function App() {
       setRetrieving(true)
 
       instance.post('/designerViewProject', data).then((response) => {
-        let temp = {}
+        let inner1 = {}
         if (response != null) {
-          temp.name = response.data.name
-          temp.story = response.data.story
-          temp.type = response.data.type
-          temp.goal = response.data.goal
-          temp.deadline = response.data.deadline
-          temp.activePledges = response.data.activePledges
+          inner1.name = response.data.name
+          inner1.story = response.data.story
+          inner1.designerEmail = response.data.designerEmail
+          inner1.type = response.data.type
+          inner1.goal = response.data.goal
+          inner1.deadline = response.data.deadline
+          inner1.activePledges = response.data.activePledges
         }
-        setEntries(temp)
+        setEntries(inner1)
+
+        if (inner1.activePledges != null) {
+          let inner2 = []
+          for (let i = 0; i < inner1.activePledges.length; i++) {
+            let pledge = inner1.activePledges[i]
+            let entry = (
+              <div id="pledge_box" style={pledge_box}>
+                <label style={pledge_amount}>Amount: ${pledge.amount}</label><br/>
+                <label>{pledge.description}</label>
+                <button style={pledge_delete_button} onClick={() => handle_button_delete_pledge(pledge.description)}>Delete</button>
+                <label></label><br/>
+              </div>
+            )
+            inner2.push(entry)
+          }
+          setPledges(inner2)
+        }
         setRetrieving(false)
       })
     }
@@ -347,6 +388,24 @@ function App() {
       }
     }
 
+    function handle_button_create_pledge() {
+      current_page = <DesignerCreatePledge />
+      forceRedraw(redraw + 1)
+      redraw++
+    }
+
+    function handle_button_delete_pledge(reward_param) {
+      msg["descriptionReward"] = reward_param
+      let data = { 'body': JSON.stringify(msg) }
+
+      instance.post('/designerDeletePledge', data).then((response) => {
+        current_project = null
+        current_page = <DesignerEditProject />
+        forceRedraw(redraw + 1)
+        redraw++
+      })
+    }
+
     if (entries === undefined) {
       retrieve()
       return
@@ -354,15 +413,22 @@ function App() {
 
     return (
       <div className="DesignerEditProject">
-        <label>EDIT PROJECT</label><br />
-        <label>Project Name:<input name="project_name" type="text" ref={input_name} defaultValue={entries.name} /></label><br />
-        <label>Description (optional):<input name="project_description" type="text" ref={input_description} defaultValue={entries.description} /></label><br />
-        <label>Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1" defaultValue={entries.goal} /></label><br />
-        <label>Deadline:<input name="project_deadline" type="date" ref={input_deadline} defaultValue={entries.deadline} /></label><br />
-        <label>Type:<input name="project_type" type="text" ref={input_type} defaultValue={entries.type} /></label><br />
-        <button onClick={handle_button_save}>Save Project</button>
-        <button onClick={handle_button_launch}>Launch Project</button>
-        <button onClick={handle_button_delete}>Delete Project</button>
+        <Header />
+        <div style={info_box}>
+          <label style={project_name}>{entries.name}</label><br />
+          <div style={deadline_box}><label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" ref={input_deadline} defaultValue={entries.deadline} /></label></div>
+          <div style={goal_box}><label style={goal_label}>Project Goal: $<input name="project_goal" type="number" ref={input_goal} min="1" default="1" defaultValue={entries.goal} /></label></div>
+          <textarea wrap="soft" name="project_description" type="text" ref={input_description} defaultValue={entries.name} style={description_box} />
+          <label style={designer_label}><i>Designer: {entries.designerEmail}</i></label>
+        </div>
+
+        <button style={save_button} onClick={handle_button_save}>Save</button>
+        <button style={launch_button} onClick={handle_button_launch}>Launch</button>
+        <button style={delete_button} onClick={handle_button_delete}>Delete</button>
+
+        <label style={all_pledges_label}>All Pledges</label>
+        <button style={pledge_create_button} onClick={() => handle_button_create_pledge()}>+</button>
+        <div style={all_pledges_box}>{pledges}</div>
       </div>
     )
   }
@@ -402,25 +468,25 @@ function App() {
       setRetrieving(true)
 
       instance.post('/designerViewProject', data).then((response) => {
-        let temp = {}
+        let inner1 = {}
         if (response != null) {
-          temp.name = response.data.name
-          temp.story = response.data.story
-          temp.designerEmail = response.data.designerEmail
-          temp.type = response.data.type
-          temp.goal = response.data.goal
-          temp.deadline = response.data.deadline
-          temp.successful = response.data.successful
-          temp.launched = response.data.launched
-          temp.activePledges = response.data.activePledges
-          temp.directSupports = response.data.directSupports
+          inner1.name = response.data.name
+          inner1.story = response.data.story
+          inner1.designerEmail = response.data.designerEmail
+          inner1.type = response.data.type
+          inner1.goal = response.data.goal
+          inner1.deadline = response.data.deadline
+          inner1.successful = response.data.successful
+          inner1.launched = response.data.launched
+          inner1.activePledges = response.data.activePledges
+          inner1.directSupports = response.data.directSupports
         }
-        setEntries(temp)
+        setEntries(inner1)
   
-        if (temp.activePledges != null) {
-          let inner = []
-          for (let i = 0; i < temp.activePledges.length; i++) {
-            let pledge = temp.activePledges[i]
+        if (inner1.activePledges != null) {
+          let inner2 = []
+          for (let i = 0; i < inner1.activePledges.length; i++) {
+            let pledge = inner1.activePledges[i]
             let entry = (
               <div id="pledge_box" style={pledge_box}>
                 <label style={pledge_amount}>Amount: ${pledge.amount}</label><br/>
@@ -428,9 +494,9 @@ function App() {
                 <label></label><br/>
               </div>
             )
-            inner.push(entry)
+            inner2.push(entry)
           }
-          setPledges(inner)
+          setPledges(inner2)
         }
         setRetrieving(false)
       })
@@ -484,7 +550,7 @@ function App() {
     const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
     const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 613, overflowY: "scroll", top: 160, left: 20 }
     const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
-    const delete_button = { position: "relative", top: -10, width: 50 }
+    const delete_button = { position: "relative", top: -10, width: 55 }
     
     let [entries, setEntries] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
@@ -494,6 +560,7 @@ function App() {
       setRetrieving(true)
 
       instance.post('/adminList').then((response) => {
+        console.log(response.data.result)
         if (response != null) {
           let allProjects = response.data.result
           if (allProjects != undefined) {
@@ -508,10 +575,10 @@ function App() {
                     <label>Deadline: {project.deadline}</label><br/>
                     <label>Type: {project.type}</label><br/>
                     <label>Goal: ${project.goal}</label><br/>
-                    <label>Designer: {project.designer}</label>
+                    <label>Designer: {project.entrepreneur}</label><br/>
                     <label>Launched: {project.launched ? "Yes":"No"}</label>
                   </button>
-                  <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Edit</button>
+                  <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button>
                 </div>
               )
               inner.push(entry)
