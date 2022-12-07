@@ -121,7 +121,8 @@ let getSupporters = (desc) => {
             let deadline = (foundProject.deadline);
             let activePledges = [];
             let successful = (foundProject.successful);
-            let launched = (foundProject.launched); //maybe no semicolon here?
+            let launched = (foundProject.launched); 
+            let amountRaised = (foundProject.amountRaised);
             
             //GETTING PLEDGES HERE
             let pledges = await getPledges(info);
@@ -165,6 +166,7 @@ let getSupporters = (desc) => {
             response.activePledges = activePledges;
             response.successful = successful;
             response.launched = launched;
+            response.amountRaised = amountRaised;
             console.log("RESPONSE: " + JSON.stringify(response))
         } else {
             response.statusCode = 400;
