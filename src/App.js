@@ -7,7 +7,7 @@ const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east
 
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
-  if (current_page == null) current_page = <DesignerListProjects />
+  if (current_page == null) current_page = <Login />
 
   function Header() {
     const header_user = { position: "absolute", left: 20, top: 28 }
@@ -81,14 +81,13 @@ function App() {
 
     let [input_email, setEmail] = useState("")
     let [input_password, setPassword] = useState("")
-    let [input_account_type, setAccountType] = useState("")
+    let input_account_type = ""
 
     function handle_button_login() {
-      if (document.querySelector('input[name="account_type"]:checked') != null) setAccountType(document.querySelector('input[name="account_type"]:checked'))
+      if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked')
 
-      if (input_email == "" || input_password == "" || input_account_type == "") {
-        alert("Fill out all fields before logging in or registering.")
-      } else {
+      if (input_email == "" || input_password == "" || input_account_type == "") alert("Fill out all fields before logging in or registering.")
+      else {
         let msg = {}
         msg["email"] = input_email
         msg["password"] = input_password
