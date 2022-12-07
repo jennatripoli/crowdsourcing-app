@@ -84,9 +84,9 @@ function App() {
     let input_account_type = ""
 
     function handle_button_login() {
-      if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked')
+      if (document.querySelector('input[name="account_type"]:checked') != "") input_account_type = document.querySelector('input[name="account_type"]:checked')
 
-      if (input_email == "" || input_password == "" || input_account_type == "") alert("Fill out all fields before logging in or registering.")
+      if (input_email == "" || input_password == "" || input_account_type.value == "") alert("Fill out all fields before logging in or registering.")
       else {
         let msg = {}
         msg["email"] = input_email
@@ -95,13 +95,13 @@ function App() {
 
         current_user = input_email
 
-        if (input_account_type == 'designer') {
+        if (input_account_type.value == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
             current_page = <DesignerListProjects />
             forceRedraw(redraw + 1)
             redraw++
           })
-        } else if (input_account_type == 'administrator') {
+        } else if (input_account_type.value == 'administrator') {
           instance.post('/loginAdministrator', data).then((response) => {
             current_page = <AdministratorListProjects />
             forceRedraw(redraw + 1)
@@ -121,23 +121,23 @@ function App() {
     return (
       <div className="Login">
         <Header />
-        <div id="login-box" style={login_box}>
+        <div style={login_box}>
           <label style={login_title}>LOG IN</label>
 
           <label style={login_email_label}>email address:</label>
-          <input id="email" type="text" value={input_email} onChange={e => setEmail(e.target.value)} style={login_email_input}></input>
+          <input type="text" value={input_email} onChange={e => setEmail(e.target.value)} style={login_email_input}></input>
 
           <label style={login_pass_label}>password:</label>
-          <input id="password" type="text" value={input_password} onChange={e => setPassword(e.target.value)} style={login_pass_input}></input>
+          <input type="text" value={input_password} onChange={e => setPassword(e.target.value)} style={login_pass_input}></input>
 
           <label style={login_type_label}>account type:</label>
           <div style={login_type_radio}>
-            <div> <label><input type="radio" id="supporter" name="account_type" value="supporter"></input>supporter</label> </div>
-            <div> <label><input type="radio" id="designer" name="account_type" value="designer"></input>designer</label> </div>
-            <div> <label><input type="radio" id="administrator" name="account_type" value="administrator"></input>administrator</label> </div>
+            <div><label><input type="radio" id="supporter" name="account_type" value="supporter"></input>supporter</label></div>
+            <div><label><input type="radio" id="designer" name="account_type" value="designer"></input>designer</label></div>
+            <div><label><input type="radio" id="administrator" name="account_type" value="administrator"></input>administrator</label></div>
           </div>
 
-          <button style={login_button} onClick={handle_button_login}>Login or Register</button>
+          <button style={login_button} onClick={() => handle_button_login}>Login or Register</button>
         </div>
       </div>
     );
@@ -157,14 +157,13 @@ function App() {
     const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1050 }
     const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
 
-    let [input_search, setSearch] = useState("")
-
     let msg = {}
     msg["type"] = ""
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
+    let [input_search, setSearch] = useState("")
 
     function retrieve() {
       if (retrieving) return
@@ -226,12 +225,13 @@ function App() {
           <label style={sort_label}>Sort By: </label>
           <button style={name_button}>Name</button>
           <button style={deadline_button}>Deadline</button>
-          <button style={type_button} onClick={handle_button_type}>Type</button>
+          <button style={type_button} onClick={() => handle_button_type}>Type</button>
         </div>
+
         <div style={projects_box}>{entries}</div>
 
         <label style={activity_label}>Supporter Activity</label>
-        <div id="active_pledges_box" style={activity_box}>
+        <div style={activity_box}>
         </div>
       </div>
     )
@@ -254,7 +254,7 @@ function App() {
 
     const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
     const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
-    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10, marginBottom: 10 }
     const claim_button = { position: "absolute", right: 10, top: 10 }
 
     let msg = {}
@@ -281,6 +281,7 @@ function App() {
           temp.successful = response.data.successful
           temp.activePledges = response.data.activePledges
           temp.directSupports = response.data.directSupports
+          temp.amountRaised = response.data.amountRaised
         }
         setEntries(temp)
   
@@ -288,15 +289,16 @@ function App() {
           let inner = []
           for (let i = 0; i < temp.activePledges.length; i++) {
             let pledge = temp.activePledges[i]
-            let entry = (
-              <div id="pledge_box" style={pledge_box}>
-                <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
-                <label>{pledge.description}</label>
-                <button style={claim_button} onClick={claim_pledge(pledge.description, pledge.amount)}>Claim</button>
-                <label></label><br/>
-              </div>
-            )
-            inner.push(entry)
+            //if (pledge.pledgeCapacity > 0 || pledge.pledgeCapacity == -1) {
+              let entry = (
+                <div style={pledge_box}>
+                  <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
+                  <label>{pledge.description}</label>
+                  <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button>
+                </div>
+              )
+              inner.push(entry)
+            //}
           }
           setPledges(inner)
         }
@@ -313,7 +315,7 @@ function App() {
         msg2["descriptionReward"] = param_description
         let data2 = { 'body': JSON.stringify(msg) }
 
-        instance.post('/claimPledge', data).then((response) => {
+        instance.post('/claimPledge', data2).then((response) => {
           if (response.status == 400) alert("You have already claimed this pledge and cannot claim it again.")
           else available_funds = response.availableFunds
         })
@@ -333,26 +335,28 @@ function App() {
     return (
       <div className="SupporterViewProject">
         <Header />
-        <div id="info_box" style={info_box}>
+        <div style={info_box}>
           <label style={project_name}>{entries.name}</label>
-          <div id="deadline_box" style={deadline_box}>
+
+          <div style={deadline_box}>
             <label style={deadline_label}>Project Deadline: {entries.deadline}</label>
             <label style={days_label}>{days_from_deadline()} DAYS LEFT</label>
           </div>
-          <div id="goal_box" style={goal_box}>
+
+          <div style={goal_box}>
             <label style={goal_label}>Project Goal: ${entries.goal}</label>
-            <label style={raised_label}>$__ RAISED</label>
+            <label style={raised_label}>${entries.amountRaised} RAISED</label>
           </div>
-          <div id="description_box" style={description_box}>
+
+          <div style={description_box}>
             <label style={description_label}>{entries.story}</label>
           </div>
+
           <label style={designer_label}><i>By: {entries.designerEmail}</i></label>
         </div>
 
         <label style={active_label}>Active Pledges</label>
-        <div id="active_pledges_box" style={active_pledges_box}>
-          <div id="pledges">{pledges}</div>
-        </div>
+        <div style={active_pledges_box}>{pledges}</div>
       </div>
     );
   }
@@ -437,10 +441,10 @@ function App() {
         <Header />
         <label style={page_label}>Your Projects</label>
         <div style={projects_box}>{entries}</div>
-        <button style={create_button} onClick={handle_button_create}>+</button>
+        <button style={create_button} onClick={() => handle_button_create}>+</button>
 
         <label style={activity_label}>Project Activity</label>
-        <div id="active_pledges_box" style={activity_box}></div>
+        <div style={activity_box}></div>
       </div>
     )
   }
@@ -496,16 +500,22 @@ function App() {
       <div className="DesignerCreateProject">
         <Header />
         <div style={info_box}>
-          <input name="project_name" style={project_name} type="text" value={input_name} onChange={e => setName(e.target.value)} placeholder="project name" />
-          <div style={type_box}><label style={type_label}>Project Type: <input name="project_type" type="text" value={input_type} onChange={e => setType(e.target.value)} style={{width: 150}} /></label></div>
-            <div style={goal_box}>
-              <label style={goal_label}>Project Goal: $<input name="project_goal" type="number" value={input_goal} onChange={e => setGoal(e.target.value)} style={{width: 150}} min="1" /></label>
-              <label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" value={input_deadline} onChange={e => setDeadline(e.target.value)} style={{width: 130}} /></label>
-            </div>
-            <textarea wrap="soft" name="project_description" type="text" value={input_description} onChange={e => setDescription(e.target.value)} placeholder="project description" style={description_box} />
+          <input style={project_name} type="text" value={input_name} onChange={e => setName(e.target.value)} placeholder="project name" />
+          
+          <div style={type_box}>
+            <label style={type_label}>Project Type: <input name="project_type" type="text" value={input_type} onChange={e => setType(e.target.value)} style={{width: 150}} /></label>
+          </div>
+          
+          <div style={goal_box}>
+            <label style={goal_label}>Project Goal: $<input name="project_goal" type="number" value={input_goal} onChange={e => setGoal(e.target.value)} style={{width: 150}} min="1" /></label>
+            <label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" value={input_deadline} onChange={e => setDeadline(e.target.value)} style={{width: 130}} /></label>
+          </div>
+
+          <textarea wrap="soft" type="text" value={input_description} onChange={e => setDescription(e.target.value)} placeholder="project description" style={description_box} />
           <label style={designer_label}><i>Designer: {current_user}</i></label>
         </div>
-        <button style={create_button} onClick={handle_button_create}>Create</button>
+
+        <button style={create_button} onClick={() => handle_button_create}>Create</button>
       </div>
     )
   }
@@ -537,11 +547,11 @@ function App() {
       <div className="DesignerCreatePledge">
         <Header />
         <br/><br/><br/><br/><br/><br/>
-        <label>CREATE A NEW PLEDGE</label><br />
-        <label>Amount: $<input name="pledge_amount" type="text" value={input_amount} onChange={e => setAmount(e.target.value)} /></label><br/>
-        <label>Description of Reward:<input name="pledge_reward" type="text" value={input_reward} onChange={e => setReward(e.target.value)} /></label><br/>
-        <label>Max Supporters: <input name="pledge_max" type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
-        <button onClick={handle_button_create}>Create Pledge</button>
+        <label>CREATE A NEW PLEDGE</label><br/>
+        <label>Amount: $<input type="text" value={input_amount} onChange={e => setAmount(e.target.value)} /></label><br/>
+        <label>Description of Reward:<input type="text" value={input_reward} onChange={e => setReward(e.target.value)} /></label><br/>
+        <label>Max Supporters: <input type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
+        <button onClick={() => handle_button_create}>Create Pledge</button>
       </div>
     )
   }
@@ -700,18 +710,21 @@ function App() {
         <Header />
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label><br />
-          <div style={type_box}><label style={type_label}>Project Type: <input name="project_type" type="text" value={input_type} onChange={e => setType(e.target.value)} style={{width: 150}} /></label></div>
+          
+          <div style={type_box}><label style={type_label}>Project Type: <input type="text" value={input_type} onChange={e => setType(e.target.value)} style={{width: 150}} /></label></div>
+          
           <div style={goal_box}>
-            <label style={goal_label}>Project Goal: $<input name="project_goal" type="number" value={input_goal} onChange={e => setGoal(e.target.value)} style={{width: 150}} min="1" /></label>
-            <label style={deadline_label}>Project Deadline: <input name="project_deadline" type="date" value={input_deadline} onChange={e => setDeadline(e.target.value)} style={{width: 130}} /></label>
+            <label style={goal_label}>Project Goal: $<input type="number" value={input_goal} onChange={e => setGoal(e.target.value)} style={{width: 150}} min="1" /></label>
+            <label style={deadline_label}>Project Deadline: <input type="date" value={input_deadline} onChange={e => setDeadline(e.target.value)} style={{width: 130}} /></label>
           </div>
-          <textarea wrap="soft" name="project_description" type="text" value={input_description} onChange={e => setDescription(e.target.value)} style={description_box} />
+          
+          <textarea wrap="soft" type="text" value={input_description} onChange={e => setDescription(e.target.value)} style={description_box} />
           <label style={designer_label}><i>Designer: {entries.designerEmail}</i></label>
         </div>
 
-        <button style={save_button} onClick={handle_button_save}>Save</button>
-        <button style={launch_button} onClick={handle_button_launch}>Launch</button>
-        <button style={delete_button} onClick={handle_button_delete}>Delete</button>
+        <button style={save_button} onClick={() => handle_button_save}>Save</button>
+        <button style={launch_button} onClick={() => handle_button_launch}>Launch</button>
+        <button style={delete_button} onClick={() => handle_button_delete}>Delete</button>
 
         <label style={all_pledges_label}>All Pledges</label>
         <button style={pledge_create_button} onClick={() => handle_button_create_pledge()}>+</button>
@@ -738,7 +751,7 @@ function App() {
     
     const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
     const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
-    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
+    const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10, marginBottom: 10 }
     const pledge_amount = { fontWeight: "bold" }
 
     let msg = {}
@@ -775,7 +788,7 @@ function App() {
           for (let i = 0; i < inner1.activePledges.length; i++) {
             let pledge = inner1.activePledges[i]
             let entry = (
-              <div id="pledge_box" style={pledge_box}>
+              <div style={pledge_box}>
                 <label style={pledge_amount}>Amount: ${pledge.amount}</label><br/>
                 <label>{pledge.description}</label><br/>
                 <label><b>Supporters:</b> {pledge.currentSupporters.join(", ")}</label>
@@ -803,27 +816,29 @@ function App() {
     return (
       <div className="DesignerViewProject">
         <Header />
-        <div id="info_box" style={info_box}>
+        <div style={info_box}>
           <label style={project_name}>{entries.name}</label>
-          <div id="deadline_box" style={deadline_box}>
+
+          <div style={deadline_box}>
             <label style={deadline_label}>Project Deadline: {entries.deadline}</label>
             <label style={days_label}>{days_from_deadline()} DAYS LEFT</label>
           </div>
-          <div id="goal_box" style={goal_box}>
+
+          <div style={goal_box}>
             <label style={goal_label}>Project Goal: ${entries.goal}</label>
             <label style={raised_label}>${entries.amountRaised} RAISED</label>
           </div>
-          <div id="description_box" style={description_box}>
+
+          <div style={description_box}>
             <label style={description_label}>{entries.story}</label>
           </div>
+
           <label style={type_label}><i>Project Type: {entries.type}</i></label>
           <label style={designer_label}><i>Designer: {entries.designerEmail}</i></label>
         </div>
 
         <label style={active_label}>Active Pledges</label>
-        <div id="active_pledges_box" style={active_pledges_box}>
-          <div id="pledges">{pledges}</div>
-        </div>
+        <div style={active_pledges_box}>{pledges}</div>
       </div>
     );
   }
@@ -875,7 +890,7 @@ function App() {
                     <label>Designer: {project.entrepreneur}</label><br/>
                     <label>Launched: {project.launched ? "Yes":"No"}</label>
                   </button>
-                  <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button>
+                  {project.launched ? <br/> : <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button> }
                 </div>
               )
               inner.push(entry)
@@ -923,10 +938,12 @@ function App() {
             <label style={activity_projects_label}>TOTAL PROJECTS:</label>
             <label style={activity_projects_number}>{entries.length}</label>
           </div>
+
           <div style={activity_funded_box}>
             <label style={activity_funded_label}>TOTAL FUNDED:</label>
             <label style={activity_funded_number}>$___</label>
           </div>
+
           <div style={activity_pledges_box}>
             <label style={activity_pledges_label}>TOTAL PLEDGES:</label>
             <label style={activity_pledges_number}>___</label>
