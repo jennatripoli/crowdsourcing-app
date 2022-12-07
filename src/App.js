@@ -7,7 +7,7 @@ const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east
 
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
-  if (current_page == null) current_page = <DesignerListProjects />
+  if (current_page == null) current_page = <Login />
 
   function Header() {
     const header_user = { position: "absolute", left: 20, top: 28 }
@@ -34,27 +34,23 @@ function App() {
     function back_designer_list() {
       current_project = null
       current_page = <DesignerListProjects/>
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     function back_designer_view() {
       current_page = <DesignerViewProject/>
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     function back_designer_edit() {
       current_page = <DesignerEditProject/>
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     function back_supporter_list() {
       current_project = null
       current_page = <SupporterListProjects/>
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     return (
@@ -81,14 +77,13 @@ function App() {
 
     let [input_email, setEmail] = useState("")
     let [input_password, setPassword] = useState("")
-    let [input_account_type, setAccountType] = useState("")
+    let input_account_type = ""
 
     function handle_button_login() {
-      if (document.querySelector('input[name="account_type"]:checked') != null) setAccountType(document.querySelector('input[name="account_type"]:checked'))
+      if (document.querySelector('input[name="account_type"]:checked') != null) input_account_type = document.querySelector('input[name="account_type"]:checked')
 
-      if (input_email == "" || input_password == "" || input_account_type == "") {
-        alert("Fill out all fields before logging in or registering.")
-      } else {
+      if (input_email == "" || input_password == "" || input_account_type == "") alert("Fill out all fields before logging in or registering.")
+      else {
         let msg = {}
         msg["email"] = input_email
         msg["password"] = input_password
@@ -99,21 +94,18 @@ function App() {
         if (input_account_type == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
             current_page = <DesignerListProjects />
-            forceRedraw(redraw + 1)
-            redraw++
+            forceRedraw(redraw + 2)
           })
         } else if (input_account_type == 'administrator') {
           instance.post('/loginAdministrator', data).then((response) => {
             current_page = <AdministratorListProjects />
-            forceRedraw(redraw + 1)
-            redraw++
+            forceRedraw(redraw + 2)
           })
         } else {
           instance.post('/loginSupporter', data).then((response) => {
             available_funds = response.data.availableFunds
             current_page = <SupporterListProjects />
-            forceRedraw(redraw + 1)
-            redraw++
+            forceRedraw(redraw + 2)
           })
         }
       }
@@ -201,8 +193,7 @@ function App() {
     function handle_button_view(project_name_param) {
       current_project = project_name_param
       current_page = <SupporterViewProject />
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     function handle_button_type() {
@@ -411,21 +402,18 @@ function App() {
     function handle_button_view(name_param) {
       current_project = name_param
       current_page = <DesignerViewProject />
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     function handle_button_create() {
       current_page = <DesignerCreateProject />
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     function handle_button_edit(name_param) {
       current_project = name_param
       current_page = <DesignerEditProject />
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     if (entries === undefined) {
@@ -487,8 +475,7 @@ function App() {
         instance.post('/createProject', data).then((response) => {
           current_project = input_name
           current_page = <DesignerViewProject />
-          forceRedraw(redraw + 1)
-          redraw++
+          forceRedraw(redraw + 2)          
         })
       }
     }
@@ -528,8 +515,7 @@ function App() {
 
         instance.post('/createPledge', data).then((response) => {
           current_page = <DesignerViewProject />
-          forceRedraw(redraw + 1)
-          redraw++
+          forceRedraw(redraw + 2)    
         })
       }
     }
@@ -640,8 +626,7 @@ function App() {
 
         instance.post('/editProject', data).then((response) => {
           current_page = <DesignerViewProject />
-          forceRedraw(redraw + 1)
-          redraw++
+          forceRedraw(redraw + 2)
         })
       }
     }
@@ -653,8 +638,8 @@ function App() {
       instance.post('/designerDeleteProject', data).then((response) => {
         current_project = null
         current_page = <DesignerListProjects />
-        forceRedraw(redraw + 1)
-        redraw++
+        forceRedraw(redraw + 2)
+        
       })
     }
 
@@ -668,16 +653,14 @@ function App() {
         instance.post('/launchProject', data).then((response) => {
           current_project = null
           current_page = <DesignerListProjects />
-          forceRedraw(redraw + 1)
-          redraw++
+          forceRedraw(redraw + 2)
         })
       }
     }
 
     function handle_button_create_pledge() {
       current_page = <DesignerCreatePledge />
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     function handle_button_delete_pledge(reward_param) {
@@ -686,8 +669,7 @@ function App() {
 
       instance.post('/designerDeletePledge', data).then((response) => {
         current_page = <DesignerEditProject />
-        forceRedraw(redraw + 1)
-        redraw++
+        forceRedraw(redraw + 2)
       })
     }
 
@@ -891,8 +873,7 @@ function App() {
     function handle_button_view(name_param) {
       current_project = name_param
       current_page = <DesignerViewProject />
-      forceRedraw(redraw + 1)
-      redraw++
+      forceRedraw(redraw + 2)
     }
 
     function handle_button_delete(name_param) {
@@ -902,8 +883,7 @@ function App() {
 
       instance.post('/designerDeleteProject', data).then((response) => {
         current_page = <AdministratorListProjects />
-        forceRedraw(redraw + 1)
-        redraw++
+        forceRedraw(redraw + 2)
       })
     }
 
