@@ -85,6 +85,20 @@ exports.lambdaHandler = async (event, context) => {
         });
     }
     
+let getSupporters = (desc) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT * FROM Pledger WHERE descriptionReward=?", [desc], (error, rows) => {
+            if (error) { return reject(error); }
+            
+            if (rows) {
+                return resolve(rows);
+            } else {
+                return reject("no supporters for this pledge" + desc);
+            }
+        })
+    })
+}
+    
     
     try {
         
@@ -117,10 +131,22 @@ exports.lambdaHandler = async (event, context) => {
                 
                 for (let i = 0; i < pledges.length; i++) {
                     let pledge = pledges[i];
+                    let supporters = await getSupporters(pledge.descriptionReward);
+                    let currentSupporters = [];
+                    
+                    if (supporters) {
+                            console.log("supporter info" + JSON.stringify(supporters));
+                            for (let j=0; j<supporters.length; j++) {
+                                let supporter = supporters[j];
+                                currentSupporters[j] = supporter.supporterEmail;
+                            }
+                    }
+                    
                     activePledges[i] = {
                         description:  pledge.descriptionReward,
                         amount: pledge.amount,
-                        maxSupporters: pledge.maxSupporters
+                        maxSupporters: pledge.maxSupporters,
+                        currentSupporters: currentSupporters
                     };
                 };
                 response.statusCode = 200;
