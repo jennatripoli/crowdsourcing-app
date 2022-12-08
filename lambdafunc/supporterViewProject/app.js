@@ -85,6 +85,20 @@ exports.lambdaHandler = async (event, context) => {
         });
     }
     
+    let getCurrentSupporters = (desc) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT count(*) AS CNT FROM Pledger WHERE descriptionReward=?", [desc], (error, rows) => {
+                    if (error) { return reject(error); }
+                    if ((rows) && rows.length==1) {
+                        console.log("CURRENT SUPPORTERS: " + JSON.stringify(rows[0].CNT))
+                        return resolve(rows[0].CNT)
+                    } else {
+                        return reject("no supporters exist with email: '" + info.supporterEmail + "'");
+                    }            
+            });
+        });
+    }
+    
     
     try {
         
@@ -118,11 +132,22 @@ exports.lambdaHandler = async (event, context) => {
                 
                 for (let i = 0; i < pledges.length; i++) {
                     let pledge = pledges[i];
-                    activePledges[i] = {
+                    
+                    let currentNumSupporters = await getCurrentSupporters(pledge.descriptionReward);
+                    console.log(currentNumSupporters);
+                    
+                    if(currentNumSupporters){
+                        let spotsLefty = pledge.maxSupporters - currentNumSupporters
+                        activePledges[i] = {
                         description:  pledge.descriptionReward,
                         amount: pledge.amount,
-                        maxSupporters: pledge.maxSupporters
-                    };
+                        maxSupporters: pledge.maxSupporters,
+                        pledgeCapacity: spotsLefty
+                        };
+                    }else {
+                        response.error = "Couldn't find currentNumSupporters"
+                    }
+                    
                 };
                 response.statusCode = 200;
             }else {
