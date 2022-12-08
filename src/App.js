@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState } from 'react';
 import axios from 'axios';
 
-var current_page, current_user, current_project, available_funds
+var current_page, current_user, current_project, current_funds
 const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/' });
 
 function App() {
@@ -28,7 +28,7 @@ function App() {
     }
 
     if (current_page.type.name == "SupporterListProjects" || current_page.type.name == "SupporterViewProject") {
-      funds_label = (<label>Available Funds: ${available_funds}</label>)
+      funds_label = (<label>Available Funds: ${current_funds}</label>)
     }
 
     function back_designer_list() {
@@ -109,7 +109,7 @@ function App() {
           })
         } else {
           instance.post('/loginSupporter', data).then((response) => {
-            available_funds = response.data.availableFunds
+            current_funds = response.data.availableFunds
             current_page = <SupporterListProjects />
             forceRedraw(redraw + 1)
             redraw++
@@ -120,7 +120,6 @@ function App() {
 
     return (
       <div className="Login">
-        <Header />
         <div style={login_box}>
           <label style={login_title}>LOG IN</label>
 
@@ -159,6 +158,7 @@ function App() {
 
     let msg = {}
     msg["type"] = ""
+    msg["supporterEmail"] = current_user
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
@@ -219,7 +219,6 @@ function App() {
 
     return (
       <div className="SupporterListProjects">
-        <Header />
         <div>
           <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects" />
           <label style={sort_label}>Sort By: </label>
@@ -259,6 +258,7 @@ function App() {
 
     let msg = {}
     msg["name"] = current_project
+    msg["supporterEmail"] = current_user
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
@@ -289,16 +289,14 @@ function App() {
           let inner = []
           for (let i = 0; i < temp.activePledges.length; i++) {
             let pledge = temp.activePledges[i]
-            //if (pledge.pledgeCapacity > 0 || pledge.pledgeCapacity == -1) {
-              let entry = (
-                <div style={pledge_box}>
-                  <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
-                  <label>{pledge.description}</label>
-                  <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button>
-                </div>
-              )
-              inner.push(entry)
-            //}
+            let entry = (
+              <div style={pledge_box}>
+                <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
+                <label>{pledge.description}</label>
+                { pledge.pledgeCapacity > 0 || pledge.pledgeCapacity == -1 ? <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button> : <br/> }
+              </div>
+            )
+            inner.push(entry)
           }
           setPledges(inner)
         }
@@ -307,7 +305,7 @@ function App() {
     }
 
     function claim_pledge(param_description, param_amount) {
-      if (available_funds < param_amount) alert("Not enough available funds to claim pledge.")
+      if (current_funds < param_amount) alert("Not enough available funds to claim pledge.")
       else {
         let msg2 = {}
         msg2["projectName"] = current_project
@@ -316,10 +314,9 @@ function App() {
         let data2 = { 'body': JSON.stringify(msg2) }
 
         instance.post('/claimPledge', data2).then((response) => {
-          console.log(response)
           if (response.data.statusCode == 400) alert("You have already claimed this pledge and cannot claim it again.")
           else {
-            available_funds = response.data.availableFunds
+            current_funds -= param_amount
             current_page = <SupporterViewProject/>
             forceRedraw(redraw + 1)
             redraw++
@@ -340,7 +337,6 @@ function App() {
 
     return (
       <div className="SupporterViewProject">
-        <Header />
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label>
 
@@ -444,7 +440,6 @@ function App() {
 
     return (
       <div className="DesignerListProjects">
-        <Header />
         <label style={page_label}>Your Projects</label>
         <div style={projects_box}>{entries}</div>
         <button style={create_button} onClick={handle_button_create}>+</button>
@@ -469,7 +464,7 @@ function App() {
     const description_box = { position: "absolute", padding: 10, width: 738, height: 275, textAlign: "left", top: 205, left: 20 }
     const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 510, right: 20 }
 
-    const create_button = { position: "absolute", fontSize: "20pt", top: 700, left: 200 }
+    const create_button = { position: "absolute", fontSize: "20pt", top: 700, left: 400 }
 
     let [input_name, setName] = useState("")
     let [input_description, setDescription] = useState("")
@@ -491,20 +486,20 @@ function App() {
         msg["launched"] = 0
         let data = { 'body': JSON.stringify(msg) }
 
-        console.log(data)
-
         instance.post('/createProject', data).then((response) => {
-          current_project = input_name
-          current_page = <DesignerViewProject />
-          forceRedraw(redraw + 1)
-          redraw++
+          if (response.data.statusCode == 400) alert("Cannot create a project with the same name as another project.")
+          else {
+            current_project = input_name
+            current_page = <DesignerViewProject />
+            forceRedraw(redraw + 1)
+            redraw++
+          }
         })
       }
     }
 
     return (
       <div className="DesignerCreateProject">
-        <Header />
         <div style={info_box}>
           <input style={project_name} type="text" value={input_name} onChange={e => setName(e.target.value)} placeholder="project name" />
           
@@ -529,15 +524,15 @@ function App() {
   function DesignerCreatePledge() {
     let [input_amount, setAmount] = useState(0)
     let [input_reward, setReward] = useState("")
-    let [input_max, setMax] = useState(0)
+    let [input_max, setMax] = useState(null)
 
     function handle_button_create() {
-      if (input_amount <= 0 || input_reward == "") alert("Fill out all required fields with valid data before creating a new pledge.")
+      if (input_amount <= 0 || input_reward == "" || (input_max != "" && input_max != null && input_max <= 0)) alert("Fill out all required fields with valid data before creating a new pledge.")
       else {
         let msg = {}
         msg["amount"] = input_amount
         msg["descriptionReward"] = input_reward
-        msg["maxSupporters"] = input_max
+        msg["maxSupporters"] = (input_max == null || input_max == "") ? -1 : input_max
         msg["projectName"] = current_project
         let data = { 'body': JSON.stringify(msg) }
 
@@ -551,12 +546,11 @@ function App() {
 
     return (
       <div className="DesignerCreatePledge">
-        <Header />
-        <br/><br/><br/><br/><br/><br/>
+        <br/><br/><br/><br/><br/>
         <label>CREATE A NEW PLEDGE</label><br/>
         <label>Amount: $<input type="text" value={input_amount} onChange={e => setAmount(e.target.value)} /></label><br/>
         <label>Description of Reward:<input type="text" value={input_reward} onChange={e => setReward(e.target.value)} /></label><br/>
-        <label>Max Supporters: <input type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
+        <label>Max Supporters (optional): <input type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
         <button onClick={handle_button_create}>Create Pledge</button>
       </div>
     )
@@ -713,7 +707,6 @@ function App() {
 
     return (
       <div className="DesignerEditProject">
-        <Header />
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label><br />
           
@@ -821,7 +814,6 @@ function App() {
 
     return (
       <div className="DesignerViewProject">
-        <Header />
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label>
 
@@ -878,9 +870,9 @@ function App() {
       setRetrieving(true)
 
       instance.post('/adminList').then((response) => {
-        console.log(response.data.result)
         if (response != null) {
           let allProjects = response.data.result
+          console.log(response)
           if (allProjects != undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
@@ -934,7 +926,6 @@ function App() {
 
     return (
       <div className="AdministratorListProjects">
-        <Header />
         <label style={page_label}>All Projects</label>
         <div style={projects_box}>{entries}</div>
 
@@ -960,7 +951,10 @@ function App() {
   }
 
   return (
-    <div>{current_page}</div>
+    <div>
+      <Header />
+      {current_page}
+    </div>
   );
 }
 
