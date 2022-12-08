@@ -64,7 +64,7 @@ exports.lambdaHandler = async (event, context) => {
                 pool.query("SELECT * FROM Supporter WHERE email=?", [info.email], (error, rows) => {
                     if (error) { return reject(error); }
                     if ((rows) && (rows.length == 1)) {
-                        return resolve(rows[0]);
+                        return resolve(true);
                     } else {
                         //InsertValidUser(email);
                         return resolve(false);
