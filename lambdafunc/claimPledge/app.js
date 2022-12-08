@@ -1,4 +1,4 @@
-// const axios = require('axios')
+ // const axios = require('axios')
 // const url = 'http://checkip.amazonaws.com/';
 let response;
 const mysql = require('mysql');
@@ -72,7 +72,7 @@ exports.lambdaHandler = async (event, context) => {
     
     let getCurrentSupporters =(info) => {
         return new Promise((resolve, reject) => {
-            pool.query("SELECT count(*) AS CNT FROM Pledger WHERE supporterEmail=?", [info.supporterEmail], (error, rows) => {
+            pool.query("SELECT count(*) AS CNT FROM Pledger WHERE descriptionReward=?", [info.descriptionReward], (error, rows) => {
                     if (error) { return reject(error); }
                     if ((rows) && rows.length==1) {
                         console.log("CURRENT SUPPORTERS: " + JSON.stringify(rows[0].CNT))
