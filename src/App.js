@@ -317,9 +317,9 @@ function App() {
 
         instance.post('/claimPledge', data2).then((response) => {
           console.log(response)
-          if (response.data.status == 400) alert("You have already claimed this pledge and cannot claim it again.")
+          if (response.data.statusCode == 400) alert("You have already claimed this pledge and cannot claim it again.")
           else {
-            available_funds = response.availableFunds
+            available_funds = response.data.availableFunds
             current_page = <SupporterViewProject/>
             forceRedraw(redraw + 1)
             redraw++
