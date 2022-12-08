@@ -18,13 +18,13 @@ function App() {
     let back_button = (<div/>), funds_label = (<div/>)
 
     if (current_page.type.name == "DesignerViewProject" || current_page.type.name == "DesignerCreateProject") {
-      back_button = (<button onClick={() => back_designer_list()}>Back to List</button>)
+      back_button = (<button onClick={back_designer_list}>Back to List</button>)
     } else if (current_page.type.name == "DesignerEditProject") {
-      back_button = (<button onClick={() => back_designer_view()}>Back to View</button>)
+      back_button = (<button onClick={back_designer_view}>Back to View</button>)
     } else if (current_page.type.name == "DesignerCreatePledge") {
-      back_button = (<button onClick={() => back_designer_edit()}>Back to Edit</button>)      
+      back_button = (<button onClick={back_designer_edit}>Back to Edit</button>)      
     } else if (current_page.type.name == "SupporterViewProject") {
-      back_button = (<button onClick={() => back_supporter_list()}>Back to List</button>)      
+      back_button = (<button onClick={back_supporter_list}>Back to List</button>)      
     }
 
     if (current_page.type.name == "SupporterListProjects" || current_page.type.name == "SupporterViewProject") {
@@ -137,7 +137,7 @@ function App() {
             <div><label><input type="radio" id="administrator" name="account_type" value="administrator"></input>administrator</label></div>
           </div>
 
-          <button style={login_button} onClick={() => handle_button_login}>Login or Register</button>
+          <button style={login_button} onClick={handle_button_login}>Login or Register</button>
         </div>
       </div>
     );
@@ -225,7 +225,7 @@ function App() {
           <label style={sort_label}>Sort By: </label>
           <button style={name_button}>Name</button>
           <button style={deadline_button}>Deadline</button>
-          <button style={type_button} onClick={() => handle_button_type}>Type</button>
+          <button style={type_button} onClick={handle_button_type}>Type</button>
         </div>
 
         <div style={projects_box}>{entries}</div>
@@ -313,11 +313,17 @@ function App() {
         msg2["projectName"] = current_project
         msg2["supporterEmail"] = current_user
         msg2["descriptionReward"] = param_description
-        let data2 = { 'body': JSON.stringify(msg) }
+        let data2 = { 'body': JSON.stringify(msg2) }
 
         instance.post('/claimPledge', data2).then((response) => {
-          if (response.status == 400) alert("You have already claimed this pledge and cannot claim it again.")
-          else available_funds = response.availableFunds
+          console.log(response)
+          if (response.data.status == 400) alert("You have already claimed this pledge and cannot claim it again.")
+          else {
+            available_funds = response.availableFunds
+            current_page = <SupporterViewProject/>
+            forceRedraw(redraw + 1)
+            redraw++
+          }
         })
       }
     }
@@ -441,7 +447,7 @@ function App() {
         <Header />
         <label style={page_label}>Your Projects</label>
         <div style={projects_box}>{entries}</div>
-        <button style={create_button} onClick={() => handle_button_create}>+</button>
+        <button style={create_button} onClick={handle_button_create}>+</button>
 
         <label style={activity_label}>Project Activity</label>
         <div style={activity_box}></div>
@@ -515,7 +521,7 @@ function App() {
           <label style={designer_label}><i>Designer: {current_user}</i></label>
         </div>
 
-        <button style={create_button} onClick={() => handle_button_create}>Create</button>
+        <button style={create_button} onClick={handle_button_create}>Create</button>
       </div>
     )
   }
@@ -551,7 +557,7 @@ function App() {
         <label>Amount: $<input type="text" value={input_amount} onChange={e => setAmount(e.target.value)} /></label><br/>
         <label>Description of Reward:<input type="text" value={input_reward} onChange={e => setReward(e.target.value)} /></label><br/>
         <label>Max Supporters: <input type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
-        <button onClick={() => handle_button_create}>Create Pledge</button>
+        <button onClick={handle_button_create}>Create Pledge</button>
       </div>
     )
   }
@@ -722,12 +728,12 @@ function App() {
           <label style={designer_label}><i>Designer: {entries.designerEmail}</i></label>
         </div>
 
-        <button style={save_button} onClick={() => handle_button_save}>Save</button>
-        <button style={launch_button} onClick={() => handle_button_launch}>Launch</button>
-        <button style={delete_button} onClick={() => handle_button_delete}>Delete</button>
+        <button style={save_button} onClick={handle_button_save}>Save</button>
+        <button style={launch_button} onClick={handle_button_launch}>Launch</button>
+        <button style={delete_button} onClick={handle_button_delete}>Delete</button>
 
         <label style={all_pledges_label}>All Pledges</label>
-        <button style={pledge_create_button} onClick={() => handle_button_create_pledge()}>+</button>
+        <button style={pledge_create_button} onClick={handle_button_create_pledge}>+</button>
         <div style={all_pledges_box}>{pledges}</div>
       </div>
     )
