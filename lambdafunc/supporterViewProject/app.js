@@ -136,17 +136,15 @@ exports.lambdaHandler = async (event, context) => {
                     let currentNumSupporters = await getCurrentSupporters(pledge.descriptionReward);
                     console.log(currentNumSupporters);
                     
-                    if(currentNumSupporters){
-                        let spotsLefty = pledge.maxSupporters - currentNumSupporters
-                        activePledges[i] = {
-                        description:  pledge.descriptionReward,
-                        amount: pledge.amount,
-                        maxSupporters: pledge.maxSupporters,
-                        pledgeCapacity: spotsLefty
-                        };
-                    }else {
-                        response.error = "Couldn't find currentNumSupporters"
-                    }
+                    
+                let spotsLefty = pledge.maxSupporters - currentNumSupporters
+                activePledges[i] = {
+                description:  pledge.descriptionReward,
+                amount: pledge.amount,
+                maxSupporters: pledge.maxSupporters,
+                pledgeCapacity: spotsLefty
+                };
+            
                     
                 };
                 response.statusCode = 200;
