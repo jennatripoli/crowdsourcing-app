@@ -1,5 +1,7 @@
 {
     "body" :
     
-"{\"supporterEmail\" : \"supporter@test.com\",\n\"descriptionReward\" : \"test description\"}"
+"{\"projectName\" : \"testProject\",\n \"supporterEmail\": \"supporter2@test.com\",\n \"descriptionReward\": \"testtetsetset\"\n}"
+    
+
 }
