@@ -169,69 +169,6 @@ exports.lambdaHandler = async (event, context) => {
     });
     }
     
-    // let getCurrentFunds = (info) => {
-    //     return new Promise((resolve, reject) => {
-    //         pool.query("SELECT * FROM Supporter WHERE email=?", [info.supporterEmail], (error, rows) => {
-    //                 if (error) { return reject(error); }
-    //                 //console.log("INSERT:" + JSON.stringify(rows));
-                    
-    //                 if ((rows) && (rows.length == 1)) {
-    //                     console.log("HERE:" + JSON.stringify(rows))
-    //                     console.log("AVAILABLE FUNDS:" + JSON.stringify(rows[0].availableFunds))
-    //                     return resolve(JSON.stringify(rows[0].availableFunds));
-    //                 } else {
-    //                     return reject("project not found with name '" + info.name + "'");
-    //                 }            
-    //         });
-    //     });
-    // }
-    
-    // let getPledgeAmount = (info) => {
-    //     return new Promise((resolve, reject) => {
-    //         pool.query("SELECT * FROM Pledge WHERE descriptionReward=?", [info.descriptionReward], (error, rows) => {
-    //                 if (error) { return reject(error); }
-    //                 //console.log("INSERT:" + JSON.stringify(rows));
-                    
-    //                 if ((rows) && (rows.length == 1)) {
-    //                     return resolve(rows[0].amount);
-    //                 } else {
-    //                     return reject("pledge not found with description '" + info.descriptionReward + "'");
-    //                 }            
-    //         });
-    //     });
-    // }
-    
-    // let updateFunds = (newFunds, info) => {
-    //     return new Promise((resolve, reject) => {
-    //         pool.query("UPDATE Supporter SET availableFunds=? WHERE email=?", [newFunds, info.supporterEmail], (error, rows) => {
-    //                 if (error) { return reject(error); }
-    //                 console.log("TEST:" + JSON.stringify(rows));
-                    
-    //                 if (rows.affectedRows == 1) {
-    //                     console.log("TEST2:" + JSON.stringify(JSON.stringify(rows[0])));
-    //                     return resolve(true);
-    //                 } else {
-    //                     return reject("supporter not found with name '" + info.supporterEmail + "'");
-    //                 }            
-    //         });
-    //     });
-    // }
-    
-    // let availableFunds = (info) => {
-    //     return new Promise((resolve, reject) => {
-    //         pool.query("SELECT * FROM Supporter WHERE email=?", [info.supporterEmail], (error, rows) => {
-    //                 if (error) { return reject(error); }
-    //                 console.log("TEST:" + JSON.stringify(rows));
-                    
-    //                 if ((rows) && (rows.length == 1)) {
-    //                     console.log("TEST2:" + JSON.stringify(JSON.stringify(rows[0])));
-    //                     return resolve(rows[0].availableFunds);
-    //                 } else {
-    //                     return reject("supporter not found with name '" + info.supporterEmail + "'");
-    //                 }            
-    //         });
-    //     });
-    // }
     
     try {
         
@@ -253,6 +190,7 @@ exports.lambdaHandler = async (event, context) => {
                 let newFunds = await getSupporterCurrentFunds(info)
                 if (claimPledge){
                     let currentProjectTotal = await getProjectTotal(info)
+                    currentProjectTotal = parseInt(currentProjectTotal)
                     console.log("E6")
                     let newProjectTotal = currentProjectTotal + pledgeCost
                     console.log(currentProjectTotal)
@@ -265,6 +203,7 @@ exports.lambdaHandler = async (event, context) => {
                     response.projectTotal = newProjectTotal
                     console.log("E5")
                 }
+        }
         }
         else if (currentSupporters < maxSupporters){
             let currentFunds = await getSupporterCurrentFunds(info)
@@ -280,6 +219,8 @@ exports.lambdaHandler = async (event, context) => {
                 if (claimPledge){
                     let spotsLeft = maxSupporters - currentSupporters -1
                     let currentProjectTotal = await getProjectTotal(info)
+                    currentProjectTotal = parseInt(currentProjectTotal)
+                    pledgeCost = parseInt(pledgeCost)
                     console.log("E6")
                     let newProjectTotal = currentProjectTotal + pledgeCost
                     console.log(currentProjectTotal)
