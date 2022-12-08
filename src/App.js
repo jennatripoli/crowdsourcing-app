@@ -205,6 +205,7 @@ function App() {
 
     function handle_button_type() {
       msg = {}
+      msg["supporterEmail"] = current_user
       msg["type"] = input_search
       data = { 'body': JSON.stringify(msg) }
       setEntries(undefined)
@@ -293,7 +294,7 @@ function App() {
               <div style={pledge_box}>
                 <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
                 <label>{pledge.description}</label>
-                { pledge.pledgeCapacity > 0 || pledge.pledgeCapacity == -1 ? <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button> : <br/> }
+                { (pledge.pledgeCapacity != 0) ? <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button> : <br/> }
               </div>
             )
             inner.push(entry)
@@ -872,7 +873,6 @@ function App() {
       instance.post('/adminList').then((response) => {
         if (response != null) {
           let allProjects = response.data.result
-          console.log(response)
           if (allProjects != undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
