@@ -15,8 +15,9 @@ function App() {
     const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
     const header_label = { position: "absolute", left: 20, top: 8 }
     const header_button = {position: "absolute", right: 20, top: 24 }
-    let back_button = (<div/>), funds_label = (<div/>)
-
+    let back_button = (<div/>)
+    let funds_label = (<div/>)
+    
     if (current_page.type.name == "DesignerViewProject" || current_page.type.name == "DesignerCreateProject") {
       back_button = (<button onClick={back_designer_list}>Back to List</button>)
     } else if (current_page.type.name == "DesignerEditProject") {
@@ -219,7 +220,7 @@ function App() {
     }
 
     return (
-      <div className="SupporterListProjects">
+      <div id="SupporterListProjects" className="SupporterListProjects">
         <div>
           <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects" />
           <label style={sort_label}>Sort By: </label>
@@ -337,7 +338,7 @@ function App() {
     }
 
     return (
-      <div className="SupporterViewProject">
+      <div id="SupporterViewProject" className="SupporterViewProject">
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label>
 
@@ -440,7 +441,7 @@ function App() {
     }
 
     return (
-      <div className="DesignerListProjects">
+      <div id="DesignerListProjects" className="DesignerListProjects">
         <label style={page_label}>Your Projects</label>
         <div style={projects_box}>{entries}</div>
         <button style={create_button} onClick={handle_button_create}>+</button>
@@ -500,7 +501,7 @@ function App() {
     }
 
     return (
-      <div className="DesignerCreateProject">
+      <div id="DesignerCreateProject" className="DesignerCreateProject">
         <div style={info_box}>
           <input style={project_name} type="text" value={input_name} onChange={e => setName(e.target.value)} placeholder="project name" />
           
@@ -546,7 +547,7 @@ function App() {
     }
 
     return (
-      <div className="DesignerCreatePledge">
+      <div id="DesignerCreatePledge" className="DesignerCreatePledge">
         <br/><br/><br/><br/><br/>
         <label>CREATE A NEW PLEDGE</label><br/>
         <label>Amount: $<input type="text" value={input_amount} onChange={e => setAmount(e.target.value)} /></label><br/>
@@ -707,7 +708,7 @@ function App() {
     }
 
     return (
-      <div className="DesignerEditProject">
+      <div id="DesignerEditProject" className="DesignerEditProject">
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label><br />
           
@@ -814,7 +815,7 @@ function App() {
     }
 
     return (
-      <div className="DesignerViewProject">
+      <div id="DesignerViewProject" className="DesignerViewProject">
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label>
 
@@ -925,7 +926,7 @@ function App() {
     }
 
     return (
-      <div className="AdministratorListProjects">
+      <div id="AdministratorListProjects" className="AdministratorListProjects">
         <label style={page_label}>All Projects</label>
         <div style={projects_box}>{entries}</div>
 
