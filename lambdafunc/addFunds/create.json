@@ -1,0 +1,6 @@
+{
+    "body" :
+    
+"{\n  \"descriptionReward\": \"test description\",\n  \"projectName\": \"testProject\",\n  \"amount\": 10,\n  \"maxSupporters\": 100\n}"
+
+}
