@@ -119,7 +119,7 @@ function App() {
     let input_account_type = ""
 
     function handle_button_login() {
-      if (document.querySelector('input[name="account_type"]:checked') != "") input_account_type = document.querySelector('input[name="account_type"]:checked')
+      if (document.querySelector('input[name="account_type"]:checked') !== "") input_account_type = document.querySelector('input[name="account_type"]:checked')
 
       if (input_email === "" || input_password === "" || input_account_type.value === "") alert("Fill out all fields before logging in or registering.")
       else {
@@ -206,9 +206,9 @@ function App() {
       setRetrieving(true)
 
       instance.post('/searchProject', data).then((response) => {
-        if (response != null) {
+        if (response !== null) {
           let allProjects = response.data.result
-          if (allProjects != undefined) {
+          if (allProjects !== undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
               let project = allProjects[i]
@@ -308,7 +308,7 @@ function App() {
 
       instance.post('/supporterViewProject', data).then((response) => {
         let temp = {}
-        if (response != null) {
+        if (response !== null) {
           temp.name = response.data.name
           temp.story = response.data.story
           temp.designerEmail = response.data.designerEmail
@@ -322,7 +322,7 @@ function App() {
         }
         setEntries(temp)
   
-        if (temp.activePledges != null) {
+        if (temp.activePledges !== null) {
           let inner = []
           for (let i = 0; i < temp.activePledges.length; i++) {
             let pledge = temp.activePledges[i]
@@ -330,7 +330,7 @@ function App() {
               <div style={pledge_box}>
                 <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
                 <label>{pledge.description}</label>
-                { (pledge.pledgeCapacity != 0) ? <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button> : <br/> }
+                { (pledge.pledgeCapacity !== 0) ? <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button> : <br/> }
               </div>
             )
             inner.push(entry)
@@ -421,9 +421,9 @@ function App() {
       setRetrieving(true)
 
       instance.post('/designerList', data).then((response) => {
-        if (response != null) {
+        if (response !== null) {
           let allProjects = response.data.result
-          if (allProjects != undefined) {
+          if (allProjects !== undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
               let project = allProjects[i]
@@ -560,7 +560,7 @@ function App() {
     let [input_max, setMax] = useState(null)
 
     function handle_button_create() {
-      if (input_amount <= 0 || input_reward === "" || (input_max != "" && input_max != null && input_max <= 0)) alert("Fill out all required fields with valid data before creating a new pledge.")
+      if (input_amount <= 0 || input_reward === "" || (input_max !== "" && input_max !== null && input_max <= 0)) alert("Fill out all required fields with valid data before creating a new pledge.")
       else {
         let msg = {}
         msg["amount"] = input_amount
@@ -632,7 +632,7 @@ function App() {
 
       instance.post('/designerViewProject', data).then((response) => {
         let inner1 = {}
-        if (response != null) {
+        if (response !== null) {
           inner1.name = response.data.name
           inner1.story = response.data.story
           inner1.designerEmail = response.data.designerEmail
@@ -648,7 +648,7 @@ function App() {
         }
         setEntries(inner1)
 
-        if (inner1.activePledges != null) {
+        if (inner1.activePledges !== null) {
           let inner2 = []
           for (let i = 0; i < inner1.activePledges.length; i++) {
             let pledge = inner1.activePledges[i]
@@ -794,7 +794,7 @@ function App() {
 
       instance.post('/designerViewProject', data).then((response) => {
         let inner1 = {}
-        if (response != null) {
+        if (response !== null) {
           inner1.name = response.data.name
           inner1.story = response.data.story
           inner1.designerEmail = response.data.designerEmail
@@ -809,7 +809,7 @@ function App() {
         }
         setEntries(inner1)
   
-        if (inner1.activePledges != null) {
+        if (inner1.activePledges !== null) {
           let inner2 = []
           for (let i = 0; i < inner1.activePledges.length; i++) {
             let pledge = inner1.activePledges[i]
@@ -900,12 +900,12 @@ function App() {
       setRetrieving(true)
 
       instance.post('/adminList').then((response) => {
-        if (response != null) {
+        if (response !== null) {
           let allProjects = response.data.result
           setProjects(response.projectCount)
           setFunded(response.totalAmountRaised)
           setPledges(response.pledgeCount)
-          if (allProjects != undefined) {
+          if (allProjects !== undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
               let project = allProjects[i]
@@ -1016,7 +1016,7 @@ function App() {
 
       instance.post('/designerViewProject', data).then((response) => {
         let inner1 = {}
-        if (response != null) {
+        if (response !== null) {
           inner1.name = response.data.name
           inner1.story = response.data.story
           inner1.designerEmail = response.data.designerEmail
@@ -1031,7 +1031,7 @@ function App() {
         }
         setEntries(inner1)
   
-        if (inner1.activePledges != null) {
+        if (inner1.activePledges !== null) {
           let inner2 = []
           for (let i = 0; i < inner1.activePledges.length; i++) {
             let pledge = inner1.activePledges[i]
