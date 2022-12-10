@@ -2,12 +2,26 @@ import './App.css';
 import React, { useState } from 'react';
 import axios from 'axios';
 
-var current_page, current_user, current_project, current_funds
 const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/' });
 
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
-  if (current_page == null) current_page = <Login />
+  let [current_page, setCurrentPage] = React.useState(<Login/>)
+  let [current_name, setCurrentName] = React.useState("Login")
+  let [current_funds, setCurrentFunds] = React.useState(0)
+  let [current_project, setCurrentProject] = React.useState(null)
+  let [current_user, setCurrentUser] = React.useState(null)
+
+  React.useEffect (() => {
+    if (current_name === "SupporterListProjects") setCurrentPage(<SupporterListProjects/>)
+    else if (current_name === "SupporterViewProject") setCurrentPage(<SupporterViewProject/>)
+    else if (current_name === "DesignerListProjects") setCurrentPage(<DesignerListProjects/>)
+    else if (current_name === "DesignerViewProject") setCurrentPage(<DesignerViewProject/>)
+    else if (current_name === "DesignerEditProject") setCurrentPage(<DesignerEditProject/>)
+    else if (current_name === "DesignerCreateProject") setCurrentPage(<DesignerCreateProject/>)
+    else if (current_name === "DesignerCreatePledge") setCurrentPage(<DesignerCreatePledge/>)
+    else if (current_name === "AdministratorListProjects") setCurrentPage(<AdministratorListProjects/>)
+  }, [redraw])
 
   function Header() {
     const header_user = { position: "absolute", left: 20, top: 28 }
@@ -21,6 +35,17 @@ function App() {
     let back_button = (<div/>), funds_label = (<div/>), funds_input = (<div/>), funds_button = (<div/>)
     let [funds_input_val, setFundsInput] = useState("")
 
+    if (current_name == "DesignerViewProject" || current_name == "DesignerCreateProject") back_button = (<button style={header_button} onClick={back_designer_list}>Back to List</button>)
+    else if (current_name == "DesignerEditProject") back_button = (<button style={header_button} onClick={back_designer_view}>Back to View</button>)
+    else if (current_name == "DesignerCreatePledge") back_button = (<button style={header_button} onClick={back_designer_edit}>Back to Edit</button>)      
+    else if (current_name == "SupporterViewProject") back_button = (<button style={header_button} onClick={back_supporter_list}>Back to List</button>)
+
+    if (current_name == "SupporterListProjects" || current_name == "SupporterViewProject") {
+      funds_label = (<label style={header_label}>Available Funds: ${current_funds}</label>)
+      funds_input = (<label style={header_input}>Add Funds: $<input name="funds" type="number" value={funds_input_val} onChange={e => setFundsInput(e.target.value)} style={{width: 60}} min="1" /></label>)
+      funds_button = (<button style={header_button2} onClick={() => setFunds(funds_input_val)}>+</button>)
+    }
+
     function setFunds(param_add) {
       if (param_add == "" || param_add <= 0) alert("Please enter a valid amount to add to your current funds.")
       else {
@@ -30,58 +55,34 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         // TODO get rid of this after the lambda function is created
-        current_funds = parseInt(current_funds) + parseInt(param_add)
-        forceRedraw(redraw + 1)
-        redraw++
+        setCurrentFunds(parseInt(current_funds) + parseInt(param_add))
 
         /*instance.post('/supporterAddFunds', data).then((response) => {
-          current_funds = response.data.availableFunds
-          forceRedraw(redraw + 1)
-          redraw++
+          setCurrentFunds(response.data.availableFunds)
         })*/
       }
     }
-    
-    if (current_page.type.name == "DesignerViewProject" || current_page.type.name == "DesignerCreateProject") {
-      back_button = (<button style={header_button} onClick={back_designer_list}>Back to List</button>)
-    } else if (current_page.type.name == "DesignerEditProject") {
-      back_button = (<button style={header_button} onClick={back_designer_view}>Back to View</button>)
-    } else if (current_page.type.name == "DesignerCreatePledge") {
-      back_button = (<button style={header_button} onClick={back_designer_edit}>Back to Edit</button>)      
-    } else if (current_page.type.name == "SupporterViewProject") {
-      back_button = (<button style={header_button} onClick={back_supporter_list}>Back to List</button>)      
-    }
-
-    if (current_page.type.name == "SupporterListProjects" || current_page.type.name == "SupporterViewProject") {
-      funds_label = (<label style={header_label}>Available Funds: ${current_funds}</label>)
-      funds_input = (<label style={header_input}>Add Funds: $<input name="funds" type="number" value={funds_input_val} onChange={e => setFundsInput(e.target.value)} style={{width: 60}} min="1" /></label>)
-      funds_button = (<button style={header_button2} onClick={() => setFunds(funds_input_val)}>+</button>)
-    }
 
     function back_designer_list() {
-      current_project = null
-      current_page = <DesignerListProjects/>
+      setCurrentProject(null)
+      setCurrentName("DesignerListProjects")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function back_designer_view() {
-      current_page = <DesignerViewProject/>
+      setCurrentName("DesignerViewProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function back_designer_edit() {
-      current_page = <DesignerEditProject/>
+      setCurrentName("DesignerEditProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function back_supporter_list() {
-      current_project = null
-      current_page = <SupporterListProjects/>
+      setCurrentProject(null)
+      setCurrentName("SupporterListProjects")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     return (
@@ -119,26 +120,23 @@ function App() {
         msg["password"] = input_password
         let data = { 'body': JSON.stringify(msg) }
 
-        current_user = input_email
+        setCurrentUser(input_email)
 
         if (input_account_type.value == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
-            current_page = <DesignerListProjects />
+            setCurrentName("DesignerListProjects")
             forceRedraw(redraw + 1)
-            redraw++
           })
         } else if (input_account_type.value == 'administrator') {
           instance.post('/loginAdministrator', data).then((response) => {
-            current_page = <AdministratorListProjects />
+            setCurrentName("AdministratorListProjects")
             forceRedraw(redraw + 1)
-            redraw++
           })
         } else {
           instance.post('/loginSupporter', data).then((response) => {
-            current_funds = response.data.availableFunds
-            current_page = <SupporterListProjects />
+            setCurrentFunds(response.data.availableFunds)
+            setCurrentName("SupporterListProjects")
             forceRedraw(redraw + 1)
-            redraw++
           })
         }
       }
@@ -223,10 +221,9 @@ function App() {
     }
 
     function handle_button_view(project_name_param) {
-      current_project = project_name_param
-      current_page = <SupporterViewProject />
+      setCurrentProject(project_name_param)
+      setCurrentName("SupporterViewProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_type() {
@@ -343,10 +340,9 @@ function App() {
         instance.post('/claimPledge', data2).then((response) => {
           if (response.data.statusCode == 400) alert("You have already claimed this pledge and cannot claim it again.")
           else {
-            current_funds -= param_amount
-            current_page = <SupporterViewProject/>
+            setCurrentFunds(current_funds - param_amount)
+            setCurrentName("SupporterViewProject")
             forceRedraw(redraw + 1)
-            redraw++
           }
         })
       }
@@ -441,23 +437,20 @@ function App() {
     }
 
     function handle_button_view(name_param) {
-      current_project = name_param
-      current_page = <DesignerViewProject />
+      setCurrentProject(name_param)
+      setCurrentName("DesignerViewProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_create() {
-      current_page = <DesignerCreateProject />
+      setCurrentName("DesignerCreateProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_edit(name_param) {
-      current_project = name_param
-      current_page = <DesignerEditProject />
+      setCurrentProject(name_param)
+      setCurrentName("DesignerEditProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     if (entries === undefined) {
@@ -516,10 +509,9 @@ function App() {
         instance.post('/createProject', data).then((response) => {
           if (response.data.statusCode == 400) alert("Cannot create a project with the same name as another project.")
           else {
-            current_project = input_name
-            current_page = <DesignerViewProject />
+            setCurrentProject(input_name)
+            setCurrentName("DesignerViewProject")
             forceRedraw(redraw + 1)
-            redraw++
           }
         })
       }
@@ -564,9 +556,8 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/createPledge', data).then((response) => {
-          current_page = <DesignerViewProject />
+          setCurrentName("DesignerViewProject")
           forceRedraw(redraw + 1)
-          redraw++
         })
       }
     }
@@ -675,9 +666,8 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/editProject', data).then((response) => {
-          current_page = <DesignerViewProject />
+          setCurrentName("DesignerViewProject")
           forceRedraw(redraw + 1)
-          redraw++
         })
       }
     }
@@ -687,10 +677,9 @@ function App() {
       let data = { 'body': JSON.stringify(msg) }
 
       instance.post('/designerDeleteProject', data).then((response) => {
-        current_project = null
-        current_page = <DesignerListProjects />
+        setCurrentProject(null)
+        setCurrentName("DesignerListProjects")
         forceRedraw(redraw + 1)
-        redraw++
       })
     }
 
@@ -702,18 +691,16 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/launchProject', data).then((response) => {
-          current_project = null
-          current_page = <DesignerListProjects />
+          setCurrentProject(null)
+          setCurrentName("DesignerListProjects")
           forceRedraw(redraw + 1)
-          redraw++
         })
       }
     }
 
     function handle_button_create_pledge() {
-      current_page = <DesignerCreatePledge />
+      setCurrentName("DesignerCreatePledge")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_delete_pledge(reward_param) {
@@ -721,9 +708,8 @@ function App() {
       let data = { 'body': JSON.stringify(msg) }
 
       instance.post('/designerDeletePledge', data).then((response) => {
-        current_page = <DesignerEditProject />
+        setCurrentName("DesignerEditProject")
         forceRedraw(redraw + 1)
-        redraw++
       })
     }
 
@@ -931,10 +917,9 @@ function App() {
     }
 
     function handle_button_view(name_param) {
-      current_project = name_param
-      current_page = <DesignerViewProject />
+      setCurrentProject(name_param)
+      setCurrentName("DesignerViewProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_delete(name_param) {
@@ -943,9 +928,8 @@ function App() {
       let data = { 'body': JSON.stringify(msg) }
 
       instance.post('/designerDeleteProject', data).then((response) => {
-        current_page = <AdministratorListProjects />
+        setCurrentName("AdministratorListProjects")
         forceRedraw(redraw + 1)
-        redraw++
       })
     }
 
@@ -982,7 +966,7 @@ function App() {
 
   return (
     <div>
-      <Header />
+      <Header/>
       {current_page}
     </div>
   );
