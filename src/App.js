@@ -11,6 +11,7 @@ function App() {
   let [current_funds, setCurrentFunds] = React.useState(0)
   let [current_project, setCurrentProject] = React.useState(null)
   let [current_user, setCurrentUser] = React.useState(null)
+  let [current_type, setCurrentType] = React.useState("")
 
   React.useEffect (() => {
     if (current_name === "SupporterListProjects") setCurrentPage(<SupporterListProjects/>)
@@ -32,6 +33,7 @@ function App() {
     const header_button = {position: "absolute", right: 20, top: 28 }
     const header_input = { position: "absolute", fontSize: "12pt", top: 28, left: 250 }
     const header_button2 = { position: "absolute", top: 29, left: 410 }
+    const header_type = { position: "absolute", left: 20, top: 8 }
 
     let back_button = (<div/>), funds_label = (<div/>), funds_input = (<div/>), funds_button = (<div/>)
     let [funds_input_val, setFundsInput] = useState("")
@@ -93,6 +95,7 @@ function App() {
     return (
       <div>
         <label style={header_user}>{current_user}</label>
+        <label style={header_type}>{current_type}</label>
         <label style={header_title}>CROWDSOURCING APP</label>
         {funds_label} {funds_input} {back_button} {funds_button}
         <div style={header_box}/>
@@ -125,20 +128,24 @@ function App() {
         msg["password"] = input_password
         let data = { 'body': JSON.stringify(msg) }
 
-        setCurrentUser(input_email)
-
         if (input_account_type.value === 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
+            setCurrentUser(input_email)
+            setCurrentType("DESIGNER")
             setCurrentName("DesignerListProjects")
             forceRedraw(redraw + 1)
           })
         } else if (input_account_type.value === 'administrator') {
           instance.post('/loginAdministrator', data).then((response) => {
+            setCurrentUser(input_email)
+            setCurrentType("ADMINISTRATOR")
             setCurrentName("AdministratorListProjects")
             forceRedraw(redraw + 1)
           })
         } else {
           instance.post('/loginSupporter', data).then((response) => {
+            setCurrentUser(input_email)
+            setCurrentType("SUPPORTER")
             setCurrentFunds(response.data.availableFunds)
             setCurrentName("SupporterListProjects")
             forceRedraw(redraw + 1)
@@ -209,10 +216,10 @@ function App() {
                 <div id="project_box">
                   <button style={project_button} onClick={() => handle_button_view(project.name)}>
                     <label style={project_name}>{project.name}</label><br/>
-                    <label>Description: {project.description}</label><br/>
-                    <label>Deadline: {project.deadline}</label><br/>
-                    <label>Type: {project.type}</label><br/>
-                    <label>Goal: ${project.goal}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Description: </span>{project.description}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Deadline: </span>{project.deadline}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
                   </button>
                 </div>
               )
@@ -424,11 +431,11 @@ function App() {
                 <div id="project_box">
                   <button style={project_button} onClick={() => handle_button_view(project.name)}>
                     <label style={{fontSize: "18pt", fontWeight: "bold"}}>{project.name}</label><br/>
-                    <label>Description: {project.description}</label><br/>
-                    <label>Deadline: {project.deadline}</label><br/>
-                    <label>Type: {project.type}</label><br/>
-                    <label>Goal: ${project.goal}</label><br/>
-                    <label>Launched: {project.launched ? "Yes":"No"}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Description: </span>{project.description}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Deadline: </span>{project.deadline}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Launched?: </span>{project.launched ? "Yes":"No"}</label><br/>
                   </button>
                   {project.launched ? <br/> : <button style={edit_button} onClick={() => handle_button_edit(project.name)}>Edit</button> }
                 </div>
@@ -906,12 +913,12 @@ function App() {
                 <div id="project_box">
                   <button style={project_button} onClick={() => handle_button_view(project.name)}>
                     <label style={{fontSize: "18pt", fontWeight: "bold"}}>{project.name}</label><br/>
-                    <label>Description: {project.description}</label><br/>
-                    <label>Deadline: {project.deadline}</label><br/>
-                    <label>Type: {project.type}</label><br/>
-                    <label>Goal: ${project.goal}</label><br/>
-                    <label>Designer: {project.entrepreneur}</label><br/>
-                    <label>Launched: {project.launched ? "Yes":"No"}</label>
+                    <label><span style={{fontWeight: "bold"}}>Description: </span>{project.description}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Deadline: </span>{project.deadline}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Designer: </span>{project.entrepreneur}</label><br/>
+                    <label><span style={{fontWeight: "bold"}}>Launched?: </span>{project.launched ? "Yes":"No"}</label>
                   </button>
                   {project.launched ? <br/> : <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button> }
                 </div>
