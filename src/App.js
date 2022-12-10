@@ -2,67 +2,94 @@ import './App.css';
 import React, { useState } from 'react';
 import axios from 'axios';
 
-var current_page, current_user, current_project, available_funds
 const instance = axios.create({ baseURL: 'https://icki0h6bb0.execute-api.us-east-1.amazonaws.com/Prod/' });
 
 function App() {
   let [redraw, forceRedraw] = React.useState(0)
-  if (current_page == null) current_page = <Login />
+  let [current_page, setCurrentPage] = React.useState(<Login/>)
+  let [current_name, setCurrentName] = React.useState("Login")
+  let [current_funds, setCurrentFunds] = React.useState(0)
+  let [current_project, setCurrentProject] = React.useState(null)
+  let [current_user, setCurrentUser] = React.useState(null)
+
+  React.useEffect (() => {
+    if (current_name === "SupporterListProjects") setCurrentPage(<SupporterListProjects/>)
+    else if (current_name === "SupporterViewProject") setCurrentPage(<SupporterViewProject/>)
+    else if (current_name === "DesignerListProjects") setCurrentPage(<DesignerListProjects/>)
+    else if (current_name === "DesignerViewProject") setCurrentPage(<DesignerViewProject/>)
+    else if (current_name === "DesignerEditProject") setCurrentPage(<DesignerEditProject/>)
+    else if (current_name === "DesignerCreateProject") setCurrentPage(<DesignerCreateProject/>)
+    else if (current_name === "DesignerCreatePledge") setCurrentPage(<DesignerCreatePledge/>)
+    else if (current_name === "AdministratorListProjects") setCurrentPage(<AdministratorListProjects/>)
+  }, [redraw])
 
   function Header() {
     const header_user = { position: "absolute", left: 20, top: 28 }
     const header_title = { position: "absolute", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
     const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
-    const header_label = { position: "absolute", left: 20, top: 8 }
-    const header_button = {position: "absolute", right: 20, top: 24 }
-    let back_button = (<div/>), funds_label = (<div/>)
+    const header_label = { position: "absolute", left: 250, top: 8 }
+    const header_button = {position: "absolute", right: 20, top: 28 }
+    const header_input = { position: "absolute", fontSize: "12pt", top: 28, left: 250 }
+    const header_button2 = { position: "absolute", top: 29, left: 410 }
 
-    if (current_page.type.name == "DesignerViewProject" || current_page.type.name == "DesignerCreateProject") {
-      back_button = (<button onClick={back_designer_list}>Back to List</button>)
-    } else if (current_page.type.name == "DesignerEditProject") {
-      back_button = (<button onClick={back_designer_view}>Back to View</button>)
-    } else if (current_page.type.name == "DesignerCreatePledge") {
-      back_button = (<button onClick={back_designer_edit}>Back to Edit</button>)      
-    } else if (current_page.type.name == "SupporterViewProject") {
-      back_button = (<button onClick={back_supporter_list}>Back to List</button>)      
+    let back_button = (<div/>), funds_label = (<div/>), funds_input = (<div/>), funds_button = (<div/>)
+    let [funds_input_val, setFundsInput] = useState("")
+
+    if (current_name == "DesignerViewProject" || current_name == "DesignerCreateProject") back_button = (<button style={header_button} onClick={back_designer_list}>Back to List</button>)
+    else if (current_name == "DesignerEditProject") back_button = (<button style={header_button} onClick={back_designer_view}>Back to View</button>)
+    else if (current_name == "DesignerCreatePledge") back_button = (<button style={header_button} onClick={back_designer_edit}>Back to Edit</button>)      
+    else if (current_name == "SupporterViewProject") back_button = (<button style={header_button} onClick={back_supporter_list}>Back to List</button>)
+
+    if (current_name == "SupporterListProjects" || current_name == "SupporterViewProject") {
+      funds_label = (<label style={header_label}>Available Funds: ${current_funds}</label>)
+      funds_input = (<label style={header_input}>Add Funds: $<input name="funds" type="number" value={funds_input_val} onChange={e => setFundsInput(e.target.value)} style={{width: 60}} min="1" /></label>)
+      funds_button = (<button style={header_button2} onClick={() => setFunds(funds_input_val)}>+</button>)
     }
 
-    if (current_page.type.name == "SupporterListProjects" || current_page.type.name == "SupporterViewProject") {
-      funds_label = (<label>Available Funds: ${available_funds}</label>)
+    function setFunds(param_add) {
+      if (param_add == "" || param_add <= 0) alert("Please enter a valid amount to add to your current funds.")
+      else {
+        let msg = {}
+        msg["name"] = current_user
+        msg["availableFunds"] = param_add + current_funds
+        let data = { 'body': JSON.stringify(msg) }
+
+        // TODO get rid of this after the lambda function is created
+        setCurrentFunds(parseInt(current_funds) + parseInt(param_add))
+
+        /*instance.post('/supporterAddFunds', data).then((response) => {
+          setCurrentFunds(response.data.availableFunds)
+        })*/
+      }
     }
 
     function back_designer_list() {
-      current_project = null
-      current_page = <DesignerListProjects/>
+      setCurrentProject(null)
+      setCurrentName("DesignerListProjects")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function back_designer_view() {
-      current_page = <DesignerViewProject/>
+      setCurrentName("DesignerViewProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function back_designer_edit() {
-      current_page = <DesignerEditProject/>
+      setCurrentName("DesignerEditProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function back_supporter_list() {
-      current_project = null
-      current_page = <SupporterListProjects/>
+      setCurrentProject(null)
+      setCurrentName("SupporterListProjects")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     return (
       <div>
         <label style={header_user}>{current_user}</label>
         <label style={header_title}>CROWDSOURCING APP</label>
-        <div style={header_label}>{funds_label}</div>
-        <div style={header_button}>{back_button}</div>
+        {funds_label} {funds_input} {back_button} {funds_button}
         <div style={header_box}/>
       </div>
     )
@@ -93,26 +120,23 @@ function App() {
         msg["password"] = input_password
         let data = { 'body': JSON.stringify(msg) }
 
-        current_user = input_email
+        setCurrentUser(input_email)
 
         if (input_account_type.value == 'designer') {
           instance.post('/loginDesigner', data).then((response) => {
-            current_page = <DesignerListProjects />
+            setCurrentName("DesignerListProjects")
             forceRedraw(redraw + 1)
-            redraw++
           })
         } else if (input_account_type.value == 'administrator') {
           instance.post('/loginAdministrator', data).then((response) => {
-            current_page = <AdministratorListProjects />
+            setCurrentName("AdministratorListProjects")
             forceRedraw(redraw + 1)
-            redraw++
           })
         } else {
           instance.post('/loginSupporter', data).then((response) => {
-            available_funds = response.data.availableFunds
-            current_page = <SupporterListProjects />
+            setCurrentFunds(response.data.availableFunds)
+            setCurrentName("SupporterListProjects")
             forceRedraw(redraw + 1)
-            redraw++
           })
         }
       }
@@ -120,7 +144,6 @@ function App() {
 
     return (
       <div className="Login">
-        <Header />
         <div style={login_box}>
           <label style={login_title}>LOG IN</label>
 
@@ -159,6 +182,7 @@ function App() {
 
     let msg = {}
     msg["type"] = ""
+    msg["supporterEmail"] = current_user
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
@@ -197,14 +221,14 @@ function App() {
     }
 
     function handle_button_view(project_name_param) {
-      current_project = project_name_param
-      current_page = <SupporterViewProject />
+      setCurrentProject(project_name_param)
+      setCurrentName("SupporterViewProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_type() {
       msg = {}
+      msg["supporterEmail"] = current_user
       msg["type"] = input_search
       data = { 'body': JSON.stringify(msg) }
       setEntries(undefined)
@@ -218,8 +242,7 @@ function App() {
     }
 
     return (
-      <div className="SupporterListProjects">
-        <Header />
+      <div id="SupporterListProjects" className="SupporterListProjects">
         <div>
           <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects" />
           <label style={sort_label}>Sort By: </label>
@@ -259,6 +282,7 @@ function App() {
 
     let msg = {}
     msg["name"] = current_project
+    msg["supporterEmail"] = current_user
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
@@ -289,16 +313,14 @@ function App() {
           let inner = []
           for (let i = 0; i < temp.activePledges.length; i++) {
             let pledge = temp.activePledges[i]
-            //if (pledge.pledgeCapacity > 0 || pledge.pledgeCapacity == -1) {
-              let entry = (
-                <div style={pledge_box}>
-                  <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
-                  <label>{pledge.description}</label>
-                  <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button>
-                </div>
-              )
-              inner.push(entry)
-            //}
+            let entry = (
+              <div style={pledge_box}>
+                <label style={{fontWeight: "bold"}}>Amount: ${pledge.amount}</label><br/>
+                <label>{pledge.description}</label>
+                { (pledge.pledgeCapacity != 0) ? <button style={claim_button} onClick={() => claim_pledge(pledge.description, pledge.amount)}>Claim</button> : <br/> }
+              </div>
+            )
+            inner.push(entry)
           }
           setPledges(inner)
         }
@@ -307,7 +329,7 @@ function App() {
     }
 
     function claim_pledge(param_description, param_amount) {
-      if (available_funds < param_amount) alert("Not enough available funds to claim pledge.")
+      if (current_funds < param_amount) alert("Not enough available funds to claim pledge.")
       else {
         let msg2 = {}
         msg2["projectName"] = current_project
@@ -316,13 +338,11 @@ function App() {
         let data2 = { 'body': JSON.stringify(msg2) }
 
         instance.post('/claimPledge', data2).then((response) => {
-          console.log(response)
           if (response.data.statusCode == 400) alert("You have already claimed this pledge and cannot claim it again.")
           else {
-            available_funds = response.data.availableFunds
-            current_page = <SupporterViewProject/>
+            setCurrentFunds(current_funds - param_amount)
+            setCurrentName("SupporterViewProject")
             forceRedraw(redraw + 1)
-            redraw++
           }
         })
       }
@@ -339,8 +359,7 @@ function App() {
     }
 
     return (
-      <div className="SupporterViewProject">
-        <Header />
+      <div id="SupporterViewProject" className="SupporterViewProject">
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label>
 
@@ -418,23 +437,20 @@ function App() {
     }
 
     function handle_button_view(name_param) {
-      current_project = name_param
-      current_page = <DesignerViewProject />
+      setCurrentProject(name_param)
+      setCurrentName("DesignerViewProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_create() {
-      current_page = <DesignerCreateProject />
+      setCurrentName("DesignerCreateProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_edit(name_param) {
-      current_project = name_param
-      current_page = <DesignerEditProject />
+      setCurrentProject(name_param)
+      setCurrentName("DesignerEditProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     if (entries === undefined) {
@@ -443,8 +459,7 @@ function App() {
     }
 
     return (
-      <div className="DesignerListProjects">
-        <Header />
+      <div id="DesignerListProjects" className="DesignerListProjects">
         <label style={page_label}>Your Projects</label>
         <div style={projects_box}>{entries}</div>
         <button style={create_button} onClick={handle_button_create}>+</button>
@@ -469,7 +484,7 @@ function App() {
     const description_box = { position: "absolute", padding: 10, width: 738, height: 275, textAlign: "left", top: 205, left: 20 }
     const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 510, right: 20 }
 
-    const create_button = { position: "absolute", fontSize: "20pt", top: 700, left: 200 }
+    const create_button = { position: "absolute", fontSize: "20pt", top: 700, left: 400 }
 
     let [input_name, setName] = useState("")
     let [input_description, setDescription] = useState("")
@@ -491,20 +506,19 @@ function App() {
         msg["launched"] = 0
         let data = { 'body': JSON.stringify(msg) }
 
-        console.log(data)
-
         instance.post('/createProject', data).then((response) => {
-          current_project = input_name
-          current_page = <DesignerViewProject />
-          forceRedraw(redraw + 1)
-          redraw++
+          if (response.data.statusCode == 400) alert("Cannot create a project with the same name as another project.")
+          else {
+            setCurrentProject(input_name)
+            setCurrentName("DesignerViewProject")
+            forceRedraw(redraw + 1)
+          }
         })
       }
     }
 
     return (
-      <div className="DesignerCreateProject">
-        <Header />
+      <div id="DesignerCreateProject" className="DesignerCreateProject">
         <div style={info_box}>
           <input style={project_name} type="text" value={input_name} onChange={e => setName(e.target.value)} placeholder="project name" />
           
@@ -529,34 +543,32 @@ function App() {
   function DesignerCreatePledge() {
     let [input_amount, setAmount] = useState(0)
     let [input_reward, setReward] = useState("")
-    let [input_max, setMax] = useState(0)
+    let [input_max, setMax] = useState(null)
 
     function handle_button_create() {
-      if (input_amount <= 0 || input_reward == "") alert("Fill out all required fields with valid data before creating a new pledge.")
+      if (input_amount <= 0 || input_reward == "" || (input_max != "" && input_max != null && input_max <= 0)) alert("Fill out all required fields with valid data before creating a new pledge.")
       else {
         let msg = {}
         msg["amount"] = input_amount
         msg["descriptionReward"] = input_reward
-        msg["maxSupporters"] = input_max
+        msg["maxSupporters"] = (input_max == null || input_max == "") ? -1 : input_max
         msg["projectName"] = current_project
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/createPledge', data).then((response) => {
-          current_page = <DesignerViewProject />
+          setCurrentName("DesignerViewProject")
           forceRedraw(redraw + 1)
-          redraw++
         })
       }
     }
 
     return (
-      <div className="DesignerCreatePledge">
-        <Header />
-        <br/><br/><br/><br/><br/><br/>
+      <div id="DesignerCreatePledge" className="DesignerCreatePledge">
+        <br/><br/><br/><br/><br/>
         <label>CREATE A NEW PLEDGE</label><br/>
         <label>Amount: $<input type="text" value={input_amount} onChange={e => setAmount(e.target.value)} /></label><br/>
         <label>Description of Reward:<input type="text" value={input_reward} onChange={e => setReward(e.target.value)} /></label><br/>
-        <label>Max Supporters: <input type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
+        <label>Max Supporters (optional): <input type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
         <button onClick={handle_button_create}>Create Pledge</button>
       </div>
     )
@@ -654,9 +666,8 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/editProject', data).then((response) => {
-          current_page = <DesignerViewProject />
+          setCurrentName("DesignerViewProject")
           forceRedraw(redraw + 1)
-          redraw++
         })
       }
     }
@@ -666,10 +677,9 @@ function App() {
       let data = { 'body': JSON.stringify(msg) }
 
       instance.post('/designerDeleteProject', data).then((response) => {
-        current_project = null
-        current_page = <DesignerListProjects />
+        setCurrentProject(null)
+        setCurrentName("DesignerListProjects")
         forceRedraw(redraw + 1)
-        redraw++
       })
     }
 
@@ -681,18 +691,16 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/launchProject', data).then((response) => {
-          current_project = null
-          current_page = <DesignerListProjects />
+          setCurrentProject(null)
+          setCurrentName("DesignerListProjects")
           forceRedraw(redraw + 1)
-          redraw++
         })
       }
     }
 
     function handle_button_create_pledge() {
-      current_page = <DesignerCreatePledge />
+      setCurrentName("DesignerCreatePledge")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_delete_pledge(reward_param) {
@@ -700,9 +708,8 @@ function App() {
       let data = { 'body': JSON.stringify(msg) }
 
       instance.post('/designerDeletePledge', data).then((response) => {
-        current_page = <DesignerEditProject />
+        setCurrentName("DesignerEditProject")
         forceRedraw(redraw + 1)
-        redraw++
       })
     }
 
@@ -712,8 +719,7 @@ function App() {
     }
 
     return (
-      <div className="DesignerEditProject">
-        <Header />
+      <div id="DesignerEditProject" className="DesignerEditProject">
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label><br />
           
@@ -820,8 +826,7 @@ function App() {
     }
 
     return (
-      <div className="DesignerViewProject">
-        <Header />
+      <div id="DesignerViewProject" className="DesignerViewProject">
         <div style={info_box}>
           <label style={project_name}>{entries.name}</label>
 
@@ -872,15 +877,18 @@ function App() {
     
     let [entries, setEntries] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
+    let total_projects = 0, total_funded = 0, total_pledges = 0
 
     function retrieve() {
       if (retrieving) return
       setRetrieving(true)
 
       instance.post('/adminList').then((response) => {
-        console.log(response.data.result)
         if (response != null) {
           let allProjects = response.data.result
+          //total_projects = response.projectCount
+          //total_funded = response.totalAmountRaised
+          //total_pledges = response.pledgeCount
           if (allProjects != undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
@@ -909,10 +917,9 @@ function App() {
     }
 
     function handle_button_view(name_param) {
-      current_project = name_param
-      current_page = <DesignerViewProject />
+      setCurrentProject(name_param)
+      setCurrentName("DesignerViewProject")
       forceRedraw(redraw + 1)
-      redraw++
     }
 
     function handle_button_delete(name_param) {
@@ -921,9 +928,8 @@ function App() {
       let data = { 'body': JSON.stringify(msg) }
 
       instance.post('/designerDeleteProject', data).then((response) => {
-        current_page = <AdministratorListProjects />
+        setCurrentName("AdministratorListProjects")
         forceRedraw(redraw + 1)
-        redraw++
       })
     }
 
@@ -933,8 +939,7 @@ function App() {
     }
 
     return (
-      <div className="AdministratorListProjects">
-        <Header />
+      <div id="AdministratorListProjects" className="AdministratorListProjects">
         <label style={page_label}>All Projects</label>
         <div style={projects_box}>{entries}</div>
 
@@ -942,17 +947,17 @@ function App() {
         <div style={activity_box}>
           <div style={activity_projects_box}>
             <label style={activity_projects_label}>TOTAL PROJECTS:</label>
-            <label style={activity_projects_number}>{entries.length}</label>
+            <label style={activity_projects_number}>{total_projects}</label>
           </div>
 
           <div style={activity_funded_box}>
             <label style={activity_funded_label}>TOTAL FUNDED:</label>
-            <label style={activity_funded_number}>$___</label>
+            <label style={activity_funded_number}>${total_funded}</label>
           </div>
 
           <div style={activity_pledges_box}>
             <label style={activity_pledges_label}>TOTAL PLEDGES:</label>
-            <label style={activity_pledges_number}>___</label>
+            <label style={activity_pledges_number}>{total_pledges}</label>
           </div>
         </div>
       </div>
@@ -960,7 +965,10 @@ function App() {
   }
 
   return (
-    <div>{current_page}</div>
+    <div>
+      <Header/>
+      {current_page}
+    </div>
   );
 }
 

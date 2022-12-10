@@ -88,6 +88,8 @@ exports.lambdaHandler = async (event, context) => {
     
         });
     };
+    
+    // let GetUser = (info) =
 
 
     try {
@@ -127,6 +129,7 @@ exports.lambdaHandler = async (event, context) => {
                     response.email = newUser.email
                     response.availableFunds = newUser.availableFunds
                     response.statusCode = 200;
+                    console.log(response)
                 } else {
                     response.statusCode = 400;
                     response.error = "Couldn't find new user";
