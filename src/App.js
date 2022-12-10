@@ -891,6 +891,7 @@ function App() {
     
     let [entries, setEntries] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
+    let total_projects = 0, total_funded = 0, total_pledges = 0
 
     function retrieve() {
       if (retrieving) return
@@ -899,6 +900,9 @@ function App() {
       instance.post('/adminList').then((response) => {
         if (response != null) {
           let allProjects = response.data.result
+          //total_projects = response.projectCount
+          //total_funded = response.totalAmountRaised
+          //total_pledges = response.pledgeCount
           if (allProjects != undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
@@ -959,17 +963,17 @@ function App() {
         <div style={activity_box}>
           <div style={activity_projects_box}>
             <label style={activity_projects_label}>TOTAL PROJECTS:</label>
-            <label style={activity_projects_number}>{entries.length}</label>
+            <label style={activity_projects_number}>{total_projects}</label>
           </div>
 
           <div style={activity_funded_box}>
             <label style={activity_funded_label}>TOTAL FUNDED:</label>
-            <label style={activity_funded_number}>$___</label>
+            <label style={activity_funded_number}>${total_funded}</label>
           </div>
 
           <div style={activity_pledges_box}>
             <label style={activity_pledges_label}>TOTAL PLEDGES:</label>
-            <label style={activity_pledges_number}>___</label>
+            <label style={activity_pledges_number}>{total_pledges}</label>
           </div>
         </div>
       </div>
