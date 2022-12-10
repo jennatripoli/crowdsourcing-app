@@ -13,23 +13,49 @@ function App() {
     const header_user = { position: "absolute", left: 20, top: 28 }
     const header_title = { position: "absolute", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
     const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
-    const header_label = { position: "absolute", left: 20, top: 8 }
-    const header_button = {position: "absolute", right: 20, top: 24 }
-    let back_button = (<div/>)
-    let funds_label = (<div/>)
+    const header_label = { position: "absolute", left: 250, top: 8 }
+    const header_button = {position: "absolute", right: 20, top: 28 }
+    const header_input = { position: "absolute", fontSize: "12pt", top: 28, left: 250 }
+    const header_button2 = { position: "absolute", top: 29, left: 410 }
+
+    let back_button = (<div/>), funds_label = (<div/>), funds_input = (<div/>), funds_button = (<div/>)
+    let [funds_input_val, setFundsInput] = useState("")
+
+    function setFunds(param_add) {
+      if (param_add == "" || param_add <= 0) alert("Please enter a valid amount to add to your current funds.")
+      else {
+        let msg = {}
+        msg["name"] = current_user
+        msg["availableFunds"] = param_add + current_funds
+        let data = { 'body': JSON.stringify(msg) }
+
+        // TODO get rid of this after the lambda function is created
+        current_funds = parseInt(current_funds) + parseInt(param_add)
+        forceRedraw(redraw + 1)
+        redraw++
+
+        /*instance.post('/supporterAddFunds', data).then((response) => {
+          current_funds = response.data.availableFunds
+          forceRedraw(redraw + 1)
+          redraw++
+        })*/
+      }
+    }
     
     if (current_page.type.name == "DesignerViewProject" || current_page.type.name == "DesignerCreateProject") {
-      back_button = (<button onClick={back_designer_list}>Back to List</button>)
+      back_button = (<button style={header_button} onClick={back_designer_list}>Back to List</button>)
     } else if (current_page.type.name == "DesignerEditProject") {
-      back_button = (<button onClick={back_designer_view}>Back to View</button>)
+      back_button = (<button style={header_button} onClick={back_designer_view}>Back to View</button>)
     } else if (current_page.type.name == "DesignerCreatePledge") {
-      back_button = (<button onClick={back_designer_edit}>Back to Edit</button>)      
+      back_button = (<button style={header_button} onClick={back_designer_edit}>Back to Edit</button>)      
     } else if (current_page.type.name == "SupporterViewProject") {
-      back_button = (<button onClick={back_supporter_list}>Back to List</button>)      
+      back_button = (<button style={header_button} onClick={back_supporter_list}>Back to List</button>)      
     }
 
     if (current_page.type.name == "SupporterListProjects" || current_page.type.name == "SupporterViewProject") {
-      funds_label = (<label>Available Funds: ${current_funds}</label>)
+      funds_label = (<label style={header_label}>Available Funds: ${current_funds}</label>)
+      funds_input = (<label style={header_input}>Add Funds: $<input name="funds" type="number" value={funds_input_val} onChange={e => setFundsInput(e.target.value)} style={{width: 60}} min="1" /></label>)
+      funds_button = (<button style={header_button2} onClick={() => setFunds(funds_input_val)}>+</button>)
     }
 
     function back_designer_list() {
@@ -62,8 +88,7 @@ function App() {
       <div>
         <label style={header_user}>{current_user}</label>
         <label style={header_title}>CROWDSOURCING APP</label>
-        <div style={header_label}>{funds_label}</div>
-        <div style={header_button}>{back_button}</div>
+        {funds_label} {funds_input} {back_button} {funds_button}
         <div style={header_box}/>
       </div>
     )
