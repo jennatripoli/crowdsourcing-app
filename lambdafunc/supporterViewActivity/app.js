@@ -70,21 +70,52 @@ exports.lambdaHandler = async (event, context) => {
         });
     }
     
-    let getPledges = (pledger) => {
+    let getPledges = (input) => {
         return new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM Pledge WHERE descriptionReward=?", [pledger.description], (error, rows) => {
-                console.log("INPUT: " + pledger.description)
+            // pool.query("SELECT * FROM Pledge WHERE descriptionReward=?", [input], (error, rows) => {
+            pool.query("SELECT * FROM Pledge WHERE descriptionReward=?", [input], (error, rows) => {
                 if(error) { return reject(error); }
                 
-                if(rows){
-                    console.log(resolve(rows))
-                    return resolve(rows);
+                if ((rows)) {
+                    return resolve(rows[0]);
                 } else {
-                    return reject("no pledges for supporter: '"+info.name+ "'");
+                    return reject("no pledges for supporter: ");
                 }
             });
         });
     }
+    
+    let getDirectSupport = (info) => {
+        return new Promise((resolve, reject) => {
+            // pool.query("SELECT * FROM Pledge WHERE descriptionReward=?", [input], (error, rows) => {
+            pool.query("SELECT * FROM DirectSupport WHERE supporterEmail=?", [info.name], (error, rows) => {
+                if(error) { return reject(error); }
+                
+                if ((rows)) {
+                    return resolve(rows);
+                } else {
+                    return reject("no direct support for supporter: ");
+                }
+            });
+        });
+    }
+    
+    
+    // let getPledges = (info, pledger) => {
+    //     return new Promise((resolve, reject) => {
+    //         pool.query("SELECT * FROM Pledge WHERE descriptionReward=?", [pledger], (error, rows) => {
+    //             console.log("INPUT: " + pledger)
+    //             if(error) { return reject(error); }
+                
+    //             if(rows){
+    //                 console.log("GET PLEDGES RESPONSE:" + rows)
+    //                 return resolve(rows);
+    //             } else {
+    //                 return reject("no pledges for supporter: '" +info.name+ "'");
+    //             }
+    //         });
+    //     });
+    // }
     
     
     try {
@@ -105,25 +136,33 @@ exports.lambdaHandler = async (event, context) => {
             let activePledges = [];
             
             if(pledgers) {
-                console.log("pledger info: " + JSON.stringify(pledgers));
+                console.log("PLEDGER INFO: " + JSON.stringify(pledgers));
                 
                 for (let i = 0; i < pledgers.length; i++) {
                     let pledger = pledgers[i];
                     activePledgers[i] = {
                         description:  pledger.descriptionReward,
+                    
+                    }
+                    console.log("PLEDGER LIST: " + JSON.stringify(activePledgers))
                     };
                 
                 for (let i=0; i<activePledgers.length; i++){
-                    let pledge = await getPledges(activePledgers[i])
+                    let getPledgeInput = (activePledgers[i].description)
+                    console.log("INPUT: " + getPledgeInput)
+                    let pledge = await getPledges(getPledgeInput)
                     // pledge = JSON.stringify(pledge)
-                    console.log("PLEDGE: " +pledge.descriptionReward)
+                    console.log("PLEDGE: " + JSON.stringify(pledge))
                     activePledges[i] = {
                         description:  pledge.descriptionReward,
                         amount: pledge.amount,
                         maxSupporters: pledge.maxSupporters
-                    };
-                }
+                    }
                 };
+                
+                let directSupports = await getDirectSupport(info)
+                response.directSupport = directSupports;
+                
                 response.statusCode = 200;
                 response.pledges = activePledges;
             }else {
