@@ -56,30 +56,31 @@ exports.lambdaHandler = async (event, context) => {
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
     
-    let SupporterViewProject = (info) => {
+    let getPledgers = (info) => {
         return new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM Project WHERE name=?", [info.name], (error, rows) => {
-                    if (error) { return reject(error); }
-                    console.log("INSERT:" + JSON.stringify(rows));
-                    
-                    if ((rows) && (rows.length == 1)) {
-                        return resolve(rows[0]);
-                    } else {
-                        return reject("project not found with name '" + info.name + "'");
-                    }            
-            });
-        });
-    }
-    
-    let getPledges = (info) => {
-        return new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM Pledge WHERE projectName=?", [info.name], (error, rows) => {
+            pool.query("SELECT * FROM Pledger WHERE supporterEmail=?", [info.name], (error, rows) => {
                 if(error) { return reject(error); }
                 
                 if(rows){
                     return resolve(rows);
                 } else {
-                    return reject("no pledges for project with name "+info.name);
+                    return reject("no pledges for supporter: '"+info.name+ "'");
+                }
+            });
+        });
+    }
+    
+    let getPledges = (pledger) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Pledge WHERE descriptionReward=?", [pledger.description], (error, rows) => {
+                console.log("INPUT: " + pledger.description)
+                if(error) { return reject(error); }
+                
+                if(rows){
+                    console.log(resolve(rows))
+                    return resolve(rows);
+                } else {
+                    return reject("no pledges for supporter: '"+info.name+ "'");
                 }
             });
         });
@@ -94,58 +95,46 @@ exports.lambdaHandler = async (event, context) => {
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
         //console.log("E1")
-        let foundProject = await SupporterViewProject(info);
+        // let foundProject = await SupporterViewProject(info);
         
-        if(foundProject){
-            console.log("project info: " + JSON.stringify(foundProject));
-            //console.log("E2")
-            let name = (foundProject.name);
-            let story = (foundProject.story);
-            let designerEmail = (foundProject.designerEmail);
-            let type = (foundProject.type);
-            let goal = (foundProject.goal);
-            let deadline = (foundProject.deadline);
-            let activePledges = [];
-            let successful = (foundProject.successful);
-            let launched = (foundProject.launched); 
-            let amountRaised = (foundProject.amountRaised);
+        // if(foundProject){
             
             //GETTING PLEDGES HERE
-            let pledges = await getPledges(info);
+            let pledgers = await getPledgers(info);
+            let activePledgers = [];
+            let activePledges = [];
             
-            if(pledges) {
-                console.log("pledge info: " + JSON.stringify(pledges));
+            if(pledgers) {
+                console.log("pledger info: " + JSON.stringify(pledgers));
                 
-                for (let i = 0; i < pledges.length; i++) {
-                    let pledge = pledges[i];
+                for (let i = 0; i < pledgers.length; i++) {
+                    let pledger = pledgers[i];
+                    activePledgers[i] = {
+                        description:  pledger.descriptionReward,
+                    };
+                
+                for (let i=0; i<activePledgers.length; i++){
+                    let pledge = await getPledges(activePledgers[i])
+                    // pledge = JSON.stringify(pledge)
+                    console.log("PLEDGE: " +pledge.descriptionReward)
                     activePledges[i] = {
                         description:  pledge.descriptionReward,
                         amount: pledge.amount,
                         maxSupporters: pledge.maxSupporters
                     };
+                }
                 };
                 response.statusCode = 200;
+                response.pledges = activePledges;
             }else {
                 response.error = "No pledges";
             }
             
             
             response.statusCode = 200;
-            response.name = name;
-            response.story = story;
-            response.designerEmail = designerEmail;
-            response.type = type;
-            response.goal = goal;
-            response.deadline = deadline;
-            response.activePledges = activePledges;
-            response.successful = successful;
-            response.launched = launched;
-            response.amountRaised = amountRaised;
+            // response.pledges = activePledges;
             console.log("RESPONSE: " + JSON.stringify(response))
-        } else {
-            response.statusCode = 400;
-            response.error = "Couldn't find projects";
-        }
+        
         
         
     } catch (error) {
