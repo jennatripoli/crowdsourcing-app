@@ -54,11 +54,11 @@ function App() {
       if (param_add === "" || param_add <= 0) alert("Please enter a valid amount to add to your current funds.")
       else {
         let msg = {}
-        msg["name"] = current_user
-        msg["availableFunds"] = parseInt(current_funds) + parseInt(param_add)
+        msg["supporterEmail"] = current_user
+        msg["additionalFunds"] = parseInt(param_add)
         let data = { 'body': JSON.stringify(msg) }
         
-        instance.post('/supporterAddFunds', data).then((response) => {
+        instance.post('/addFunds', data).then((response) => {
           setCurrentFunds(response.data.availableFunds)
         })
       }
@@ -231,6 +231,16 @@ function App() {
           }
         }
       })
+
+      /*let msg2 = {}
+      msg2["supporterEmail"] = current_user
+      let data2 = { 'body': JSON.stringify(msg2) }
+
+      instance.post('/supporterViewActivity', data2).then((response) => {
+        if (response != null) {
+        }
+        setRetrieving(false)
+      })*/
     }
 
     function handle_button_view(project_name_param) {
@@ -283,15 +293,19 @@ function App() {
     const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
     const goal_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
     const raised_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
+    const type_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, left: 20 } 
 
     const description_box = { position: "absolute", width: 760, height: 340, background: "white", outline: "1px solid black", textAlign: "center", top: 205, left: 20 }
     const description_label = { position: "absolute", width: 740, height: 320, textAlign: "left", top: 10, left: 10 }
     const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, right: 20 }
 
     const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
-    const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const active_pledges_box = { position: "absolute", width: 540, height: 540, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10, marginBottom: 10 }
     const claim_button = { position: "absolute", right: 10, top: 10 }
+
+    const direct_input = { position: "absolute", fontSize: "18pt", fontWeight: "bold", background: "lightgrey", top: 710, left: 980 }
+    const direct_button = { position: "absolute", top: 710, left: 1270, fontSize: "18pt" }
 
     let msg = {}
     msg["name"] = current_project
@@ -301,6 +315,7 @@ function App() {
     let [entries, setEntries] = React.useState(undefined)
     let [pledges, setPledges] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
+    let [direct_input_val, setDirectInput] = useState("")
 
     function retrieve() {
       if (retrieving) return;
@@ -366,6 +381,24 @@ function App() {
       return Math.ceil((deadline - today) / (1000*60*60*24))
     }
 
+    function direct_support(param_amount) {
+      if (param_amount == "" || param_amount <= 0) alert("Please enter a valid amount to directly support this project.")
+      else if (parseInt(param_amount) > current_funds) alert("Not enough available funds to directly support this amount.")
+      else {
+        let msg2 = {}
+        msg2["projectName"] = current_project
+        msg2["supporterEmail"] = current_user
+        msg2["amount"] = parseInt(param_amount)
+        let data2 = { 'body': JSON.stringify(msg2) }
+
+        /*instance.post('/directSupport', data2).then((response) => {
+          setCurrentFunds(current_funds - param_amount)
+          forceRedraw(redraw + 1)
+          // TODO make sure the page redraws with the updated amount raised and current funds
+        })*/
+      }
+    }
+
     if (entries === undefined || pledges === undefined) {
       retrieve()
       return
@@ -390,11 +423,15 @@ function App() {
             <label style={description_label}>{entries.story}</label>
           </div>
 
+          <label style={type_label}><i>Project Type: {entries.type}</i></label>
           <label style={designer_label}><i>By: {entries.designerEmail}</i></label>
         </div>
 
         <label style={active_label}>Active Pledges</label>
         <div style={active_pledges_box}>{pledges}</div>
+
+        <label style={direct_input}>Directly Support: $<input name="money" type="number" value={direct_input_val} onChange={e => setDirectInput(e.target.value)} style={{width: 60, height: 20}} min="1" /></label>
+        <button style={direct_button} onClick={() => direct_support(direct_input_val)}>Submit</button>
       </div>
     );
   }
@@ -447,6 +484,17 @@ function App() {
             setRetrieving(false)
           }
         }
+      })
+
+      let msg2 = {}
+      msg2["email"] = current_user
+      let data2 = { 'body': JSON.stringify(msg2) }
+
+      instance.post('/designerViewActivity', data2).then((response) =>{
+        console.log(response)
+        if (response != null) {
+        }
+        setRetrieving(false)
       })
     }
 
@@ -900,11 +948,12 @@ function App() {
       setRetrieving(true)
 
       instance.post('/adminList').then((response) => {
+        console.log(response)
         if (response !== null) {
           let allProjects = response.data.result
-          setProjects(response.projectCount)
-          setFunded(response.totalAmountRaised)
-          setPledges(response.pledgeCount)
+          setProjects(response.data.projectCount)
+          setFunded(response.data.totalAmountRaised)
+          setPledges(response.data.pledgeCount)
           if (allProjects !== undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
@@ -930,6 +979,16 @@ function App() {
             setRetrieving(false)
           }
         }
+      })
+
+      let msg2 = {}
+      msg2["supporterEmail"] = current_user
+      let data2 = { 'body': JSON.stringify(msg2) }
+
+      instance.post('/supporterViewProject', data2).then((response) => {
+        if (response != null) {
+        }
+        setRetrieving(false)
       })
     }
 
