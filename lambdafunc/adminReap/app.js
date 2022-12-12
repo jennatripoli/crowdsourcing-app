@@ -66,34 +66,32 @@ exports.lambdaHandler = async (event, context) => {
             });
 
     };
-    
-    let getCurrentProjectCount =(info) => {
+
+    let failProject = (projectName) => {
         return new Promise((resolve, reject) => {
-            pool.query("SELECT count(*) AS CNT FROM Project", (error, rows) => {
-                    if (error) { return reject(error); }
-                    if ((rows) && rows.length==1) {
-                        console.log("CURRENT PROJECTS: " + JSON.stringify(rows[0].CNT))
-                        return resolve(rows[0].CNT)
+            pool.query("UPDATE Project SET successful=false WHERE name=?", [projectName], (error, rows) => {
+                if (error) { return reject(error); }
+                    if (rows.affectedRows == 1) {
+                        return resolve(true);
                     } else {
-                        return reject("idk it didnt work");
-                    }            
-            });
+                        return reject("there are no projects");
+                    }
+                });
         });
-    }
+    };
     
-    let getCurrentPledgeCount =(info) => {
+    let succeedProject = (projectName) => {
         return new Promise((resolve, reject) => {
-            pool.query("SELECT count(*) AS CNT FROM Pledge", (error, rows) => {
-                    if (error) { return reject(error); }
-                    if ((rows) && rows.length==1) {
-                        console.log("CURRENT PLEDGERS: " + JSON.stringify(rows[0].CNT))
-                        return resolve(rows[0].CNT)
+            pool.query("UPDATE Project SET successful=true WHERE name=?", [projectName], (error, rows) => {
+                if (error) { return reject(error); }
+                    if (rows.affectedRows == 1) {
+                        return resolve(true);
                     } else {
-                        return reject("idk it didnt work");
-                    }            
-            });
+                        return reject("there are no projects");
+                    }
+                });
         });
-    }
+    };
 
    
    try {
@@ -114,35 +112,54 @@ exports.lambdaHandler = async (event, context) => {
         
         // const ret = await axios(url);
         let projects = await getAllProjects();
-        let projectCount = await getCurrentProjectCount();
-        response.projectCount = projectCount;
-        let pledgeCount = await getCurrentPledgeCount();
-        response.pledgeCount = pledgeCount;
-        let totalAmountRaised = 0;
+        
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1;
+        var yyyy = today.getFullYear();
         
         if(projects) {
             
-            let list = [];
-            
-            console.log("info: " + JSON.stringify(projects));
-            
             for (let i = 0; i<projects.length; i++) {
                 let project = projects[i];
-                totalAmountRaised = totalAmountRaised + parseInt(project.amountRaised);
-                list[i] = {
-                    name: project.name,
-                    description: project.story,
-                    entrepreneur: project.designerEmail,
-                    type: project.type,
-                    goal: project.goal,
-                    deadline: project.deadline,
-                    successful: project.successful,
-                    launched: project.launched
-                };
-            };
+                
+                let projectYear = parseInt(project.deadline.substring(0, 4), 10);
+                if (projectYear < yyyy) {
+                    if (project.amountRaised < project.goal) {
+                        const failed = await failProject(project.name);
+                    }
+                    else {
+                        const succeeded = await succeedProject(project.name)
+                    }
+                }
+                
+                else if (projectYear === yyyy) {
+                    let projectMonth = parseInt(project.deadline.substring(5, 7), 10);
+                        if (projectMonth < mm) {
+                            if (project.amountRaised < project.goal) {
+                            const failed = await failProject(project.name);
+                        }
+                        else {
+                            const succeeded = await succeedProject(project.name)
+                        }
+                    }
+                    
+                    else if (projectMonth === mm) {
+                        let projectDay = parseInt(project.deadline.substring(8, 10), 10);
+                        if (projectDay < dd) {
+                            if (project.amountRaised < project.goal) {
+                                const failed = await failProject(project.name);
+                            }
+                            
+                            else {
+                                const succeeded = await succeedProject(project.name)
+                            }
+                        }
+                    }   
+                }
+            }
             response.statusCode = 200;
-            response.result  = list
-            response.totalAmountRaised = JSON.stringify(totalAmountRaised)
+            response.result  = true;
         }else {
             response.statusCode = 400;
             response.error = "Couldn't find projects ";

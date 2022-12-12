@@ -65,35 +65,7 @@ exports.lambdaHandler = async (event, context) => {
                 });
             });
 
-    };
-    
-    let getCurrentProjectCount =(info) => {
-        return new Promise((resolve, reject) => {
-            pool.query("SELECT count(*) AS CNT FROM Project", (error, rows) => {
-                    if (error) { return reject(error); }
-                    if ((rows) && rows.length==1) {
-                        console.log("CURRENT PROJECTS: " + JSON.stringify(rows[0].CNT))
-                        return resolve(rows[0].CNT)
-                    } else {
-                        return reject("idk it didnt work");
-                    }            
-            });
-        });
-    }
-    
-    let getCurrentPledgeCount =(info) => {
-        return new Promise((resolve, reject) => {
-            pool.query("SELECT count(*) AS CNT FROM Pledge", (error, rows) => {
-                    if (error) { return reject(error); }
-                    if ((rows) && rows.length==1) {
-                        console.log("CURRENT PLEDGERS: " + JSON.stringify(rows[0].CNT))
-                        return resolve(rows[0].CNT)
-                    } else {
-                        return reject("idk it didnt work");
-                    }            
-            });
-        });
-    }
+};
 
    
    try {
@@ -114,11 +86,6 @@ exports.lambdaHandler = async (event, context) => {
         
         // const ret = await axios(url);
         let projects = await getAllProjects();
-        let projectCount = await getCurrentProjectCount();
-        response.projectCount = projectCount;
-        let pledgeCount = await getCurrentPledgeCount();
-        response.pledgeCount = pledgeCount;
-        let totalAmountRaised = 0;
         
         if(projects) {
             
@@ -128,7 +95,6 @@ exports.lambdaHandler = async (event, context) => {
             
             for (let i = 0; i<projects.length; i++) {
                 let project = projects[i];
-                totalAmountRaised = totalAmountRaised + parseInt(project.amountRaised);
                 list[i] = {
                     name: project.name,
                     description: project.story,
@@ -142,7 +108,6 @@ exports.lambdaHandler = async (event, context) => {
             };
             response.statusCode = 200;
             response.result  = list
-            response.totalAmountRaised = JSON.stringify(totalAmountRaised)
         }else {
             response.statusCode = 400;
             response.error = "Couldn't find projects ";
