@@ -131,7 +131,6 @@ exports.lambdaHandler = async (event, context) => {
                 
                 //GETTING PLEDGES
                 if(pledges){
-                    console.log("pledges found");
                     
                     for (let j = 0; j < pledges.length; j++) {
                         let currentPledgers = [];
