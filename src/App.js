@@ -186,7 +186,7 @@ function App() {
     const project_button = { width: 760, textAlign: "left", margin: 10, marginBottom: 0 }
     const project_name = { fontSize: "18pt", fontWeight: "bold" }
 
-    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 930 }
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 925 }
     const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
     const activity_box = { position: "absolute", width: 214, background: "white", margin: 10, marginBottom: 0, padding: 5, paddingTop: 2 }
@@ -302,7 +302,7 @@ function App() {
 
         <div style={projects_box}>{entries}</div>
 
-        <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;Direct Support</label>
+        <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;&nbsp;Direct Support</label>
         <div style={activity_box_1}>{entries2}</div>
         <div style={activity_box_2}>{entries3}</div>
       </div>
@@ -469,7 +469,7 @@ function App() {
     const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 420 }
     const edit_button = { position: "relative", top: -10, width: 50 }
 
-    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 930 }
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 925 }
     const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
     const activity_box = { position: "absolute", width: 214, background: "white", margin: 10, marginBottom: 0, padding: 5, paddingTop: 2 }
@@ -503,7 +503,7 @@ function App() {
                     <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Launched?: </span>{project.launched ? "Yes":"No"}</label><br/>
-                    {project.successful != null ? <label><span style={{fontWeight: "bold"}}>Successful?: </span>{project.successful ? "Yes":"No"}</label> : <br/> }
+                    {project.successful != null ? <label><span style={{fontWeight: "bold"}}>Successful?: </span>{project.successful ? "Yes":"No"}</label> : <></> }
                   </button>
                   {project.launched ? <br/> : <button style={edit_button} onClick={() => handle_button_edit(project.name)}>Edit</button> }
                 </div>
@@ -585,7 +585,7 @@ function App() {
         <div style={projects_box}>{entries}</div>
         <button style={create_button} onClick={handle_button_create}>+</button>
 
-        <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;Direct Support</label>
+        <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;&nbsp;Direct Support</label>
         <div style={activity_box_1}>{entries2}</div>
         <div style={activity_box_2}>{entries3}</div>
       </div>
