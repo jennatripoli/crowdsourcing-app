@@ -119,6 +119,8 @@ exports.lambdaHandler = async (event, context) => {
         let projectList = [];
         let projects = await getDesignerProjects(info);
         let directSupportList = [];
+        let activePledges = [];
+        let num = 0;
         
         if(projects) {
             
@@ -126,7 +128,6 @@ exports.lambdaHandler = async (event, context) => {
             
             for(let i = 0; i < projects.length; i++) {
                 let project = projects[i];
-                let activePledges = [];
                 let pledges = await getPledges(project.name);
                 
                 //GETTING PLEDGES
@@ -143,11 +144,13 @@ exports.lambdaHandler = async (event, context) => {
                                 currentPledgers.push(pledger.supporterEmail);
                             }
                         }
-                        activePledges[j] = {
-                            name: pledge.descriptionReward,
+                        activePledges[num] = {
+                            projectName: project.name,
+                            pledgeName: pledge.descriptionReward,
                             amount: pledge.amount,
                             pledgers: currentPledgers
                         };
+                        num += 1;
                     }
                     //GETTING DIRECT SUPPORT
                     
@@ -157,26 +160,22 @@ exports.lambdaHandler = async (event, context) => {
                         for (let j = 0; j < directSupports.length; j++){
                             let directSupporter = directSupports[j];
                             directSupportList[j] = {
+                              project: directSupporter.projectName,
                               amount: directSupporter.amount,
-                              email: directSupporter.email
+                              email: directSupporter.supporterEmail
                             };
                         }
                         
                     }
                     
                 }
-                //GETTING
-                
-                projectList[i] = {
-                    name: project.name,
-                    pledges: activePledges
-                };
             };
         
             //TODO !!!!!!!!!!!!!
             response.statusCode = 200;
             response.pledges = projectList;
             response.directSupports = directSupportList;
+            response.pledges = activePledges;
         }
         else {
             response.statusCode = 400;
