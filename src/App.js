@@ -180,17 +180,16 @@ function App() {
 
   function SupporterListProjects() {
     const search_bar = { position: "absolute", width: 300, left: 50, top: 120 }
-    const sort_label = { position: "absolute", left: 408, top: 120 }
-    const name_button = { position: "absolute", left: 470, top: 120 }
-    const deadline_button = { position: "absolute", left: 530, top: 120 }
-    const type_button = { position: "absolute", left: 608, top: 120 }
+    const type_button = { position: "absolute", left: 365, top: 120 }
 
     const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 760, textAlign: "left", margin: 10, marginBottom: 0 }
     const project_name = { fontSize: "18pt", fontWeight: "bold" }
 
-    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1050 }
-    const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 930 }
+    const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
+    const activity_box = { position: "absolute", width: 214, background: "white", margin: 10, marginBottom: 0, padding: 5, paddingTop: 2 }
 
     let msg = {}
     msg["type"] = ""
@@ -198,6 +197,8 @@ function App() {
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
+    let [entries2, setEntries2] = React.useState(undefined)
+    let [entries3, setEntries3] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
     let [input_search, setSearch] = useState("")
 
@@ -232,15 +233,43 @@ function App() {
         }
       })
 
-      /*let msg2 = {}
+      let msg2 = {}
       msg2["supporterEmail"] = current_user
       let data2 = { 'body': JSON.stringify(msg2) }
 
       instance.post('/supporterViewActivity', data2).then((response) => {
+        console.log(response)
         if (response != null) {
+          let inner2 = [], inner3 = [], pledges = response.data.pledges, supports = response.data.directSupport
+          for (let i = 0; i < supports.length; i++) {
+            const entry = ( 
+              <div id="support_box" style={activity_box}>
+                <label style={{fontWeight: "bold", fontSize: "20pt"}}>${supports[i].amount}</label><br/>
+                <label style={{fontWeight: "bold"}}>Project: {supports[i].project}</label><br/>
+              </div>
+            )
+            inner2.push(entry)
+          }
+          inner2.push(<div style={{height: 10}}/>)
+          setEntries2(inner2)
+
+          for (let i =  0; i < pledges.length; i++) {
+            for (let j = 0; j < pledges[i].pledgers.length; j++) {
+              const entry = ( 
+                <div id="pledge_box" style={activity_box}>
+                  <label style={{fontWeight: "bold", fontSize: "20pt"}}>${pledges[i].amount}</label><br/>
+                  <label style={{fontWeight: "bold"}}>Project: {pledges[i].projectName}</label><br/>
+                  <label>{pledges[i].pledgeName}</label><br/>
+                </div>
+              )
+              inner3.push(entry)
+            }
+          }
+          inner3.push(<div style={{height: 10}}/>)
+          setEntries3(inner3)
+          setRetrieving(false)
         }
-        setRetrieving(false)
-      })*/
+      })
     }
 
     function handle_button_view(project_name_param) {
@@ -267,18 +296,15 @@ function App() {
     return (
       <div id="SupporterListProjects" className="SupporterListProjects">
         <div>
-          <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects" />
-          <label style={sort_label}>Sort By: </label>
-          <button style={name_button}>Name</button>
-          <button style={deadline_button}>Deadline</button>
-          <button style={type_button} onClick={handle_button_type}>Type</button>
+          <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects by genre" />
+          <button style={type_button} onClick={handle_button_type}>Search</button>
         </div>
 
         <div style={projects_box}>{entries}</div>
 
-        <label style={activity_label}>Supporter Activity</label>
-        <div style={activity_box}>
-        </div>
+        <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;Direct Support</label>
+        <div style={activity_box_1}>{entries2}</div>
+        <div style={activity_box_2}>{entries3}</div>
       </div>
     )
   }
@@ -443,14 +469,18 @@ function App() {
     const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 420 }
     const edit_button = { position: "relative", top: -10, width: 50 }
 
-    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1060 }
-    const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 930 }
+    const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
+    const activity_box = { position: "absolute", width: 214, background: "white", margin: 10, marginBottom: 0, padding: 5, paddingTop: 2 }
 
     let msg = {}
     msg["email"] = current_user
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
+    let [entries2, setEntries2] = React.useState(undefined)
+    let [entries3, setEntries3] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
 
     function retrieve() {
@@ -473,6 +503,7 @@ function App() {
                     <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Launched?: </span>{project.launched ? "Yes":"No"}</label><br/>
+                    {project.successful != null ? <label><span style={{fontWeight: "bold"}}>Successful?: </span>{project.successful ? "Yes":"No"}</label> : <br/> }
                   </button>
                   {project.launched ? <br/> : <button style={edit_button} onClick={() => handle_button_edit(project.name)}>Edit</button> }
                 </div>
@@ -491,10 +522,38 @@ function App() {
       let data2 = { 'body': JSON.stringify(msg2) }
 
       instance.post('/designerViewActivity', data2).then((response) =>{
-        console.log(response)
         if (response != null) {
+          let inner2 = [], inner3 = [], pledges = response.data.pledges, supports = response.data.directSupports
+          for (let i = 0; i < supports.length; i++) {
+            const entry = ( 
+              <div id="support_box" style={activity_box}>
+                <label style={{fontWeight: "bold", fontSize: "20pt"}}>${supports[i].amount}</label><br/>
+                <label style={{fontWeight: "bold"}}>Project: {supports[i].project}</label><br/>
+                <label><i>{supports[i].email}</i></label>
+              </div>
+            )
+            inner2.push(entry)
+          }
+          inner2.push(<div style={{height: 10}}/>)
+          setEntries2(inner2)
+
+          for (let i =  0; i < pledges.length; i++) {
+            for (let j = 0; j < pledges[i].pledgers.length; j++) {
+              const entry = ( 
+                <div id="pledge_box" style={activity_box}>
+                  <label style={{fontWeight: "bold", fontSize: "20pt"}}>${pledges[i].amount}</label><br/>
+                  <label style={{fontWeight: "bold"}}>Project: {pledges[i].projectName}</label><br/>
+                  <label>{pledges[i].pledgeName}</label><br/>
+                  <label><i>{pledges[i].pledgers[j]}</i></label>
+                </div>
+              )
+              inner3.push(entry)
+            }
+          }
+          inner3.push(<div style={{height: 10}}/>)
+          setEntries3(inner3)
+          setRetrieving(false)
         }
-        setRetrieving(false)
       })
     }
 
@@ -526,8 +585,9 @@ function App() {
         <div style={projects_box}>{entries}</div>
         <button style={create_button} onClick={handle_button_create}>+</button>
 
-        <label style={activity_label}>Project Activity</label>
-        <div style={activity_box}></div>
+        <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;Direct Support</label>
+        <div style={activity_box_1}>{entries2}</div>
+        <div style={activity_box_2}>{entries3}</div>
       </div>
     )
   }
@@ -948,7 +1008,6 @@ function App() {
       setRetrieving(true)
 
       instance.post('/adminList').then((response) => {
-        console.log(response)
         if (response !== null) {
           let allProjects = response.data.result
           setProjects(response.data.projectCount)
@@ -968,8 +1027,9 @@ function App() {
                     <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Designer: </span>{project.entrepreneur}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Launched?: </span>{project.launched ? "Yes":"No"}</label>
+                    {project.successful != null ? <label><span style={{fontWeight: "bold"}}>Successful?: </span>{project.successful ? "Yes":"No"}</label> : <br/> }
                   </button>
-                  {project.launched ? <br/> : <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button> }
+                  <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button>
                 </div>
               )
               inner.push(entry)
