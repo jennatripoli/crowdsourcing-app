@@ -691,8 +691,11 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/createPledge', data).then((response) => {
-          setCurrentName("DesignerEditProject")
-          forceRedraw(redraw + 1)
+          if (response.data.statusCode === 400) alert("Cannot create a pledge with the same description as another pledge.")
+          else {
+            setCurrentName("DesignerEditProject")
+            forceRedraw(redraw + 1)
+          }
         })
       }
     }
