@@ -27,15 +27,16 @@ function App() {
 
   function Header() {
     const header_user = { position: "absolute", left: 20, top: 28 }
-    const header_title = { position: "absolute", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
+    const header_title = { position: "absolute", fontWeight: "bold", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
     const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
     const header_label = { position: "absolute", left: 250, top: 8 }
     const header_button = {position: "absolute", right: 20, top: 28 }
-    const header_input = { position: "absolute", fontSize: "12pt", top: 28, left: 250 }
-    const header_button2 = { position: "absolute", top: 29, left: 410 }
+    const header_label2 = { position: "absolute", top: 28, left: 250 }
+    const header_input = { position: "absolute", top: 29, left: 344, width: 50 }
+    const header_button2 = { position: "absolute", top: 29, left: 406 }
     const header_type = { position: "absolute", left: 20, top: 8 }
 
-    let back_button = (<div/>), funds_label = (<div/>), funds_input = (<div/>), funds_button = (<div/>)
+    let back_button = (<div/>), funds_label = (<div/>), funds_label2 = (<div/>), funds_input = (<div/>), funds_button = (<div/>)
     let [funds_input_val, setFundsInput] = useState("")
 
     if (current_name === "DesignerViewProject" || current_name === "DesignerCreateProject") back_button = (<button style={header_button} onClick={back_designer_list}>Back to List</button>)
@@ -46,7 +47,8 @@ function App() {
 
     if (current_name === "SupporterListProjects" || current_name === "SupporterViewProject") {
       funds_label = (<label style={header_label}>Available Funds: ${current_funds}</label>)
-      funds_input = (<label style={header_input}>Add Funds: $<input name="funds" type="number" value={funds_input_val} onChange={e => setFundsInput(e.target.value)} style={{width: 60}} min="1" /></label>)
+      funds_label2 = (<label style={header_label2}>Add Funds: $</label>)
+      funds_input = (<input style={header_input} name="funds" type="number" value={funds_input_val} onChange={e => setFundsInput(e.target.value)} min="1" />)
       funds_button = (<button style={header_button2} onClick={() => setFunds(funds_input_val)}>+</button>)
     }
 
@@ -54,11 +56,11 @@ function App() {
       if (param_add === "" || param_add <= 0) alert("Please enter a valid amount to add to your current funds.")
       else {
         let msg = {}
-        msg["name"] = current_user
-        msg["availableFunds"] = parseInt(current_funds) + parseInt(param_add)
+        msg["supporterEmail"] = current_user
+        msg["additionalFunds"] = parseInt(param_add)
         let data = { 'body': JSON.stringify(msg) }
         
-        instance.post('/supporterAddFunds', data).then((response) => {
+        instance.post('/addFunds', data).then((response) => {
           setCurrentFunds(response.data.availableFunds)
         })
       }
@@ -97,7 +99,7 @@ function App() {
         <label style={header_user}>{current_user}</label>
         <label style={header_type}>{current_type}</label>
         <label style={header_title}>CROWDSOURCING APP</label>
-        {funds_label} {funds_input} {back_button} {funds_button}
+        {funds_label} {funds_label2} {funds_input} {back_button} {funds_button}
         <div style={header_box}/>
       </div>
     )
@@ -180,17 +182,16 @@ function App() {
 
   function SupporterListProjects() {
     const search_bar = { position: "absolute", width: 300, left: 50, top: 120 }
-    const sort_label = { position: "absolute", left: 408, top: 120 }
-    const name_button = { position: "absolute", left: 470, top: 120 }
-    const deadline_button = { position: "absolute", left: 530, top: 120 }
-    const type_button = { position: "absolute", left: 608, top: 120 }
+    const type_button = { position: "absolute", left: 365, top: 120 }
 
     const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 760, textAlign: "left", margin: 10, marginBottom: 0 }
     const project_name = { fontSize: "18pt", fontWeight: "bold" }
 
-    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1050 }
-    const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 925 }
+    const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
+    const activity_box = { width: 212, background: "white", margin: 10, marginBottom: 0, padding: 5, paddingTop: 2 }
 
     let msg = {}
     msg["type"] = ""
@@ -198,6 +199,8 @@ function App() {
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
+    let [entries2, setEntries2] = React.useState(undefined)
+    let [entries3, setEntries3] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
     let [input_search, setSearch] = useState("")
 
@@ -231,6 +234,44 @@ function App() {
           }
         }
       })
+
+      let msg2 = {}
+      msg2["supporterEmail"] = current_user
+      let data2 = { 'body': JSON.stringify(msg2) }
+
+      instance.post('/supporterViewActivity', data2).then((response) => {
+        console.log(response)
+        if (response != null) {
+          let inner2 = [], inner3 = [], pledges = response.data.pledges, supports = response.data.directSupport
+          for (let i = 0; i < supports.length; i++) {
+            const entry = ( 
+              <div id="support_box" style={activity_box}>
+                <label style={{fontWeight: "bold", fontSize: "20pt"}}>${supports[i].amount}</label><br/>
+                <label style={{fontWeight: "bold"}}>Project: {supports[i].project}</label>
+              </div>
+            )
+            inner2.push(entry)
+          }
+          inner2.push(<div style={{height: 10}}/>)
+          setEntries2(inner2)
+
+          for (let i =  0; i < pledges.length; i++) {
+            for (let j = 0; j < pledges[i].pledgers.length; j++) {
+              const entry = ( 
+                <div id="pledge_box" style={activity_box}>
+                  <label style={{fontWeight: "bold", fontSize: "20pt"}}>${pledges[i].amount}</label><br/>
+                  <label style={{fontWeight: "bold"}}>Project: {pledges[i].projectName}</label><br/>
+                  <label>{pledges[i].pledgeName}</label>
+                </div>
+              )
+              inner3.push(entry)
+            }
+          }
+          inner3.push(<div style={{height: 10}}/>)
+          setEntries3(inner3)
+          setRetrieving(false)
+        }
+      })
     }
 
     function handle_button_view(project_name_param) {
@@ -249,7 +290,7 @@ function App() {
       return
     }
 
-    if (entries === undefined) {
+    if (entries === undefined || entries2 === undefined || entries3 === undefined) {
       retrieve()
       return
     }
@@ -257,18 +298,15 @@ function App() {
     return (
       <div id="SupporterListProjects" className="SupporterListProjects">
         <div>
-          <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects" />
-          <label style={sort_label}>Sort By: </label>
-          <button style={name_button}>Name</button>
-          <button style={deadline_button}>Deadline</button>
-          <button style={type_button} onClick={handle_button_type}>Type</button>
+          <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects by genre" />
+          <button style={type_button} onClick={handle_button_type}>Search</button>
         </div>
 
         <div style={projects_box}>{entries}</div>
 
-        <label style={activity_label}>Supporter Activity</label>
-        <div style={activity_box}>
-        </div>
+        <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;&nbsp;Direct Support</label>
+        <div style={activity_box_1}>{entries2}</div>
+        <div style={activity_box_2}>{entries3}</div>
       </div>
     )
   }
@@ -283,15 +321,21 @@ function App() {
     const goal_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, right: 20 }
     const goal_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
     const raised_label = { position: "absolute", width: 370, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
+    const type_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, left: 20 } 
 
     const description_box = { position: "absolute", width: 760, height: 340, background: "white", outline: "1px solid black", textAlign: "center", top: 205, left: 20 }
     const description_label = { position: "absolute", width: 740, height: 320, textAlign: "left", top: 10, left: 10 }
     const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, right: 20 }
 
     const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
-    const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const active_pledges_box = { position: "absolute", width: 540, height: 540, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10, marginBottom: 10 }
     const claim_button = { position: "absolute", right: 10, top: 10 }
+
+    const direct_box = { position: "absolute", width: 540, height: 45, background: "lightgrey", textAlign: "center", top: 710, left: 900 }
+    const direct_label = { position: "absolute", fontSize: "18pt", fontWeight: "bold", top: 5, left: 80 }
+    const direct_input = { position: "absolute", width: 60, height: 22, top: 9, left: 295}
+    const direct_button = { position: "absolute", top: 9, left: 380, fontSize: "14pt" }
 
     let msg = {}
     msg["name"] = current_project
@@ -301,6 +345,7 @@ function App() {
     let [entries, setEntries] = React.useState(undefined)
     let [pledges, setPledges] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
+    let [direct_input_val, setDirectInput] = useState("")
 
     function retrieve() {
       if (retrieving) return;
@@ -342,7 +387,7 @@ function App() {
     }
 
     function claim_pledge(param_description, param_amount) {
-      if (current_funds < param_amount) alert("Not enough available funds to claim pledge.")
+      if (parseInt(current_funds) < parseInt(param_amount)) alert("Not enough available funds to claim pledge.")
       else {
         let msg2 = {}
         msg2["projectName"] = current_project
@@ -353,7 +398,7 @@ function App() {
         instance.post('/claimPledge', data2).then((response) => {
           if (response.data.statusCode === 400) alert("You have already claimed this pledge and cannot claim it again.")
           else {
-            setCurrentFunds(current_funds - param_amount)
+            setCurrentFunds(parseInt(current_funds) - parseInt(param_amount))
             setCurrentName("SupporterViewProject")
             forceRedraw(redraw + 1)
           }
@@ -364,6 +409,23 @@ function App() {
     function days_from_deadline() {
       let today = new Date(), deadline = new Date(entries.deadline)
       return Math.ceil((deadline - today) / (1000*60*60*24))
+    }
+
+    function direct_support(param_amount) {
+      if (param_amount === "" || parseInt(param_amount) <= 0) alert("Please enter a valid amount to directly support this project.")
+      else if (parseInt(param_amount) > parseInt(current_funds)) alert("Not enough available funds to directly support this amount.")
+      else {
+        let msg2 = {}
+        msg2["projectName"] = current_project
+        msg2["supporterEmail"] = current_user
+        msg2["amount"] = parseInt(param_amount)
+        let data2 = { 'body': JSON.stringify(msg2) }
+
+        instance.post('/directSupport', data2).then((response) => {
+          setCurrentFunds(parseInt(current_funds) - parseInt(param_amount))
+          forceRedraw(redraw + 1)
+        })
+      }
     }
 
     if (entries === undefined || pledges === undefined) {
@@ -390,11 +452,18 @@ function App() {
             <label style={description_label}>{entries.story}</label>
           </div>
 
+          <label style={type_label}><i>Project Type: {entries.type}</i></label>
           <label style={designer_label}><i>By: {entries.designerEmail}</i></label>
         </div>
 
         <label style={active_label}>Active Pledges</label>
         <div style={active_pledges_box}>{pledges}</div>
+
+        <div style={direct_box}>
+          <label style={direct_label}>Directly Support: $</label>
+          <input name="money" type="number" value={direct_input_val} onChange={e => setDirectInput(e.target.value)} style={direct_input} min="1" />
+          <button style={direct_button} onClick={() => direct_support(direct_input_val)}>Submit</button>
+        </div>
       </div>
     );
   }
@@ -406,14 +475,18 @@ function App() {
     const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 420 }
     const edit_button = { position: "relative", top: -10, width: 50 }
 
-    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1060 }
-    const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 925 }
+    const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
+    const activity_box = { width: 212, background: "white", margin: 10, marginBottom: 0, padding: 5, paddingTop: 2 }
 
     let msg = {}
     msg["email"] = current_user
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
+    let [entries2, setEntries2] = React.useState(undefined)
+    let [entries3, setEntries3] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
 
     function retrieve() {
@@ -436,6 +509,7 @@ function App() {
                     <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Launched?: </span>{project.launched ? "Yes":"No"}</label><br/>
+                    {project.successful != null ? <label><span style={{fontWeight: "bold"}}>Successful?: </span>{project.successful ? "Yes":"No"}</label> : <></> }
                   </button>
                   {project.launched ? <br/> : <button style={edit_button} onClick={() => handle_button_edit(project.name)}>Edit</button> }
                 </div>
@@ -444,8 +518,46 @@ function App() {
             }
             inner.push(<div style={{height: 10}}/>)
             setEntries(inner)
-            setRetrieving(false)
           }
+        }
+      })
+
+      let msg2 = {}
+      msg2["email"] = current_user
+      let data2 = { 'body': JSON.stringify(msg2) }
+
+      instance.post('/designerViewActivity', data2).then((response) =>{
+        if (response != null) {
+          let inner2 = [], inner3 = [], pledges = response.data.pledges, supports = response.data.directSupports
+          for (let i = 0; i < supports.length; i++) {
+            const entry = ( 
+              <div id="support_box" style={activity_box}>
+                <label style={{fontWeight: "bold", fontSize: "20pt"}}>${supports[i].amount}</label><br/>
+                <label style={{fontWeight: "bold"}}>Project: {supports[i].project}</label><br/>
+                <label><i>{supports[i].email}</i></label>
+              </div>
+            )
+            inner2.push(entry)
+          }
+          inner2.push(<div style={{height: 10}}/>)
+          setEntries2(inner2)
+
+          for (let i = 0; i < pledges.length; i++) {
+            for (let j = 0; j < pledges[i].pledgers.length; j++) {
+              const entry = ( 
+                <div id="pledge_box" style={activity_box}>
+                  <label style={{fontWeight: "bold", fontSize: "20pt"}}>${pledges[i].amount}</label><br/>
+                  <label style={{fontWeight: "bold"}}>Project: {pledges[i].projectName}</label><br/>
+                  <label>{pledges[i].pledgeName}</label><br/>
+                  <label><i>{pledges[i].pledgers[j]}</i></label>
+                </div>
+              )
+              inner3.push(entry)
+            }
+          }
+          inner3.push(<div style={{height: 10}}/>)
+          setEntries3(inner3)
+          setRetrieving(false)
         }
       })
     }
@@ -467,7 +579,7 @@ function App() {
       forceRedraw(redraw + 1)
     }
 
-    if (entries === undefined) {
+    if (entries === undefined || entries2 === undefined || entries3 === undefined) {
       retrieve()
       return
     }
@@ -478,8 +590,9 @@ function App() {
         <div style={projects_box}>{entries}</div>
         <button style={create_button} onClick={handle_button_create}>+</button>
 
-        <label style={activity_label}>Project Activity</label>
-        <div style={activity_box}></div>
+        <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;&nbsp;Direct Support</label>
+        <div style={activity_box_1}>{entries2}</div>
+        <div style={activity_box_2}>{entries3}</div>
       </div>
     )
   }
@@ -875,7 +988,7 @@ function App() {
     const delete_button = { position: "relative", top: -10, width: 55 }
 
     const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1092 }
-    const activity_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900 }
+    const activity_box = { position: "absolute", width: 540, height: 350, background: "lightgrey", textAlign: "center", top: 150, left: 900 }
 
     const activity_projects_box = { position: "absolute", width: 500, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 20, left: 20 }
     const activity_projects_label = { position: "absolute", width: 500, fontSize: "12pt", top: 10, left: 0 }
@@ -889,6 +1002,9 @@ function App() {
     const activity_pledges_label = { position: "absolute", width: 500, fontSize: "12pt", top: 10, left: 0 }
     const activity_pledges_number = { position: "absolute", width: 500, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
     
+    const reap_box = { position: "absolute", width: 540, height: 76, background: "lightgrey", textAlign: "center", top: 530, left: 900 }
+    const reap_button = { position: "relative", fontSize: "20pt", fontWeight: "bold", top: 20 }
+
     let [entries, setEntries] = React.useState(undefined)
     let [retrieving, setRetrieving] = React.useState(false)
     let [total_projects, setProjects] = React.useState(0)
@@ -902,9 +1018,9 @@ function App() {
       instance.post('/adminList').then((response) => {
         if (response !== null) {
           let allProjects = response.data.result
-          setProjects(response.projectCount)
-          setFunded(response.totalAmountRaised)
-          setPledges(response.pledgeCount)
+          setProjects(response.data.projectCount)
+          setFunded(response.data.totalAmountRaised)
+          setPledges(response.data.pledgeCount)
           if (allProjects !== undefined) {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
@@ -918,9 +1034,10 @@ function App() {
                     <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
                     <label><span style={{fontWeight: "bold"}}>Designer: </span>{project.entrepreneur}</label><br/>
-                    <label><span style={{fontWeight: "bold"}}>Launched?: </span>{project.launched ? "Yes":"No"}</label>
+                    <label><span style={{fontWeight: "bold"}}>Launched?: </span>{project.launched ? "Yes":"No"}</label><br/>
+                    {project.successful != null ? <label><span style={{fontWeight: "bold"}}>Successful?: </span>{project.successful ? "Yes":"No"}</label> : <></> }
                   </button>
-                  {project.launched ? <br/> : <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button> }
+                  <button style={delete_button} onClick={() => handle_button_delete(project.name)}>Delete</button>
                 </div>
               )
               inner.push(entry)
@@ -930,6 +1047,16 @@ function App() {
             setRetrieving(false)
           }
         }
+      })
+
+      let msg2 = {}
+      msg2["supporterEmail"] = current_user
+      let data2 = { 'body': JSON.stringify(msg2) }
+
+      instance.post('/supporterViewProject', data2).then((response) => {
+        if (response != null) {
+        }
+        setRetrieving(false)
       })
     }
 
@@ -946,6 +1073,12 @@ function App() {
 
       instance.post('/designerDeleteProject', data).then((response) => {
         setCurrentName("AdministratorListProjects")
+        forceRedraw(redraw + 1)
+      })
+    }
+
+    function handle_button_reap() {
+      instance.get('/adminReap').then((response) => {
         forceRedraw(redraw + 1)
       })
     }
@@ -977,6 +1110,8 @@ function App() {
             <label style={activity_pledges_number}>{total_pledges}</label>
           </div>
         </div>
+
+        <div style={reap_box}><button style={reap_button} onClick={handle_button_reap}>Reap Projects</button></div>
       </div>
     )
   }

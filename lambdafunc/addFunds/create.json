@@ -1,5 +1,6 @@
 {
     "body" :
     
-"  {\n    \"supporterEmail\" : \"testSupporter\",\n    \"additionalFunds\" : 10\n  }"
+"{\n  \"supporterEmail\": \"rjdillon@wpi.edu\",\n \"additionalFunds\": \"500\",\n}"
+
 }

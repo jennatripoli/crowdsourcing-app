@@ -56,57 +56,132 @@ exports.lambdaHandler = async (event, context) => {
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
     
-    let DesignerDeleteProject = (info) => {
-        return new Promise((resolve, reject) => {
-            pool.query("DELETE FROM Project WHERE name=?", [info.name], (error, rows) => {
+    let getDesignerProjects = (info) => {
+    return new Promise((resolve, reject) => {
+                pool.query("SELECT * FROM Project WHERE designerEmail=?", [info.email], (error, rows) => {
                     if (error) { return reject(error); }
-                    console.log("DELETE:" + JSON.stringify(rows));
-                    
-                    if ((rows.affectedRows > 0)) {
-                        return resolve(true);
+                    if (rows) {
+                        return resolve(rows);
                     } else {
-                        return reject("project not found with name '" + info.name + "'");
-                    }            
+                        return reject("there are no projects");
+                    }
+                });
             });
-        });
-    }
+
+    };
     
-    let DeleteAssociatedPledges = (info) => {
+        
+    
+    let getPledges = (name) => {
         return new Promise((resolve, reject) => {
-            pool.query("DELETE FROM Pledge WHERE projectName=?", [info.name], (error, rows) => {
+            pool.query("SELECT * FROM Pledge WHERE projectName=?", [name], (error, rows) => {
                 if(error) { return reject(error); }
                 
                 if(rows){
                     return resolve(rows);
                 } else {
-                    return reject("no pledges for project with name "+info.name);
+                    return reject("no pledges for project with name "+ name);
                 }
             });
         });
-    }
+    };
+    
+    
+    let getPledgers = (desciptionReward) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Pledger WHERE descriptionReward=?", [desciptionReward], (error, rows) => {
+                    if (error) { return reject(error); }
+                    if (rows) {
+                        return resolve(rows);
+                    } else {
+                        return reject("pledgers not found with name '" + info.descriptionReward + "'");
+                    }            
+            });
+        });
+    };
+    
+    let getDirectSupport = (name) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM DirectSupport WHERE projectName=?", [name], (error, rows) => {
+                    if (error) { return reject(error); }
+                    if (rows) {
+                        return resolve(rows);
+                    } else {
+                        return reject("pledgers not found with name '" + info.descriptionReward + "'");
+                    }            
+            });
+        });
+    };
+
     
     
     try {
+        let projectList = [];
+        let projects = await getDesignerProjects(info);
+        let directSupportList = [];
+        let activePledges = [];
+        let num = 0;
         
-        // 1. Query RDS for the first constant value to see if it exists!
-        //   1.1. If doesn't exist then ADD
-        //   1.2  If it DOES exist, then I need to replace
-        // ----> These have to be done asynchronously in series, and you wait for earlier 
-        // ----> request to complete before beginning the next one
-        //console.log("E1")
-        let deletedPledges = await DeleteAssociatedPledges(info);
-        let deletedProject = await DesignerDeleteProject(info);
+        if(projects) {
+            
+            console.log("projects "+projects);
+            
+            for(let i = 0; i < projects.length; i++) {
+                let project = projects[i];
+                let pledges = await getPledges(project.name);
+                
+                //GETTING PLEDGES
+                if(pledges){
+                    
+                    for (let j = 0; j < pledges.length; j++) {
+                        let currentPledgers = [];
+                        let pledge = pledges[j];
+                        let pledgers = await getPledgers(pledge.descriptionReward);
+                        
+                        if (pledgers) {
+                            for (let k = 0; k < pledgers.length; k ++) {
+                                let pledger = pledgers[k];
+                                currentPledgers.push(pledger.supporterEmail);
+                            }
+                        }
+                        activePledges[num] = {
+                            projectName: project.name,
+                            pledgeName: pledge.descriptionReward,
+                            amount: pledge.amount,
+                            pledgers: currentPledgers
+                        };
+                        num += 1;
+                    }
+                    //GETTING DIRECT SUPPORT
+                    
+                    let directSupports = await getDirectSupport(project.name);
+                    
+                    if(directSupports) {
+                        for (let j = 0; j < directSupports.length; j++){
+                            let directSupporter = directSupports[j];
+                            directSupportList[j] = {
+                              project: directSupporter.projectName,
+                              amount: directSupporter.amount,
+                              email: directSupporter.supporterEmail
+                            };
+                        }
+                        
+                    }
+                    
+                }
+            };
         
-        if(deletedProject){
-            console.log("project was deleted");
-
+            //TODO !!!!!!!!!!!!!
             response.statusCode = 200;
-
-            console.log("RESPONSE: " + JSON.stringify(response))
-        } else {
+            response.pledges = projectList;
+            response.directSupports = directSupportList;
+            response.pledges = activePledges;
+        }
+        else {
             response.statusCode = 400;
             response.error = "Couldn't find projects";
         }
+        
         
         
     } catch (error) {
