@@ -76,7 +76,7 @@ exports.lambdaHandler = async (event, context) => {
                     if (error) { return reject(error); }
                     if ((rows) && (rows.length == 1)) {
                         console.log("AVAILABLE FUNDS:" + JSON.stringify(rows[0].availableFunds))
-                        return resolve(JSON.stringify(rows[0].availableFunds));
+                        return resolve(rows[0].availableFunds);
                     } else {
                         return reject("supporter not found with email '" + info.supporterEmail + "'");
                     }            
@@ -93,7 +93,9 @@ exports.lambdaHandler = async (event, context) => {
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
         //console.log("E1")
-        let newFunds = info.budget + info.additionalFunds;
+        let currentFunds = await getCurrentFunds(info);
+        
+        let newFunds = currentFunds + info.additionalFunds;
         
         const exists = await updateFunds(info, newFunds);
         const updatedFunds = await getCurrentFunds(info);
