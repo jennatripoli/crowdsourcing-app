@@ -92,6 +92,75 @@ exports.lambdaHandler = async (event, context) => {
                 });
         });
     };
+    
+    let getProjectPledges = (name) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Pledge WHERE projectName=?", [name], (error, rows) => {
+                if(error) { return reject(error); }
+                
+                if(rows){
+                    return resolve(rows);
+                } else {
+                    return reject("no pledges for project with name "+ name);
+                }
+            });
+        });
+    }
+    
+    let getPledgePledgers = (desc) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Pledger WHERE descriptionReward=?", [desc], (error, rows) => {
+                if(error) { return reject(error); }
+                
+                if(rows){
+                    return resolve(rows);
+                } else {
+                    return reject("no pledgers for pledge with desc "+ desc);
+                }
+            });
+        });
+    }
+    
+     let getCurrentFunds = (email) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Supporter WHERE email=?", [email], (error, rows) => {
+                    if (error) { return reject(error); }
+                    if ((rows) && (rows.length == 1)) {
+                        console.log("AVAILABLE FUNDS:" + JSON.stringify(rows[0].availableFunds))
+                        return resolve(rows[0].availableFunds);
+                    } else {
+                        return reject("supporter not found with email '" + email + "'");
+                    }            
+            });
+    });
+    }
+    
+    let returnFunds = (email, amount) => {
+        return new Promise((resolve, reject) => {
+            pool.query("UPDATE Supporter SET availableFunds=? WHERE email=?", [amount, email], (error, rows) => {
+                if (error) { return reject(error); }
+                    if (rows.affectedRows == 1) {
+                        return resolve(true);
+                    } else {
+                        return reject("there are no projects");
+                    }
+                });
+        });
+    }
+    
+    let getDirectSupports = (name) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM DirectSupport WHERE projectName=?", [name], (error, rows) => {
+                if(error) { return reject(error); }
+                
+                if(rows){
+                    return resolve(rows);
+                } else {
+                    return reject("no pledges for project with name "+ name);
+                }
+            });
+        });
+    }
 
    
    try {
@@ -120,16 +189,19 @@ exports.lambdaHandler = async (event, context) => {
         
         if(projects) {
             
+            let failed = false;
+            let succeeded = false;
+            
             for (let i = 0; i<projects.length; i++) {
                 let project = projects[i];
                 
                 let projectYear = parseInt(project.deadline.substring(0, 4), 10);
                 if (projectYear < yyyy) {
                     if (project.amountRaised < project.goal) {
-                        const failed = await failProject(project.name);
+                        failed = await failProject(project.name);
                     }
                     else {
-                        const succeeded = await succeedProject(project.name)
+                        succeeded = await succeedProject(project.name)
                     }
                 }
                 
@@ -137,10 +209,10 @@ exports.lambdaHandler = async (event, context) => {
                     let projectMonth = parseInt(project.deadline.substring(5, 7), 10);
                         if (projectMonth < mm) {
                             if (project.amountRaised < project.goal) {
-                            const failed = await failProject(project.name);
+                            failed = await failProject(project.name);
                         }
                         else {
-                            const succeeded = await succeedProject(project.name)
+                            succeeded = await succeedProject(project.name)
                         }
                     }
                     
@@ -148,16 +220,46 @@ exports.lambdaHandler = async (event, context) => {
                         let projectDay = parseInt(project.deadline.substring(8, 10), 10);
                         if (projectDay < dd) {
                             if (project.amountRaised < project.goal) {
-                                const failed = await failProject(project.name);
+                                failed = await failProject(project.name);
                             }
                             
                             else {
-                                const succeeded = await succeedProject(project.name)
+                                succeeded = await succeedProject(project.name)
                             }
                         }
                     }   
                 }
+                
+                if (failed) {
+                    const pledges = await getProjectPledges(project.name)
+                    
+                    for (let j = 0; j<pledges.length; j++) {
+                        let pledge = pledges[j];
+                        const pledgers = await getProjectPledges(pledge.descriptionReward)
+                        
+                        for (let k = 0; k<pledgers.length; k++) {
+                            let pledger = pledgers[k];
+                            let currentFunds = await getCurrentFunds(pledger.supporterEmail);
+                            let newFunds = currentFunds + pledge.amount;
+                            let returned = await returnFunds(pledger.supporterEmail, newFunds)
+                        }
+                        
+                    }
+                    
+                    const supports = getDirectSupports(project.name);
+                    
+                    for (let l=0; l<supports.length; l++) {
+                        let support = supports[l];
+                       let cFunds = await getCurrentFunds(support.supporterEmail);
+                        let nFunds = cFunds + support.amount;
+                        let r = await returnFunds(support.supporterEmail, nFunds)
+                    }
+                }
+                
             }
+            
+            
+            
             response.statusCode = 200;
             response.result  = true;
         }else {
