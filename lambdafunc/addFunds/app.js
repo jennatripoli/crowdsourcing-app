@@ -93,9 +93,11 @@ exports.lambdaHandler = async (event, context) => {
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
         //console.log("E1")
+
         let currentFunds = await getCurrentFunds(info);
         
         let newFunds = currentFunds + info.additionalFunds;
+
         
         const exists = await updateFunds(info, newFunds);
         const updatedFunds = await getCurrentFunds(info);
