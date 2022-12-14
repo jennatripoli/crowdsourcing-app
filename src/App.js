@@ -27,7 +27,7 @@ function App() {
 
   function Header() {
     const header_user = { position: "absolute", left: 20, top: 28 }
-    const header_title = { position: "absolute", fontWeight: "bold", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
+    const header_title = { position: "absolute", fontWeight: "bold", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 14 }
     const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
     const header_label = { position: "absolute", left: 250, top: 8 }
     const header_button = {position: "absolute", right: 20, top: 28 }
@@ -53,7 +53,7 @@ function App() {
     }
 
     function setFunds(param_add) {
-      if (param_add === "" || param_add <= 0) alert("Please enter a valid amount to add to your current funds.")
+      if (param_add === "" || parseInt(param_add) <= 0) alert("Please enter a valid amount to add to your current funds.")
       else {
         let msg = {}
         msg["supporterEmail"] = current_user
@@ -106,28 +106,25 @@ function App() {
   }
 
   function Login() {
-    const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
+    const login_box = { position: "absolute", width: 400, height: 290, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -130 }
     const login_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 400, top: 20, left: 0, textAlign: "center" }
     const login_email_label = { position: "absolute", fontWeight: "bold", top: 100, left: 20, textAlign: "center" }
     const login_email_input = { position: "absolute", width: 220, background: "white", top: 100, left: 150, textAlign: "left" }
-    const login_pass_label = { position: "absolute", fontWeight: "bold", top: 150, left: 20, textAlign: "center" }
-    const login_pass_input = { position: "absolute", width: 220, background: "white", top: 150, left: 150, textAlign: "left" }
-    const login_type_label = { position: "absolute", fontWeight: "bold", top: 200, left: 20, textAlign: "center" }
-    const login_type_radio = { position: "absolute", width: 220, top: 200, left: 150, textAlign: "left" }
-    const login_button = { position: "relative", fontSize: "16pt", top: 320, width: 200 }
+    const login_type_label = { position: "absolute", fontWeight: "bold", top: 140, left: 20, textAlign: "center" }
+    const login_type_radio = { position: "absolute", width: 220, top: 140, left: 150, textAlign: "left" }
+    const login_button = { position: "relative", fontSize: "16pt", top: 230, width: 200 }
 
     let [input_email, setEmail] = useState("")
-    let [input_password, setPassword] = useState("")
     let input_account_type = ""
 
     function handle_button_login() {
       if (document.querySelector('input[name="account_type"]:checked') !== "") input_account_type = document.querySelector('input[name="account_type"]:checked')
 
-      if (input_email === "" || input_password === "" || input_account_type.value === "") alert("Fill out all fields before logging in or registering.")
+      if (input_email === "" || input_account_type.value === "") alert("Fill out all fields before logging in or registering.")
       else {
         let msg = {}
         msg["email"] = input_email
-        msg["password"] = input_password
+        msg["password"] = "mom"
         let data = { 'body': JSON.stringify(msg) }
 
         if (input_account_type.value === 'designer') {
@@ -163,9 +160,6 @@ function App() {
 
           <label style={login_email_label}>email address:</label>
           <input type="text" value={input_email} onChange={e => setEmail(e.target.value)} style={login_email_input}></input>
-
-          <label style={login_pass_label}>password:</label>
-          <input type="text" value={input_password} onChange={e => setPassword(e.target.value)} style={login_pass_input}></input>
 
           <label style={login_type_label}>account type:</label>
           <div style={login_type_radio}>
@@ -230,24 +224,22 @@ function App() {
             }
             inner.push(<div style={{height: 10}}/>)
             setEntries(inner)
-            setRetrieving(false)
           }
         }
       })
 
       let msg2 = {}
-      msg2["supporterEmail"] = current_user
+      msg2["name"] = current_user
       let data2 = { 'body': JSON.stringify(msg2) }
 
       instance.post('/supporterViewActivity', data2).then((response) => {
-        console.log(response)
         if (response != null) {
           let inner2 = [], inner3 = [], pledges = response.data.pledges, supports = response.data.directSupport
           for (let i = 0; i < supports.length; i++) {
             const entry = ( 
               <div id="support_box" style={activity_box}>
                 <label style={{fontWeight: "bold", fontSize: "20pt"}}>${supports[i].amount}</label><br/>
-                <label style={{fontWeight: "bold"}}>Project: {supports[i].project}</label>
+                <label style={{fontWeight: "bold"}}>Project: {supports[i].projectName}</label>
               </div>
             )
             inner2.push(entry)
@@ -255,17 +247,15 @@ function App() {
           inner2.push(<div style={{height: 10}}/>)
           setEntries2(inner2)
 
-          for (let i =  0; i < pledges.length; i++) {
-            for (let j = 0; j < pledges[i].pledgers.length; j++) {
-              const entry = ( 
-                <div id="pledge_box" style={activity_box}>
-                  <label style={{fontWeight: "bold", fontSize: "20pt"}}>${pledges[i].amount}</label><br/>
-                  <label style={{fontWeight: "bold"}}>Project: {pledges[i].projectName}</label><br/>
-                  <label>{pledges[i].pledgeName}</label>
-                </div>
-              )
-              inner3.push(entry)
-            }
+          for (let i = 0; i < pledges.length; i++) {
+            const entry = ( 
+              <div id="pledge_box" style={activity_box}>
+                <label style={{fontWeight: "bold", fontSize: "20pt"}}>${pledges[i].amount}</label><br/>
+                <label style={{fontWeight: "bold"}}>Project: {pledges[i].project}</label><br/>
+                <label>{pledges[i].description}</label>
+              </div>
+            )
+            inner3.push(entry)
           }
           inner3.push(<div style={{height: 10}}/>)
           setEntries3(inner3)
@@ -305,8 +295,8 @@ function App() {
         <div style={projects_box}>{entries}</div>
 
         <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;&nbsp;Direct Support</label>
-        <div style={activity_box_1}>{entries2}</div>
-        <div style={activity_box_2}>{entries3}</div>
+        <div style={activity_box_1}>{entries3}</div>
+        <div style={activity_box_2}>{entries2}</div>
       </div>
     )
   }
@@ -422,8 +412,11 @@ function App() {
         let data2 = { 'body': JSON.stringify(msg2) }
 
         instance.post('/directSupport', data2).then((response) => {
-          setCurrentFunds(parseInt(current_funds) - parseInt(param_amount))
-          forceRedraw(redraw + 1)
+          if (response.data.statusCode == 200) {
+            setCurrentFunds(response.supporterFunds)
+            setCurrentName("SupporterViewProject")
+            forceRedraw(redraw + 1)
+          } else alert("Cannot directly fund a project more than once.")
         })
       }
     }
@@ -591,8 +584,8 @@ function App() {
         <button style={create_button} onClick={handle_button_create}>+</button>
 
         <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;&nbsp;Direct Support</label>
-        <div style={activity_box_1}>{entries2}</div>
-        <div style={activity_box_2}>{entries3}</div>
+        <div style={activity_box_1}>{entries3}</div>
+        <div style={activity_box_2}>{entries2}</div>
       </div>
     )
   }
