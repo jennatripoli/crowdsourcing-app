@@ -77,7 +77,7 @@ exports.lambdaHandler = async (event, context) => {
                     if (error) { return reject(error); }
                     if ((rows) && (rows.length == 1)) {
                         console.log("AVAILABLE FUNDS:" + JSON.stringify(rows[0].availableFunds))
-                        return resolve(JSON.stringify(rows[0].availableFunds));
+                        return resolve(rows[0].availableFunds);
                     } else {
                         return reject("supporter not found with email '" + info.supporterEmail + "'");
                     }            
@@ -90,7 +90,7 @@ exports.lambdaHandler = async (event, context) => {
             pool.query("UPDATE Supporter SET availableFunds=? WHERE email=?", [newFunds, info.supporterEmail], (error, rows) => {
                     if (error) { return reject(error); }
                     if (rows.affectedRows == 1) {
-                        console.log("TEST2:" + JSON.stringify(JSON.stringify(rows[0])));
+                        console.log("TEST2:" + JSON.stringify(rows[0]));
                         return resolve(true);
                     } else {
                         return reject("supporter not found with name '" + info.supporterEmail + "'");
@@ -105,7 +105,7 @@ exports.lambdaHandler = async (event, context) => {
                 if (error) { return reject(error); }
                 if ((rows) && (rows.length == 1)) {
                     console.log("PROJECT TOTAL:" + JSON.stringify(rows[0].amountRaised))
-                    return resolve(JSON.stringify(rows[0].amountRaised));
+                    return resolve(rows[0].amountRaised);
                 } else {
                     return reject("project not found with name '" + info.projectName + "'");
                 }            
@@ -132,7 +132,7 @@ exports.lambdaHandler = async (event, context) => {
         
         if(addedSupport){
             let currentFunds = await getSupporterCurrentFunds(info);
-            let newSupporterFunds = currentFunds - info.amount;
+            let newSupporterFunds = parseInt(currentFunds, 10) - parseInt(info.amount, 10);
             console.log("NEW FUNDS: " + newSupporterFunds)
             if (newSupporterFunds > 0) {
                 let updateFunds = await setNewFunds(info, newSupporterFunds);
@@ -141,15 +141,15 @@ exports.lambdaHandler = async (event, context) => {
                     let currentProjectTotal = await getProjectTotal(info)
                     currentProjectTotal = parseInt(currentProjectTotal)
                     //console.log("E6")
-                    let newProjectTotal = currentProjectTotal + info.amount
+                    let newProjectTotal = parseInt(currentProjectTotal, 10) + parseInt(info.amount,10)
                     console.log(currentProjectTotal)
                     console.log(newFunds)
-                    console.log("NEW TOTAL: " + newProjectTotal)
+                    console.log("NEW TOTAL: " + JSON.stringify(newProjectTotal))
                     let setNewTotal = await setProjectTotal(info, newProjectTotal)
                     
                     response.statusCode = 200
-                    response.supporterFunds = newFunds
-                    response.projectTotal = newProjectTotal
+                    response.supporterFunds = parseInt(newFunds, 10)
+                    response.projectTotal = parseInt(newProjectTotal)
                     console.log("E5")
                 }
             }
