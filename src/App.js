@@ -412,6 +412,7 @@ function App() {
         let data2 = { 'body': JSON.stringify(msg2) }
 
         instance.post('/directSupport', data2).then((response) => {
+          console.log(response)
           if (response.data.statusCode == 200) {
             setCurrentFunds(response.supporterFunds)
             setCurrentName("SupporterViewProject")
@@ -630,7 +631,7 @@ function App() {
           if (response.data.statusCode === 400) alert("Cannot create a project with the same name as another project.")
           else {
             setCurrentProject(input_name)
-            setCurrentName("DesignerViewProject")
+            setCurrentName("DesignerEditProject")
             forceRedraw(redraw + 1)
           }
         })
@@ -661,6 +662,20 @@ function App() {
   }
 
   function DesignerCreatePledge() {
+    const create_box = { position: "absolute", width: 500, height: 290, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -250, marginTop: -130 }
+    const create_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 500, top: 20, left: 0, textAlign: "center" }
+
+    const amount_label = { position: "absolute", fontWeight: "bold", top: 100, left: 42, textAlign: "center" }
+    const amount_input = { position: "absolute", width: 100, background: "white", top: 100, left: 250, textAlign: "left" }
+
+    const reward_label = { position: "absolute", fontWeight: "bold", top: 140, left: 42, textAlign: "center" }
+    const reward_input = { position: "absolute", width: 200, background: "white", top: 140, left: 250, textAlign: "left" }
+
+    const max_label = { position: "absolute", fontWeight: "bold", top: 180, left: 42, textAlign: "center" }
+    const max_input = { position: "absolute", width: 100, background: "white", top: 180, left: 250, textAlign: "left" }
+
+    const create_button = { position: "relative", fontSize: "16pt", top: 230, width: 200 }
+
     let [input_amount, setAmount] = useState(0)
     let [input_reward, setReward] = useState("")
     let [input_max, setMax] = useState(null)
@@ -676,7 +691,7 @@ function App() {
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/createPledge', data).then((response) => {
-          setCurrentName("DesignerViewProject")
+          setCurrentName("DesignerEditProject")
           forceRedraw(redraw + 1)
         })
       }
@@ -684,12 +699,16 @@ function App() {
 
     return (
       <div id="DesignerCreatePledge" className="DesignerCreatePledge">
-        <br/><br/><br/><br/><br/>
-        <label>CREATE A NEW PLEDGE</label><br/>
-        <label>Amount: $<input type="text" value={input_amount} onChange={e => setAmount(e.target.value)} /></label><br/>
-        <label>Description of Reward:<input type="text" value={input_reward} onChange={e => setReward(e.target.value)} /></label><br/>
-        <label>Max Supporters (optional): <input type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
-        <button onClick={handle_button_create}>Create Pledge</button>
+        <div style={create_box}>
+          <label style={create_title}>Create a New Pledge</label>
+          <label style={amount_label}>Amount:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;$</label>
+          <input style={amount_input} type="number" value={input_amount} onChange={e => setAmount(e.target.value)} min="1"/>
+          <label style={reward_label}>Description of Reward:</label>
+          <input style={reward_input} type="text" value={input_reward} onChange={e => setReward(e.target.value)} />
+          <label style={max_label}>Max Supporters <span style={{fontWeight:"normal"}}>(optional)</span>:</label>
+          <input style={max_input} type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" />
+          <button style={create_button} onClick={handle_button_create}>Create Pledge</button>
+        </div>
       </div>
     )
   }
