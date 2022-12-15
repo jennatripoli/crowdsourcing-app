@@ -28,7 +28,7 @@ function App() {
   function Header() {
     const header_user = { position: "absolute", left: 20, top: 28 }
     const header_title = { position: "absolute", fontWeight: "bold", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 14 }
-    const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
+    const header_box = { position: "absolute", background: "thistle", width: "100%", height: 10, top: 60 }
     const header_label = { position: "absolute", left: 250, top: 8 }
     const header_button = {position: "absolute", right: 20, top: 28 }
     const header_label2 = { position: "absolute", top: 28, left: 250 }
@@ -107,7 +107,7 @@ function App() {
   }
 
   function Login() {
-    const login_box = { position: "absolute", width: 400, height: 290, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -130 }
+    const login_box = { position: "absolute", width: 400, height: 290, background: "thistle", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -130 }
     const login_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 400, top: 20, left: 0, textAlign: "center" }
     const login_email_label = { position: "absolute", fontWeight: "bold", top: 100, left: 20, textAlign: "center" }
     const login_email_input = { position: "absolute", width: 220, background: "white", top: 100, left: 150, textAlign: "left" }
@@ -181,13 +181,13 @@ function App() {
     const type_button = { position: "absolute", left: 490, top: 120 }
     const description_button = { position: "absolute", left: 540, top: 120 }
 
-    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
+    const projects_box = { position: "absolute", background: "thistle", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 760, textAlign: "left", margin: 10, marginBottom: 0 }
     const project_name = { fontSize: "18pt", fontWeight: "bold" }
 
     const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 925 }
-    const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
-    const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
+    const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "thistle", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "thistle", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
     const activity_box = { width: 212, background: "white", margin: 10, marginBottom: 0, padding: 5, paddingTop: 2 }
 
     let msg = {}
@@ -319,7 +319,7 @@ function App() {
   }
 
   function SupporterViewProject() {
-    const info_box = { position: "absolute", width: 800, height: 635, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const info_box = { position: "absolute", width: 800, height: 635, background: "thistle", textAlign: "center", top: 120, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
     const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
     const deadline_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
@@ -335,11 +335,11 @@ function App() {
     const designer_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, right: 20 }
 
     const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
-    const active_pledges_box = { position: "absolute", width: 540, height: 540, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const active_pledges_box = { position: "absolute", width: 540, height: 540, background: "thistle", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10, marginBottom: 10 }
     const claim_button = { position: "absolute", right: 10, top: 10 }
 
-    const direct_box = { position: "absolute", width: 540, height: 45, background: "lightgrey", textAlign: "center", top: 710, left: 900 }
+    const direct_box = { position: "absolute", width: 540, height: 45, background: "thistle", textAlign: "center", top: 710, left: 900 }
     const direct_label = { position: "absolute", fontSize: "18pt", fontWeight: "bold", top: 5, left: 80 }
     const direct_input = { position: "absolute", width: 60, height: 22, top: 9, left: 295}
     const direct_button = { position: "absolute", top: 9, left: 380, fontSize: "14pt" }
@@ -478,14 +478,14 @@ function App() {
 
   function DesignerListProjects() {
     const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
-    const projects_box = { background: "lightgrey", position: "absolute", width: 800, height: 520, overflowY: "scroll", top: 150, left: 50 }
+    const projects_box = { background: "thistle", position: "absolute", width: 800, height: 520, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
     const create_button = { position: "absolute", fontSize: "40pt", paddingLeft: 16, paddingRight: 16, top: 690, left: 420 }
     const edit_button = { position: "relative", top: -10, width: 50 }
 
     const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 925 }
-    const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
-    const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
+    const activity_box_1 = { position: "absolute", width: 260, height: 605, background: "thistle", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const activity_box_2 = { position: "absolute", width: 260, height: 605, background: "thistle", textAlign: "center", top: 150, left: 1172, display: "inline-block", overflowY: "scroll" }
     const activity_box = { width: 212, background: "white", margin: 10, marginBottom: 0, padding: 5, paddingTop: 2 }
 
     let msg = {}
@@ -606,7 +606,7 @@ function App() {
   }
 
   function DesignerCreateProject() {
-    const info_box = { position: "absolute", width: 800, height: 550, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const info_box = { position: "absolute", width: 800, height: 550, background: "thistle", textAlign: "center", top: 120, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", textAlign: "center", top: 20 }
 
     const type_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
@@ -676,7 +676,7 @@ function App() {
   }
 
   function DesignerCreatePledge() {
-    const create_box = { position: "absolute", width: 500, height: 290, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -250, marginTop: -130 }
+    const create_box = { position: "absolute", width: 500, height: 290, background: "thistle", textAlign: "center", top: "50%", left: "50%", marginLeft: -250, marginTop: -130 }
     const create_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 500, top: 20, left: 0, textAlign: "center" }
 
     const amount_label = { position: "absolute", fontWeight: "bold", top: 100, left: 42, textAlign: "center" }
@@ -731,7 +731,7 @@ function App() {
   }
 
   function DesignerEditProject() {
-    const info_box = { position: "absolute", width: 800, height: 550, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const info_box = { position: "absolute", width: 800, height: 550, background: "thistle", textAlign: "center", top: 120, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
 
     const type_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
@@ -749,7 +749,7 @@ function App() {
     const delete_button = { position: "absolute", fontSize: "20pt", top: 700, left: 600 }
 
     const all_pledges_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
-    const all_pledges_box = { position: "absolute", width: 540, height: 520, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const all_pledges_box = { position: "absolute", width: 540, height: 520, background: "thistle", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10 }
     const pledge_amount = { fontWeight: "bold" }
     const pledge_delete_button = { position: "absolute", top: 10, right: 10 }
@@ -902,7 +902,7 @@ function App() {
   }
 
   function DesignerViewProject() {
-    const info_box = { position: "absolute", width: 800, height: 635, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const info_box = { position: "absolute", width: 800, height: 635, background: "thistle", textAlign: "center", top: 120, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
     const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
     const deadline_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
@@ -918,7 +918,7 @@ function App() {
     const type_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, left: 20 } 
     
     const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
-    const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "thistle", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10, marginBottom: 10 }
     const pledge_amount = { fontWeight: "bold" }
 
@@ -1012,12 +1012,12 @@ function App() {
 
   function AdministratorListProjects() {
     const page_label = { position: "absolute", fontSize: "30pt", fontWeight: "bold", textAlign: "center", width: 800, left: 20, top: 90 }
-    const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
+    const projects_box = { position: "absolute", background: "thistle", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 700, textAlign: "left", margin: 10, marginBottom: 0 }
     const delete_button = { position: "relative", top: -10, width: 55 }
 
     const activity_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1092 }
-    const activity_box = { position: "absolute", width: 540, height: 350, background: "lightgrey", textAlign: "center", top: 150, left: 900 }
+    const activity_box = { position: "absolute", width: 540, height: 350, background: "thistle", textAlign: "center", top: 150, left: 900 }
 
     const activity_projects_box = { position: "absolute", width: 500, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 20, left: 20 }
     const activity_projects_label = { position: "absolute", width: 500, fontSize: "12pt", top: 10, left: 0 }
@@ -1031,7 +1031,7 @@ function App() {
     const activity_pledges_label = { position: "absolute", width: 500, fontSize: "12pt", top: 10, left: 0 }
     const activity_pledges_number = { position: "absolute", width: 500, fontSize: "20pt", fontWeight: "bold", top: 40, left: 0 }
     
-    const reap_box = { position: "absolute", width: 540, height: 76, background: "lightgrey", textAlign: "center", top: 530, left: 900 }
+    const reap_box = { position: "absolute", width: 540, height: 76, background: "thistle", textAlign: "center", top: 530, left: 900 }
     const reap_button = { position: "relative", fontSize: "20pt", fontWeight: "bold", top: 20 }
 
     let [entries, setEntries] = React.useState(undefined)
@@ -1146,7 +1146,7 @@ function App() {
   }
 
   function AdministratorViewProject() {
-    const info_box = { position: "absolute", width: 800, height: 635, background: "lightgrey", textAlign: "center", top: 120, left: 50, display: "inline-block" }
+    const info_box = { position: "absolute", width: 800, height: 635, background: "thistle", textAlign: "center", top: 120, left: 50, display: "inline-block" }
     const project_name = { position: "relative", fontSize: "30pt", fontWeight: "bold", top: 20 }
     const deadline_box = { position: "absolute", width: 370, height: 85, background: "white", outline: "1px solid black", textAlign: "center", top: 100, left: 20 }
     const deadline_label = { position: "absolute", width: 370, fontSize: "12pt", top: 10, left: 0 }
@@ -1162,7 +1162,7 @@ function App() {
     const type_label = { position: "absolute", fontSize: "14pt", fontWeight: "bold", top: 550, left: 20 } 
     
     const active_label = { position: "absolute", fontSize: "20pt", fontWeight: "bold", top: 110, left: 1070 }
-    const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "lightgrey", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
+    const active_pledges_box = { position: "absolute", width: 540, height: 605, background: "thistle", textAlign: "center", top: 150, left: 900, display: "inline-block", overflowY: "scroll" }
     const pledge_box = { position: "relative", width: 480, background: "white", outline: "1px solid black", textAlign: "left", left: 10, top: 10, padding: 10, marginBottom: 10 }
     const pledge_amount = { fontWeight: "bold" }
 
