@@ -56,19 +56,6 @@ exports.lambdaHandler = async (event, context) => {
     let info = JSON.parse(actual_event);
     console.log("info:" + JSON.stringify(info)); //  info.arg1 and info.arg2
     
-    let checkIfAlreadySupported = (info) => {
-        return new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM Supporter WHERE email=?", [info.supporterEmail], (error, rows) => {
-                    if (error) { return reject(error); }
-                    if ((rows) && (rows.length == 1)) {
-                        return resolve(true);
-                    } else {
-                        return resolve(false);
-                    }            
-            });
-    });
-    }
-    
     let addDirectSupport = (info) => {
         return new Promise((resolve, reject) => {
             pool.query("INSERT INTO DirectSupport (projectName, amount, supporterEmail) VALUES(?, ?, ?)", 
@@ -90,7 +77,7 @@ exports.lambdaHandler = async (event, context) => {
                     if (error) { return reject(error); }
                     if ((rows) && (rows.length == 1)) {
                         console.log("AVAILABLE FUNDS:" + JSON.stringify(rows[0].availableFunds))
-                        return resolve(rows[0].availableFunds);
+                        return resolve(JSON.stringify(rows[0].availableFunds));
                     } else {
                         return reject("supporter not found with email '" + info.supporterEmail + "'");
                     }            
@@ -103,7 +90,7 @@ exports.lambdaHandler = async (event, context) => {
             pool.query("UPDATE Supporter SET availableFunds=? WHERE email=?", [newFunds, info.supporterEmail], (error, rows) => {
                     if (error) { return reject(error); }
                     if (rows.affectedRows == 1) {
-                        console.log("TEST2:" + JSON.stringify(rows[0]));
+                        console.log("TEST2:" + JSON.stringify(JSON.stringify(rows[0])));
                         return resolve(true);
                     } else {
                         return reject("supporter not found with name '" + info.supporterEmail + "'");
@@ -118,7 +105,7 @@ exports.lambdaHandler = async (event, context) => {
                 if (error) { return reject(error); }
                 if ((rows) && (rows.length == 1)) {
                     console.log("PROJECT TOTAL:" + JSON.stringify(rows[0].amountRaised))
-                    return resolve(rows[0].amountRaised);
+                    return resolve(JSON.stringify(rows[0].amountRaised));
                 } else {
                     return reject("project not found with name '" + info.projectName + "'");
                 }            
@@ -139,51 +126,13 @@ exports.lambdaHandler = async (event, context) => {
     });
     }
     
-    let getDirectSupportAmount = (info) => {
-        return new Promise((resolve, reject) => {
-        pool.query("SELECT * FROM DirectSupport WHERE supporterEmail=?", [info.supporterEmail], (error, rows) => {
-                if (error) { return reject(error); }
-                if ((rows) && (rows.length == 1)) {
-                    console.log("PROJECT TOTAL:" + JSON.stringify(rows[0].amountRaised))
-                    return resolve(rows[0].amountRaised);
-                } else {
-                    return reject("project not found with name '" + info.projectName + "'");
-                }            
-        });
-    });
-    }
-    
-    let updateDirectSupport = (info, newAmount) => {
-        return new Promise((resolve, reject) => {
-            pool.query("UPDATE DirectSupport SET amount=? WHERE (supporterEmail=? AND projectName=?)", [newAmount, info.supporterEmail, info.projectName], (error, rows) => {
-                    if (error) { return reject(error); }
-                    if (rows.affectedRows == 1) {
-                        return resolve(true);
-                    } else {
-                        return reject("couldnt update direct support");
-                    }            
-            });
-    });
-    }
-    
     
     try {
-        
-        const alreadySupported = await checkIfAlreadySupported(info)
-        const addedSupport = false;
-        
-        if(alreadySupported){
-            let currentAmount = await getDirectSupportAmount(info)
-            let newAmount = parseInt(info.amount) + parseInt(currentAmount);
-            addedSupport = await updateDirectSupport(info, newAmount);
-            
-        }else{
-            addedSupport = await addDirectSupport(info);
-        }
+        const addedSupport = await addDirectSupport(info);
         
         if(addedSupport){
             let currentFunds = await getSupporterCurrentFunds(info);
-            let newSupporterFunds = parseInt(currentFunds, 10) - parseInt(info.amount, 10);
+            let newSupporterFunds = currentFunds - info.amount;
             console.log("NEW FUNDS: " + newSupporterFunds)
             if (newSupporterFunds > 0) {
                 let updateFunds = await setNewFunds(info, newSupporterFunds);
@@ -192,15 +141,15 @@ exports.lambdaHandler = async (event, context) => {
                     let currentProjectTotal = await getProjectTotal(info)
                     currentProjectTotal = parseInt(currentProjectTotal)
                     //console.log("E6")
-                    let newProjectTotal = parseInt(currentProjectTotal, 10) + parseInt(info.amount,10)
+                    let newProjectTotal = currentProjectTotal + info.amount
                     console.log(currentProjectTotal)
                     console.log(newFunds)
-                    console.log("NEW TOTAL: " + JSON.stringify(newProjectTotal))
+                    console.log("NEW TOTAL: " + newProjectTotal)
                     let setNewTotal = await setProjectTotal(info, newProjectTotal)
                     
                     response.statusCode = 200
-                    response.supporterFunds = parseInt(newFunds, 10)
-                    response.projectTotal = parseInt(newProjectTotal)
+                    response.supporterFunds = newFunds
+                    response.projectTotal = newProjectTotal
                     console.log("E5")
                 }
             }
@@ -214,9 +163,6 @@ exports.lambdaHandler = async (event, context) => {
             response.statusCode = 400;
             response.error = JSON.stringify("unable to add direct support to project")
         }
-            
-        
-        
         // 1. Query RDS for the first constant value to see if it exists!
         //   1.1. If doesn't exist then ADD
         //   1.2  If it DOES exist, then I need to replace
