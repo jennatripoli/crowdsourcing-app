@@ -195,6 +195,7 @@ exports.lambdaHandler = async (event, context) => {
             for (let i = 0; i<projects.length; i++) {
                 let project = projects[i];
                 
+                if (project.successful === null){
                 let projectYear = parseInt(project.deadline.substring(0, 4), 10);
                 console.log("Project Year: " + JSON.stringify(projectYear));
                 if (projectYear < yyyy) {
@@ -271,7 +272,7 @@ exports.lambdaHandler = async (event, context) => {
                 
             }
             
-            
+            }
             
             response.statusCode = 200;
             response.result  = true;
