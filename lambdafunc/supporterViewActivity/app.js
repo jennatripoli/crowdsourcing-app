@@ -156,7 +156,8 @@ exports.lambdaHandler = async (event, context) => {
                     activePledges[i] = {
                         description:  pledge.descriptionReward,
                         amount: pledge.amount,
-                        maxSupporters: pledge.maxSupporters
+                        maxSupporters: pledge.maxSupporters,
+                        project: pledge.projectName
                     }
                 };
                 

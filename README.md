@@ -1,2 +1,10 @@
-# Crowdsourcing App
-CS 3733 B22
+# Crowdsourcing Application
+This is a crowdsourced funding application using JavaScript with React and Amazon Web Services (AWS). The application allows for custom user-created projects to be funded through claimed pledges and direct donations.
+
+Users start off by signing in or creating an account with a username and password and selecting an account type – supporter, designer, or administrator. If a user tries to log in with a username that does not have an account already, a new account will be created for them. Administrators are able to view all projects on the site, both launched and not launched. They can delete projects and see basic information about each project. 
+ 
+Supporters can view all active projects on the site and donate money either by claiming pledges with a specific donation amount and reward or by directly funding a project without a reward. Supporters are also able to search through all active projects using the project genre field. When a Supporter creates an account, they start with a specific balance of available funds to put towards projects. The Supporter can add funds to this balance at any time. Each Supporter can view their past activity with both directly supporting projects and claiming pledges through a side dashboard. Supporters who donate to a project that fails to reach its goal amount by its deadline will have their funds returned to them. 
+ 
+Designers are responsible for creating all projects. A Designer can create as many projects as they please, with each project having information such as a name, description, deadline, goal amount, and genre. Each project also has a list of available pledges that Supporters can claim, with a description of the reward, dollar amount, and an optional maximum number of Supporters that can claim the pledge. The Designer can edit project details, including the list of pledges, up until the project is launched. Designers can also delete their own projects before the project is launched. When a project is launched, its Designer can still view the project, and they are also able to see what Supporters have claimed each pledge. Each Designer can view activity for their projects (both direct support and claimed pledges) through a side dashboard. 
+
+CS 3733, B-Term 2022, Professor Heineman

@@ -27,7 +27,7 @@ function App() {
 
   function Header() {
     const header_user = { position: "absolute", left: 20, top: 28 }
-    const header_title = { position: "absolute", fontWeight: "bold", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 20 }
+    const header_title = { position: "absolute", fontWeight: "bold", fontSize: 24, left: "50%", textAlign: "center", marginLeft: -200, width: 400, top: 14 }
     const header_box = { position: "absolute", background: "lightgrey", width: "100%", height: 10, top: 60 }
     const header_label = { position: "absolute", left: 250, top: 8 }
     const header_button = {position: "absolute", right: 20, top: 28 }
@@ -53,7 +53,7 @@ function App() {
     }
 
     function setFunds(param_add) {
-      if (param_add === "" || param_add <= 0) alert("Please enter a valid amount to add to your current funds.")
+      if (param_add === "" || parseInt(param_add) <= 0) alert("Please enter a valid amount to add to your current funds.")
       else {
         let msg = {}
         msg["supporterEmail"] = current_user
@@ -106,28 +106,25 @@ function App() {
   }
 
   function Login() {
-    const login_box = { position: "absolute", width: 400, height: 380, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -190 }
+    const login_box = { position: "absolute", width: 400, height: 290, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -200, marginTop: -130 }
     const login_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 400, top: 20, left: 0, textAlign: "center" }
     const login_email_label = { position: "absolute", fontWeight: "bold", top: 100, left: 20, textAlign: "center" }
     const login_email_input = { position: "absolute", width: 220, background: "white", top: 100, left: 150, textAlign: "left" }
-    const login_pass_label = { position: "absolute", fontWeight: "bold", top: 150, left: 20, textAlign: "center" }
-    const login_pass_input = { position: "absolute", width: 220, background: "white", top: 150, left: 150, textAlign: "left" }
-    const login_type_label = { position: "absolute", fontWeight: "bold", top: 200, left: 20, textAlign: "center" }
-    const login_type_radio = { position: "absolute", width: 220, top: 200, left: 150, textAlign: "left" }
-    const login_button = { position: "relative", fontSize: "16pt", top: 320, width: 200 }
+    const login_type_label = { position: "absolute", fontWeight: "bold", top: 140, left: 20, textAlign: "center" }
+    const login_type_radio = { position: "absolute", width: 220, top: 140, left: 150, textAlign: "left" }
+    const login_button = { position: "relative", fontSize: "16pt", top: 230, width: 200 }
 
     let [input_email, setEmail] = useState("")
-    let [input_password, setPassword] = useState("")
     let input_account_type = ""
 
     function handle_button_login() {
       if (document.querySelector('input[name="account_type"]:checked') !== "") input_account_type = document.querySelector('input[name="account_type"]:checked')
 
-      if (input_email === "" || input_password === "" || input_account_type.value === "") alert("Fill out all fields before logging in or registering.")
+      if (input_email === "" || input_account_type.value === "") alert("Fill out all fields before logging in or registering.")
       else {
         let msg = {}
         msg["email"] = input_email
-        msg["password"] = input_password
+        msg["password"] = "mom"
         let data = { 'body': JSON.stringify(msg) }
 
         if (input_account_type.value === 'designer') {
@@ -164,9 +161,6 @@ function App() {
           <label style={login_email_label}>email address:</label>
           <input type="text" value={input_email} onChange={e => setEmail(e.target.value)} style={login_email_input}></input>
 
-          <label style={login_pass_label}>password:</label>
-          <input type="text" value={input_password} onChange={e => setPassword(e.target.value)} style={login_pass_input}></input>
-
           <label style={login_type_label}>account type:</label>
           <div style={login_type_radio}>
             <div><label><input type="radio" id="supporter" name="account_type" value="supporter"></input>supporter</label></div>
@@ -181,8 +175,10 @@ function App() {
   }
 
   function SupporterListProjects() {
-    const search_bar = { position: "absolute", width: 300, left: 50, top: 120 }
-    const type_button = { position: "absolute", left: 365, top: 120 }
+    const search_bar = { position: "absolute", width: 300, left: 60, top: 120 }
+    const search_label = { position: "absolute", left: 410, top: 120 }
+    const type_button = { position: "absolute", left: 490, top: 120 }
+    const description_button = { position: "absolute", left: 540, top: 120 }
 
     const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 760, textAlign: "left", margin: 10, marginBottom: 0 }
@@ -230,24 +226,22 @@ function App() {
             }
             inner.push(<div style={{height: 10}}/>)
             setEntries(inner)
-            setRetrieving(false)
           }
         }
       })
 
       let msg2 = {}
-      msg2["supporterEmail"] = current_user
+      msg2["name"] = current_user
       let data2 = { 'body': JSON.stringify(msg2) }
 
       instance.post('/supporterViewActivity', data2).then((response) => {
-        console.log(response)
         if (response != null) {
           let inner2 = [], inner3 = [], pledges = response.data.pledges, supports = response.data.directSupport
           for (let i = 0; i < supports.length; i++) {
             const entry = ( 
               <div id="support_box" style={activity_box}>
                 <label style={{fontWeight: "bold", fontSize: "20pt"}}>${supports[i].amount}</label><br/>
-                <label style={{fontWeight: "bold"}}>Project: {supports[i].project}</label>
+                <label style={{fontWeight: "bold"}}>Project: {supports[i].projectName}</label>
               </div>
             )
             inner2.push(entry)
@@ -255,17 +249,15 @@ function App() {
           inner2.push(<div style={{height: 10}}/>)
           setEntries2(inner2)
 
-          for (let i =  0; i < pledges.length; i++) {
-            for (let j = 0; j < pledges[i].pledgers.length; j++) {
-              const entry = ( 
-                <div id="pledge_box" style={activity_box}>
-                  <label style={{fontWeight: "bold", fontSize: "20pt"}}>${pledges[i].amount}</label><br/>
-                  <label style={{fontWeight: "bold"}}>Project: {pledges[i].projectName}</label><br/>
-                  <label>{pledges[i].pledgeName}</label>
-                </div>
-              )
-              inner3.push(entry)
-            }
+          for (let i = 0; i < pledges.length; i++) {
+            const entry = ( 
+              <div id="pledge_box" style={activity_box}>
+                <label style={{fontWeight: "bold", fontSize: "20pt"}}>${pledges[i].amount}</label><br/>
+                <label style={{fontWeight: "bold"}}>Project: {pledges[i].project}</label><br/>
+                <label>{pledges[i].description}</label>
+              </div>
+            )
+            inner3.push(entry)
           }
           inner3.push(<div style={{height: 10}}/>)
           setEntries3(inner3)
@@ -290,6 +282,16 @@ function App() {
       return
     }
 
+    function handle_button_description() {
+      msg = {}
+      msg["supporterEmail"] = current_user
+      msg["keyWord"] = input_search
+      data = { 'body': JSON.stringify(msg) }
+      setEntries(undefined)
+      retrieve()
+      return
+    }
+
     if (entries === undefined || entries2 === undefined || entries3 === undefined) {
       retrieve()
       return
@@ -298,15 +300,17 @@ function App() {
     return (
       <div id="SupporterListProjects" className="SupporterListProjects">
         <div>
-          <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects by genre" />
-          <button style={type_button} onClick={handle_button_type}>Search</button>
+          <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects" />
+          <label style={search_label}>Search By:</label>
+          <button style={type_button} onClick={handle_button_type}>Type</button>
+          <button style={description_button} onClick={handle_button_description}>Description</button>
         </div>
 
         <div style={projects_box}>{entries}</div>
 
         <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;&nbsp;Direct Support</label>
-        <div style={activity_box_1}>{entries2}</div>
-        <div style={activity_box_2}>{entries3}</div>
+        <div style={activity_box_1}>{entries3}</div>
+        <div style={activity_box_2}>{entries2}</div>
       </div>
     )
   }
@@ -422,8 +426,12 @@ function App() {
         let data2 = { 'body': JSON.stringify(msg2) }
 
         instance.post('/directSupport', data2).then((response) => {
-          setCurrentFunds(parseInt(current_funds) - parseInt(param_amount))
-          forceRedraw(redraw + 1)
+          console.log(response)
+          if (response.data.statusCode === 200) {
+            setCurrentFunds(response.supporterFunds)
+            setCurrentName("SupporterViewProject")
+            forceRedraw(redraw + 1)
+          } else alert("Cannot directly fund a project more than once.")
         })
       }
     }
@@ -591,8 +599,8 @@ function App() {
         <button style={create_button} onClick={handle_button_create}>+</button>
 
         <label style={activity_label}>Pledge Activity&emsp;&emsp;&emsp;&nbsp;Direct Support</label>
-        <div style={activity_box_1}>{entries2}</div>
-        <div style={activity_box_2}>{entries3}</div>
+        <div style={activity_box_1}>{entries3}</div>
+        <div style={activity_box_2}>{entries2}</div>
       </div>
     )
   }
@@ -637,7 +645,7 @@ function App() {
           if (response.data.statusCode === 400) alert("Cannot create a project with the same name as another project.")
           else {
             setCurrentProject(input_name)
-            setCurrentName("DesignerViewProject")
+            setCurrentName("DesignerEditProject")
             forceRedraw(redraw + 1)
           }
         })
@@ -668,35 +676,56 @@ function App() {
   }
 
   function DesignerCreatePledge() {
+    const create_box = { position: "absolute", width: 500, height: 290, background: "lightgrey", textAlign: "center", top: "50%", left: "50%", marginLeft: -250, marginTop: -130 }
+    const create_title = { position: "absolute", fontSize: "30pt", fontWeight: "bold", width: 500, top: 20, left: 0, textAlign: "center" }
+
+    const amount_label = { position: "absolute", fontWeight: "bold", top: 100, left: 42, textAlign: "center" }
+    const amount_input = { position: "absolute", width: 100, background: "white", top: 100, left: 250, textAlign: "left" }
+
+    const reward_label = { position: "absolute", fontWeight: "bold", top: 140, left: 42, textAlign: "center" }
+    const reward_input = { position: "absolute", width: 200, background: "white", top: 140, left: 250, textAlign: "left" }
+
+    const max_label = { position: "absolute", fontWeight: "bold", top: 180, left: 42, textAlign: "center" }
+    const max_input = { position: "absolute", width: 100, background: "white", top: 180, left: 250, textAlign: "left" }
+
+    const create_button = { position: "relative", fontSize: "16pt", top: 230, width: 200 }
+
     let [input_amount, setAmount] = useState(0)
     let [input_reward, setReward] = useState("")
     let [input_max, setMax] = useState(null)
 
     function handle_button_create() {
-      if (input_amount <= 0 || input_reward === "" || (input_max !== "" && input_max !== null && input_max <= 0)) alert("Fill out all required fields with valid data before creating a new pledge.")
+      if (parseInt(input_amount) <= 0 || input_reward === "" || (input_max !== "" && input_max !== null && parseInt(input_max) <= 0)) alert("Fill out all required fields with valid data before creating a new pledge.")
       else {
         let msg = {}
-        msg["amount"] = input_amount
+        msg["amount"] = parseInt(input_amount)
         msg["descriptionReward"] = input_reward
-        msg["maxSupporters"] = (input_max === null || input_max === "") ? -1 : input_max
+        msg["maxSupporters"] = (input_max === null || input_max === "") ? -1 : parseInt(input_max)
         msg["projectName"] = current_project
         let data = { 'body': JSON.stringify(msg) }
 
         instance.post('/createPledge', data).then((response) => {
-          setCurrentName("DesignerViewProject")
-          forceRedraw(redraw + 1)
+          if (response.data.statusCode === 400) alert("Cannot create a pledge with the same description as another pledge.")
+          else {
+            setCurrentName("DesignerEditProject")
+            forceRedraw(redraw + 1)
+          }
         })
       }
     }
 
     return (
       <div id="DesignerCreatePledge" className="DesignerCreatePledge">
-        <br/><br/><br/><br/><br/>
-        <label>CREATE A NEW PLEDGE</label><br/>
-        <label>Amount: $<input type="text" value={input_amount} onChange={e => setAmount(e.target.value)} /></label><br/>
-        <label>Description of Reward:<input type="text" value={input_reward} onChange={e => setReward(e.target.value)} /></label><br/>
-        <label>Max Supporters (optional): <input type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" /></label>
-        <button onClick={handle_button_create}>Create Pledge</button>
+        <div style={create_box}>
+          <label style={create_title}>Create a New Pledge</label>
+          <label style={amount_label}>Amount:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;$</label>
+          <input style={amount_input} type="number" value={input_amount} onChange={e => setAmount(e.target.value)} min="1"/>
+          <label style={reward_label}>Description of Reward:</label>
+          <input style={reward_input} type="text" value={input_reward} onChange={e => setReward(e.target.value)} />
+          <label style={max_label}>Max Supporters <span style={{fontWeight:"normal"}}>(optional)</span>:</label>
+          <input style={max_input} type="number" value={input_max} onChange={e => setMax(e.target.value)} min="1" />
+          <button style={create_button} onClick={handle_button_create}>Create Pledge</button>
+        </div>
       </div>
     )
   }
