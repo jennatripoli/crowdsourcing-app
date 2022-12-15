@@ -87,6 +87,19 @@ exports.lambdaHandler = async (event, context) => {
         });
     };
     
+    let searchProjects = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Project WHERE launched=1 AND story LIKE ?", [info.keyWord], (error, rows) => {
+                if (error) {return reject(error); }
+                if (rows) {
+                    return resolve(rows);
+                } else {
+                    return reject("there are no projects");
+                }
+            });
+        });
+    };
+    
     
 
    
@@ -110,6 +123,9 @@ exports.lambdaHandler = async (event, context) => {
         let projects;
         if(info.type.length > 0){
             projects = await filterProjects(info);    
+        } else if (info.keyWord.length > 0){
+            info.keyWord = "%"+info.keyWord+"%";
+            projects = await searchProjects(info);
         } else {
             projects = await getAllProjects();
         }
