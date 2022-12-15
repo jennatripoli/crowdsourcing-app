@@ -1,5 +1,6 @@
 { 
     "body":
     
-"  {\n    \"projectName\" : \"testProject\",\n    \"supporterEmail\" : \"testSupporter\"\n    \"amount\" : 10\n  }"
+"  {\n    \"projectName\" : \"P1\",\n    \"supporterEmail\" : \"S1\",\n    \"amount\" : 10\n  }"
+    
 }
