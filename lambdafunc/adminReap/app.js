@@ -142,7 +142,7 @@ exports.lambdaHandler = async (event, context) => {
                     if (rows.affectedRows == 1) {
                         return resolve(true);
                     } else {
-                        return reject("there are no projects");
+                        return reject("unable to return funds to supporter: " + email);
                     }
                 });
         });
@@ -156,7 +156,7 @@ exports.lambdaHandler = async (event, context) => {
                 if(rows){
                     return resolve(rows);
                 } else {
-                    return reject("no pledges for project with name "+ name);
+                    return reject("no direct supports for project with name "+ name);
                 }
             });
         });
@@ -196,52 +196,63 @@ exports.lambdaHandler = async (event, context) => {
                 let project = projects[i];
                 
                 let projectYear = parseInt(project.deadline.substring(0, 4), 10);
+                console.log("Project Year: " + JSON.stringify(projectYear));
                 if (projectYear < yyyy) {
                     if (project.amountRaised < project.goal) {
+                        console.log("Project is failed: " + project.name);
                         failed = await failProject(project.name);
                     }
                     else {
-                        succeeded = await succeedProject(project.name)
+                        console.log("Project is succeeded: " + project.name);
+                        succeeded = await succeedProject(project.name);
                     }
                 }
                 
                 else if (projectYear === yyyy) {
                     let projectMonth = parseInt(project.deadline.substring(5, 7), 10);
+                    console.log("Project Month: " + JSON.stringify(projectMonth));
                         if (projectMonth < mm) {
                             if (project.amountRaised < project.goal) {
+                            console.log("Project is failed: " + project.name);
                             failed = await failProject(project.name);
                         }
                         else {
-                            succeeded = await succeedProject(project.name)
+                            console.log("Project is succeeded: " + project.name);
+                            succeeded = await succeedProject(project.name);
                         }
                     }
                     
                     else if (projectMonth === mm) {
                         let projectDay = parseInt(project.deadline.substring(8, 10), 10);
+                        console.log("Project Day: " + JSON.stringify(projectDay));
                         if (projectDay < dd) {
                             if (project.amountRaised < project.goal) {
+                                console.log("Project is failed: " + project.name);
                                 failed = await failProject(project.name);
                             }
                             
                             else {
-                                succeeded = await succeedProject(project.name)
+                                console.log("Project is succeeded: " + project.name);
+                                succeeded = await succeedProject(project.name);
                             }
                         }
                     }   
                 }
                 
                 if (failed) {
-                    const pledges = await getProjectPledges(project.name)
+                    const pledges = await getProjectPledges(project.name);
                     
                     for (let j = 0; j<pledges.length; j++) {
                         let pledge = pledges[j];
-                        const pledgers = await getProjectPledges(pledge.descriptionReward)
+                        const pledgers = await getPledgePledgers(pledge.descriptionReward);
                         
                         for (let k = 0; k<pledgers.length; k++) {
                             let pledger = pledgers[k];
                             let currentFunds = await getCurrentFunds(pledger.supporterEmail);
                             let newFunds = currentFunds + pledge.amount;
-                            let returned = await returnFunds(pledger.supporterEmail, newFunds)
+                            let returned = await returnFunds(pledger.supporterEmail, newFunds);
+                            let FUNDS = await getCurrentFunds(pledger.supporterEmail);
+                            console.log("AVAILABLE FUNDS:" + JSON.stringify(FUNDS));
                         }
                         
                     }
@@ -252,7 +263,9 @@ exports.lambdaHandler = async (event, context) => {
                         let support = supports[l];
                        let cFunds = await getCurrentFunds(support.supporterEmail);
                         let nFunds = cFunds + support.amount;
-                        let r = await returnFunds(support.supporterEmail, nFunds)
+                        let r = await returnFunds(support.supporterEmail, nFunds);
+                        let FUNDS = await getCurrentFunds(support.supporterEmail);
+                        console.log("AVAILABLE FUNDS:" + JSON.stringify(FUNDS));
                     }
                 }
                 
@@ -275,5 +288,5 @@ exports.lambdaHandler = async (event, context) => {
         return err;
     }
 
-    return response
+    return response;
 };
