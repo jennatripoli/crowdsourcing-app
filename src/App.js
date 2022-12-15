@@ -175,8 +175,10 @@ function App() {
   }
 
   function SupporterListProjects() {
-    const search_bar = { position: "absolute", width: 300, left: 50, top: 120 }
-    const type_button = { position: "absolute", left: 365, top: 120 }
+    const search_bar = { position: "absolute", width: 300, left: 60, top: 120 }
+    const search_label = { position: "absolute", left: 410, top: 120 }
+    const type_button = { position: "absolute", left: 490, top: 120 }
+    const description_button = { position: "absolute", left: 540, top: 120 }
 
     const projects_box = { position: "absolute", background: "lightgrey", width: 800, height: 607, overflowY: "scroll", top: 150, left: 50 }
     const project_button = { width: 760, textAlign: "left", margin: 10, marginBottom: 0 }
@@ -280,6 +282,16 @@ function App() {
       return
     }
 
+    function handle_button_description() {
+      msg = {}
+      msg["supporterEmail"] = current_user
+      msg["keyWord"] = input_search
+      data = { 'body': JSON.stringify(msg) }
+      setEntries(undefined)
+      retrieve()
+      return
+    }
+
     if (entries === undefined || entries2 === undefined || entries3 === undefined) {
       retrieve()
       return
@@ -288,8 +300,10 @@ function App() {
     return (
       <div id="SupporterListProjects" className="SupporterListProjects">
         <div>
-          <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects by genre" />
-          <button style={type_button} onClick={handle_button_type}>Search</button>
+          <input style={search_bar} name="project_search" type="text" value={input_search} onChange={e => setSearch(e.target.value)} placeholder="search projects" />
+          <label style={search_label}>Search By:</label>
+          <button style={type_button} onClick={handle_button_type}>Type</button>
+          <button style={description_button} onClick={handle_button_description}>Description</button>
         </div>
 
         <div style={projects_box}>{entries}</div>
@@ -413,7 +427,7 @@ function App() {
 
         instance.post('/directSupport', data2).then((response) => {
           console.log(response)
-          if (response.data.statusCode == 200) {
+          if (response.data.statusCode === 200) {
             setCurrentFunds(response.supporterFunds)
             setCurrentName("SupporterViewProject")
             forceRedraw(redraw + 1)
@@ -681,12 +695,12 @@ function App() {
     let [input_max, setMax] = useState(null)
 
     function handle_button_create() {
-      if (input_amount <= 0 || input_reward === "" || (input_max !== "" && input_max !== null && input_max <= 0)) alert("Fill out all required fields with valid data before creating a new pledge.")
+      if (parseInt(input_amount) <= 0 || input_reward === "" || (input_max !== "" && input_max !== null && parseInt(input_max) <= 0)) alert("Fill out all required fields with valid data before creating a new pledge.")
       else {
         let msg = {}
-        msg["amount"] = input_amount
+        msg["amount"] = parseInt(input_amount)
         msg["descriptionReward"] = input_reward
-        msg["maxSupporters"] = (input_max === null || input_max === "") ? -1 : input_max
+        msg["maxSupporters"] = (input_max === null || input_max === "") ? -1 : parseInt(input_max)
         msg["projectName"] = current_project
         let data = { 'body': JSON.stringify(msg) }
 
