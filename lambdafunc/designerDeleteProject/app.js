@@ -85,6 +85,35 @@ exports.lambdaHandler = async (event, context) => {
         });
     }
     
+    let DeleteAssociatedPledgers = (info, descriptionReward) => {
+        return new Promise((resolve, reject) => {
+            pool.query("DELETE FROM Pledger WHERE descriptionReward=?", [descriptionReward], (error, rows) => {
+                if(error) { return reject(error); }
+                
+                if(rows){
+                    return resolve(rows);
+                } else {
+                    return reject("no pledges for project with name "+info.name);
+                }
+            });
+        });
+    }
+    
+    let getPledges = (info) => {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM Pledge WHERE projectName=?", [info.name], (error, rows) => {
+                if(error) { return reject(error); }
+                
+                if(rows){
+                    console.log(JSON.stringify(rows))
+                    return resolve(rows);
+                } else {
+                    return reject("no pledges for project with name "+info.name);
+                }
+            });
+        });
+    }
+    
     
     try {
         
@@ -94,6 +123,14 @@ exports.lambdaHandler = async (event, context) => {
         // ----> These have to be done asynchronously in series, and you wait for earlier 
         // ----> request to complete before beginning the next one
         //console.log("E1")
+        let allPledges = await getPledges(info)
+        for (let i=0; i<allPledges.length; i++){
+            console.log("HERE")
+            let thisDescription = allPledges[i].descriptionReward;
+            let deletedPledger = await DeleteAssociatedPledgers(info, thisDescription)
+        }
+        // let deletedPledgers = await 
+
         let deletedPledges = await DeleteAssociatedPledges(info);
         let deletedProject = await DesignerDeleteProject(info);
         
