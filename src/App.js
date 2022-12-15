@@ -62,6 +62,7 @@ function App() {
         
         instance.post('/addFunds', data).then((response) => {
           setCurrentFunds(response.data.availableFunds)
+          forceRedraw(redraw + 1)
         })
       }
     }
@@ -191,7 +192,7 @@ function App() {
 
     let msg = {}
     msg["type"] = ""
-    msg["supporterEmail"] = current_user
+    msg["keyWord"] = ""
     let data = { 'body': JSON.stringify(msg) }
 
     let [entries, setEntries] = React.useState(undefined)
@@ -211,18 +212,20 @@ function App() {
             let inner = []
             for (let i = 0; i < allProjects.length; i++) {
               let project = allProjects[i]
-              const entry = (
-                <div id="project_box">
-                  <button style={project_button} onClick={() => handle_button_view(project.name)}>
-                    <label style={project_name}>{project.name}</label><br/>
-                    <label><span style={{fontWeight: "bold"}}>Description: </span>{project.description}</label><br/>
-                    <label><span style={{fontWeight: "bold"}}>Deadline: </span>{project.deadline}</label><br/>
-                    <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
-                    <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
-                  </button>
-                </div>
-              )
-              inner.push(entry)
+              if (project.successful === null) {
+                const entry = (
+                  <div id="project_box">
+                    <button style={project_button} onClick={() => handle_button_view(project.name)}>
+                      <label style={project_name}>{project.name}</label><br/>
+                      <label><span style={{fontWeight: "bold"}}>Description: </span>{project.description}</label><br/>
+                      <label><span style={{fontWeight: "bold"}}>Deadline: </span>{project.deadline}</label><br/>
+                      <label><span style={{fontWeight: "bold"}}>Type: </span>{project.type}</label><br/>
+                      <label><span style={{fontWeight: "bold"}}>Goal: </span>${project.goal}</label><br/>
+                    </button>
+                  </div>
+                )
+                inner.push(entry)
+              }
             }
             inner.push(<div style={{height: 10}}/>)
             setEntries(inner)
@@ -274,8 +277,8 @@ function App() {
 
     function handle_button_type() {
       msg = {}
-      msg["supporterEmail"] = current_user
       msg["type"] = input_search
+      msg["keyWord"] = ""
       data = { 'body': JSON.stringify(msg) }
       setEntries(undefined)
       retrieve()
@@ -284,7 +287,7 @@ function App() {
 
     function handle_button_description() {
       msg = {}
-      msg["supporterEmail"] = current_user
+      msg["type"] = ""
       msg["keyWord"] = input_search
       data = { 'body': JSON.stringify(msg) }
       setEntries(undefined)
@@ -403,7 +406,6 @@ function App() {
           if (response.data.statusCode === 400) alert("You have already claimed this pledge and cannot claim it again.")
           else {
             setCurrentFunds(parseInt(current_funds) - parseInt(param_amount))
-            setCurrentName("SupporterViewProject")
             forceRedraw(redraw + 1)
           }
         })
@@ -426,10 +428,8 @@ function App() {
         let data2 = { 'body': JSON.stringify(msg2) }
 
         instance.post('/directSupport', data2).then((response) => {
-          console.log(response)
           if (response.data.statusCode === 200) {
-            setCurrentFunds(response.supporterFunds)
-            setCurrentName("SupporterViewProject")
+            setCurrentFunds(parseInt(response.data.supporterFunds))
             forceRedraw(redraw + 1)
           } else alert("Cannot directly fund a project more than once.")
         })
