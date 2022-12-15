@@ -155,7 +155,7 @@ exports.lambdaHandler = async (event, context) => {
     
     let updateDirectSupport = (info, newAmount) => {
         return new Promise((resolve, reject) => {
-            pool.query("UPDATE DirectSupport SET amount=? WHERE (supporterEmail=? AND projectName=?)", [newAmount, info.supporterEmailm, info.projectName], (error, rows) => {
+            pool.query("UPDATE DirectSupport SET amount=? WHERE (supporterEmail=? AND projectName=?)", [newAmount, info.supporterEmail, info.projectName], (error, rows) => {
                     if (error) { return reject(error); }
                     if (rows.affectedRows == 1) {
                         return resolve(true);
