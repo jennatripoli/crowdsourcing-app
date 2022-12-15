@@ -1,1 +1,5 @@
-
+{ 
+    "body":
+    
+"  {\n    \"projectName\" : \"testProject\",\n    \"supporterEmail\" : \"testSupporter\"\n    \"amount\" : 10\n  }"
+}
