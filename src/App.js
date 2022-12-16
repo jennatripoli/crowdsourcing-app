@@ -1077,16 +1077,6 @@ function App() {
           }
         }
       })
-
-      let msg2 = {}
-      msg2["supporterEmail"] = current_user
-      let data2 = { 'body': JSON.stringify(msg2) }
-
-      instance.post('/supporterViewProject', data2).then((response) => {
-        if (response != null) {
-        }
-        setRetrieving(false)
-      })
     }
 
     function handle_button_view(name_param) {
@@ -1107,7 +1097,10 @@ function App() {
     }
 
     function handle_button_reap() {
-      instance.get('/adminReap').then((response) => {
+      let msg = {}
+      let data = { 'body': JSON.stringify(msg) }
+
+      instance.post('/adminReap', data).then((response) => {
         forceRedraw(redraw + 1)
       })
     }
