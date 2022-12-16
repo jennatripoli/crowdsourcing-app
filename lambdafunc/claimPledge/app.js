@@ -185,23 +185,33 @@ exports.lambdaHandler = async (event, context) => {
             let newSupporterFunds = currentFunds - pledgeCost
             console.log("NEW FUNDS: " + newSupporterFunds)
             if (newSupporterFunds > 0) {
-                let claimPledge = await addPledger(info)
-                let updateFunds = await setNewFunds(info, newSupporterFunds)
-                let newFunds = await getSupporterCurrentFunds(info)
-                if (claimPledge){
-                    let currentProjectTotal = await getProjectTotal(info)
-                    currentProjectTotal = parseInt(currentProjectTotal)
-                    console.log("E6")
-                    let newProjectTotal = currentProjectTotal + pledgeCost
-                    console.log(currentProjectTotal)
-                    console.log(pledgeCost)
-                    console.log("NEW TOTAL: " + newProjectTotal)
-                    let setNewTotal = await setProjectTotal(info, newProjectTotal)
-                    
-                    response.statusCode = 200
-                    response.supporterFunds = newFunds
-                    response.projectTotal = newProjectTotal
-                    console.log("E5")
+                let currentFunds = await getSupporterCurrentFunds(info)
+                console.log("E3")
+                let pledgeCost = await getPledgeAmount(info)
+                console.log("E4")
+                let newSupporterFunds = currentFunds - pledgeCost
+                console.log("NEW FUNDS: " + newSupporterFunds)
+                if (newSupporterFunds > 0) {
+                    let claimPledge = await addPledger(info)
+                    let updateFunds = await setNewFunds(info, newSupporterFunds)
+                    let newFunds = await getSupporterCurrentFunds(info)
+                    if (claimPledge){
+                        let currentProjectTotal = await getProjectTotal(info)
+                        currentProjectTotal = parseInt(currentProjectTotal)
+                        pledgeCost = parseInt(pledgeCost)
+                        console.log("E6")
+                        let newProjectTotal = currentProjectTotal + pledgeCost
+                        console.log(currentProjectTotal)
+                        console.log(pledgeCost)
+                        console.log("NEW TOTAL: " + newProjectTotal)
+                        let setNewTotal = await setProjectTotal(info, newProjectTotal)
+                        
+                        
+                        response.statusCode = 200
+                        response.supporterFunds = newFunds
+                        response.projectTotal = newProjectTotal
+                        console.log("E5")
+                    }
                 }
         }
         }
